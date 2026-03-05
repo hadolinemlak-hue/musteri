@@ -15,8 +15,6 @@
     :root{
       --bg:#052b23;
       --bg2:#041f1a;
-      --card:#083b31;
-      --card2:#0a463a;
       --txt:#ffffff;
       --muted:rgba(255,255,255,.72);
       --line:rgba(255,255,255,.14);
@@ -28,9 +26,19 @@
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:radial-gradient(1200px 700px at 20% -10%, rgba(46,229,157,.14), transparent 55%), linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--txt);}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(46,229,157,.14), transparent 55%),
+        linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--txt);
+    }
     .wrap{max-width:1040px;margin:0 auto;padding:16px 16px calc(22px + env(safe-area-inset-bottom));}
-    .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;padding-top:env(safe-area-inset-top);}
+    .top{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+      margin-bottom:12px;padding-top:env(safe-area-inset-top);
+    }
+    .topLeft{display:flex;align-items:flex-start;gap:10px}
     h1{margin:0;font-size:18px;letter-spacing:.35px}
     .sub{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.35}
     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:rgba(255,255,255,.85)}
@@ -105,6 +113,7 @@
       background:rgba(0,0,0,.72);color:#fff;padding:10px 12px;border-radius:14px;
       font-size:13px;opacity:0;pointer-events:none;transition:.2s;
       border:1px solid rgba(255,255,255,.12);
+      z-index:80;
     }
     .toast.show{opacity:1}
 
@@ -122,19 +131,148 @@
       padding:4px 8px;border-radius:999px;
       font-size:12px;
     }
+
+    /* --- Hamburger / Drawer --- */
+    .iconBtn{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--txt);
+      width:44px; height:44px;
+      border-radius:14px;
+      display:inline-flex; align-items:center; justify-content:center;
+      cursor:pointer;
+    }
+    .burger{
+      width:18px; height:2px; background:var(--txt); border-radius:999px; position:relative; display:block;
+    }
+    .burger::before,.burger::after{
+      content:""; position:absolute; left:0; width:18px; height:2px; background:var(--txt); border-radius:999px;
+    }
+    .burger::before{top:-6px}
+    .burger::after{top:6px}
+
+    .drawerOverlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      z-index:50;
+    }
+    .drawer{
+      position:fixed; top:0; left:0; height:100vh;
+      width:min(340px, 86vw);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-right:1px solid rgba(255,255,255,.12);
+      box-shadow: 18px 0 50px rgba(0,0,0,.45);
+      z-index:60;
+      transform:translateX(-105%);
+      transition:transform .22s ease;
+      padding:14px;
+      backdrop-filter: blur(8px);
+    }
+    .drawer.open{transform:translateX(0)}
+    .drawerHead{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+      padding-bottom:12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .drawerTitle{font-weight:950; letter-spacing:.25px}
+    .drawerMeta{color:var(--muted); font-size:12px; margin-top:4px}
+    .drawerBody{padding-top:12px; display:grid; gap:12px}
+    .drawerSection{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      border-radius:16px;
+      padding:12px;
+    }
+    .drawerSectionTitle{font-weight:900; font-size:12px; color:rgba(255,255,255,.9); margin-bottom:10px}
+    .drawerGrid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .drawerBtn{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      color:var(--txt);
+      padding:10px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:13px;
+      text-align:left;
+    }
+    .drawerBtn:hover{filter:brightness(1.08)}
+    .drawerBtn.danger{
+      border-color:rgba(239,68,68,.42);
+      background:rgba(239,68,68,.14);
+    }
+    .drawerHint{margin-top:10px; color:var(--muted); font-size:12px; line-height:1.35}
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="top">
+  <!-- Drawer -->
+  <div class="drawerOverlay" id="drawerOverlay" hidden></div>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawerHead">
       <div>
-        <h1>HADOLIN CRM</h1>
-        <div class="sub">
-          Ana ekrana ekle: <span class="kbd">Paylaş → Ana Ekrana Ekle</span>
-          · Offline: <span id="net">kontrol ediliyor…</span>
+        <div class="drawerTitle">Menü</div>
+        <div class="drawerMeta">Kısayollar · Yedek · Eşleşme</div>
+      </div>
+      <button class="iconBtn" id="menuClose" type="button" aria-label="Kapat">✕</button>
+    </div>
+
+    <div class="drawerBody">
+      <div class="drawerSection">
+        <div class="drawerSectionTitle">Bugün</div>
+        <div class="drawerGrid">
+          <button class="drawerBtn" type="button" id="mTodayMatch">Bugün Eşleşme Yap</button>
+          <button class="drawerBtn" type="button" data-goto="matchCard">Eşleşme Paneli</button>
         </div>
       </div>
+
+      <div class="drawerSection">
+        <div class="drawerSectionTitle">Git</div>
+        <div class="drawerGrid">
+          <button class="drawerBtn" type="button" data-goto="customerForm">Müşteri Ekle</button>
+          <button class="drawerBtn" type="button" data-goto="portfolioForm">Portföy Ekle</button>
+          <button class="drawerBtn" type="button" data-goto="customerList">Müşteri Listesi</button>
+          <button class="drawerBtn" type="button" data-goto="portfolioList">Portföy Listesi</button>
+        </div>
+      </div>
+
+      <div class="drawerSection">
+        <div class="drawerSectionTitle">İşlemler</div>
+        <div class="drawerGrid">
+          <button class="drawerBtn" type="button" id="mBackup">Yedek Al</button>
+          <button class="drawerBtn" type="button" id="mRestore">Geri Yükle</button>
+          <button class="drawerBtn" type="button" id="mExportCustomers">Müşteri CSV</button>
+          <button class="drawerBtn" type="button" id="mExportPortfolios">Portföy CSV</button>
+        </div>
+      </div>
+
+      <div class="drawerSection">
+        <div class="drawerSectionTitle">Tehlikeli</div>
+        <div class="drawerGrid">
+          <button class="drawerBtn danger" type="button" id="mWipeCustomers">Tüm Müşteri</button>
+          <button class="drawerBtn danger" type="button" id="mWipePortfolios">Tüm Portföy</button>
+        </div>
+        <div class="drawerHint">Silmek kolaydır. Geri almak pahalıdır. Yedek almadan dokunma.</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="wrap">
+    <div class="top">
+      <div class="topLeft">
+        <button class="iconBtn" id="menuBtn" type="button" aria-label="Menü" aria-expanded="false">
+          <span class="burger"></span>
+        </button>
+
+        <div>
+          <h1>HADOLIN CRM</h1>
+          <div class="sub">
+            Ana ekrana ekle: <span class="kbd">Paylaş → Ana Ekrana Ekle</span>
+            · Offline: <span id="net">kontrol ediliyor…</span>
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <button class="btn" id="btnBackup" type="button">Yedek Al</button>
         <button class="btn" id="btnRestore" type="button">Geri Yükle</button>
@@ -145,7 +283,7 @@
       <!-- LEFT: FORMS -->
       <div>
         <!-- CUSTOMER FORM -->
-        <div class="card">
+        <div class="card" id="customerForm">
           <div class="sectionTitle">
             <div class="t">Müşteri</div>
             <div class="pill"><span id="count">0</span> kayıt</div>
@@ -221,7 +359,7 @@
         </div>
 
         <!-- PORTFOLIO FORM -->
-        <div class="card" style="margin-top:12px">
+        <div class="card" id="portfolioForm" style="margin-top:12px">
           <div class="sectionTitle">
             <div class="t">Portföy</div>
             <div class="pill"><span id="pCount">0</span> portföy</div>
@@ -309,7 +447,7 @@
         </div>
       </div>
 
-      <!-- RIGHT: MATCH + LISTS -->
+      <!-- RIGHT: TODAY + MATCH + LISTS -->
       <div>
         <!-- MATCH PANEL -->
         <div class="card" id="matchCard" style="display:none">
@@ -364,8 +502,30 @@
           </div>
         </div>
 
+        <!-- TODAY MATCH -->
+        <div class="card" id="todayCard" style="display:none; margin-top:12px">
+          <div class="sectionTitle">
+            <div class="t">Bugün Eşleşme Yap</div>
+            <div class="row">
+              <button class="btn ghost" type="button" id="btnTodayRefresh">Yenile</button>
+              <button class="btn warn" type="button" id="btnTodayClose">Kapat</button>
+            </div>
+          </div>
+
+          <div class="meta" id="todayMeta" style="margin-top:8px"></div>
+
+          <div class="list" id="todayList"></div>
+          <div id="todayEmpty" class="empty" style="display:none">
+            Bugün güncellenen müşteri yok. O zaman iş basit: bugün müşteri çıkar.
+          </div>
+
+          <div class="hint">
+            Bugünün eşleşmesi: yarının randevusu. Randevu: paranın sessiz yürüyüşü.
+          </div>
+        </div>
+
         <!-- CUSTOMER LIST -->
-        <div class="card">
+        <div class="card" id="customerList" style="margin-top:12px">
           <div class="row" style="justify-content:space-between;align-items:center">
             <div class="pill">Müşteri Listesi</div>
             <input class="search" id="search" placeholder="Ara: ad, telefon, mevkii, talep..." />
@@ -408,7 +568,7 @@
         </div>
 
         <!-- PORTFOLIO LIST -->
-        <div class="card" style="margin-top:12px">
+        <div class="card" id="portfolioList" style="margin-top:12px">
           <div class="row" style="justify-content:space-between;align-items:center">
             <div class="pill">Portföy Listesi</div>
             <input class="search" id="pSearch" placeholder="Ara: başlık, mevkii, açıklama..." />
@@ -523,6 +683,21 @@
     localStorage.setItem(key, JSON.stringify(items));
   }
 
+  // ---- UTIL: CSV / download ----
+  function csvCell(v){
+    const s = String(v ?? "");
+    if(/[",\n]/.test(s)) return `"${s.replaceAll('"','""')}"`;
+    return s;
+  }
+  function downloadText(text, filename, mime){
+    const blob = new Blob([text], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   // ---- BACKUP / RESTORE (customers + portfolios) ----
   const btnBackup = $("btnBackup");
   const btnRestore = $("btnRestore");
@@ -558,6 +733,7 @@
         try{
           const data = JSON.parse(String(r.result||""));
           if(!data) throw new Error("invalid");
+
           const customers = Array.isArray(data.customers) ? data.customers : (Array.isArray(data.items) ? data.items : []);
           const portfolios = Array.isArray(data.portfolios) ? data.portfolios : [];
 
@@ -603,6 +779,7 @@
           renderCustomers(); resetCustomerForm();
           renderPortfolios(); resetPortfolioForm();
           closeMatch();
+          if(todayCard && todayCard.style.display !== "none") renderToday();
 
           toast("Geri yüklendi.");
         }catch(e){
@@ -657,11 +834,13 @@
     else items.unshift(item);
     save(LS_KEY_C, items);
     renderCustomers();
+    if(todayCard && todayCard.style.display !== "none") renderToday();
   }
   function removeCustomer(id){
     const items = load(LS_KEY_C).filter(x => x.id !== id);
     save(LS_KEY_C, items);
     renderCustomers();
+    if(todayCard && todayCard.style.display !== "none") renderToday();
   }
 
   function renderCustomers(){
@@ -857,6 +1036,7 @@ Talep: ${item.demand || "-"}`;
     localStorage.removeItem(LS_KEY_C);
     renderCustomers(); resetCustomerForm();
     closeMatch();
+    if(todayCard && todayCard.style.display !== "none") renderToday();
     toast("Hepsi silindi.");
   });
 
@@ -919,7 +1099,7 @@ Talep: ${item.demand || "-"}`;
     else items.unshift(item);
     save(LS_KEY_P, items);
     renderPortfolios();
-    if(selectedCustomerId) renderMatch(); // eşleşme paneli açıksa güncelle
+    if(selectedCustomerId) renderMatch();
   }
   function removePortfolio(id){
     const items = load(LS_KEY_P).filter(x => x.id !== id);
@@ -1166,8 +1346,9 @@ Notlar: ${item.notes || "-"}`;
   function openMatch(customerId){
     selectedCustomerId = customerId;
     matchCard.style.display = "block";
+    // Today panel açıksa kapat: odağı eşleşmeye al
+    if(todayCard && todayCard.style.display !== "none") closeToday();
     window.scrollTo({ top: 0, behavior: "smooth" });
-    // reset match filters each time
     mBudgetEl.value = "";
     mLocEl.value = "";
     mSortEl.value = "score";
@@ -1216,30 +1397,25 @@ Notlar: ${item.notes || "-"}`;
   function scoreMatch(customer, portfolio){
     let score = 0;
 
-    // deal / type
     if(customer.deal && portfolio.deal && customer.deal === portfolio.deal) score += 3;
     if(customer.ptype && portfolio.type && customer.ptype === portfolio.type) score += 3;
 
-    // rooms (only if customer is daire)
     const cRooms = (customer.ptype === "Daire") ? parseRoomsFromText(customer.demand) : "";
     if(customer.ptype === "Daire" && cRooms && portfolio.rooms && cRooms === portfolio.rooms) score += 2;
-    if(customer.ptype === "Daire" && cRooms && !portfolio.rooms) score -= 0.5; // daire ama daire tipi yoksa zayıf
+    if(customer.ptype === "Daire" && cRooms && !portfolio.rooms) score -= 0.5;
 
-    // budget: prefer within budget, allow slightly above
     const cb = customer.budget ? parseInt(customer.budget, 10) : 0;
     const pp = portfolio.price ? parseInt(portfolio.price, 10) : 0;
     if(cb && pp){
       if(pp <= cb) score += 2;
-      else if(pp <= Math.round(cb * 1.10)) score += 1; // %10 üstüne tolerans
+      else if(pp <= Math.round(cb * 1.10)) score += 1;
       else score -= 1;
     }
 
-    // location similarity
     const sim = locationSimilarity(customer.location, portfolio.location);
     if(sim >= 0.5) score += 1.5;
     else if(sim >= 0.25) score += 1;
 
-    // freshness
     const updated = new Date(portfolio.updatedAt || portfolio.createdAt || 0).getTime();
     const ageDays = updated ? (Date.now() - updated) / (1000*60*60*24) : 999;
     if(ageDays <= 14) score += 0.5;
@@ -1266,19 +1442,14 @@ Notlar: ${item.notes || "-"}`;
         Bütçe: <b>${escapeHtml(budgetText)}</b> · Mevkii: <b>${escapeHtml(customer.location || "—")}</b>
       </div>`;
 
-    // raw scoring + mandatory filter
     let scored = portfolios.map(p => {
       const s = scoreMatch(customer, p);
       return { p, ...s };
     });
 
-    // MUST-MATCH logic when customer specifies deal/type
     if(customer.deal) scored = scored.filter(x => x.p.deal === customer.deal);
     if(customer.ptype) scored = scored.filter(x => x.p.type === customer.ptype);
 
-    // If customer is daire and rooms can be inferred, keep rooms match first but don't hard-filter
-    // (some portfolios may not have rooms filled)
-    // Additional panel filters:
     if(mBudgetEl.value === "Icinde"){
       const cb = customer.budget ? parseInt(customer.budget, 10) : 0;
       if(cb) scored = scored.filter(x => (x.pp ? x.pp <= cb : true));
@@ -1287,7 +1458,6 @@ Notlar: ${item.notes || "-"}`;
       scored = scored.filter(x => x.sim >= 0.25);
     }
 
-    // sort
     const sort = mSortEl.value;
     scored.sort((a,b) => {
       if(sort === "priceAsc"){
@@ -1305,14 +1475,12 @@ Notlar: ${item.notes || "-"}`;
         const bu = new Date(b.p.updatedAt || b.p.createdAt || 0).getTime();
         return bu - au;
       }
-      // default score desc
       if(b.score !== a.score) return b.score - a.score;
       const bu = new Date(b.p.updatedAt || b.p.createdAt || 0).getTime();
       const au = new Date(a.p.updatedAt || a.p.createdAt || 0).getTime();
       return bu - au;
     });
 
-    // render
     matchListEl.innerHTML = "";
     matchEmptyEl.style.display = (scored.length === 0) ? "block" : "none";
 
@@ -1363,7 +1531,6 @@ Notlar: ${item.notes || "-"}`;
     });
   }
 
-  // match list copy single
   matchListEl.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if(!btn) return;
@@ -1385,13 +1552,11 @@ Notlar: ${p.notes || "-"}`;
       .catch(() => prompt("Kopyala:", text));
   });
 
-  // copy message for customer with top matches
   btnMatchCopy.addEventListener("click", () => {
     if(!selectedCustomerId) return;
     const customer = load(LS_KEY_C).find(x => x.id === selectedCustomerId);
     if(!customer){ toast("Müşteri bulunamadı."); return; }
 
-    // reconstruct scored list same as renderMatch but consistent:
     let scored = load(LS_KEY_P).map(p => ({ p, ...scoreMatch(customer,p) }));
     if(customer.deal) scored = scored.filter(x => x.p.deal === customer.deal);
     if(customer.ptype) scored = scored.filter(x => x.p.type === customer.ptype);
@@ -1424,20 +1589,181 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
       .catch(() => prompt("Kopyala:", msg));
   });
 
-  // ---- UTIL: CSV / download ----
-  function csvCell(v){
-    const s = String(v ?? "");
-    if(/[",\n]/.test(s)) return `"${s.replaceAll('"','""')}"`;
-    return s;
+  // ---- TODAY MATCH ----
+  const todayCard = $("todayCard");
+  const todayListEl = $("todayList");
+  const todayEmptyEl = $("todayEmpty");
+  const todayMetaEl = $("todayMeta");
+  const btnTodayClose = $("btnTodayClose");
+  const btnTodayRefresh = $("btnTodayRefresh");
+
+  function ymdLocal(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
   }
-  function downloadText(text, filename, mime){
-    const blob = new Blob([text], {type: mime});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+  function isoToLocalYmd(iso){
+    if(!iso) return "";
+    const d = new Date(iso);
+    if(isNaN(d)) return "";
+    return ymdLocal(d);
   }
+
+  function openToday(){
+    todayCard.style.display = "block";
+    // eşleşme açıksa kapat: odağı bugüne al
+    closeMatch();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    renderToday();
+  }
+
+  function closeToday(){
+    todayCard.style.display = "none";
+    todayListEl.innerHTML = "";
+    todayMetaEl.textContent = "";
+  }
+
+  function renderToday(){
+    const items = load(LS_KEY_C);
+    const todayStr = ymdLocal(new Date());
+
+    const todays = items
+      .filter(x => isoToLocalYmd(x.updatedAt || x.createdAt) === todayStr)
+      .sort((a,b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+
+    todayMetaEl.innerHTML = `<div class="meta">Tarih: <b>${todayStr}</b> · Bugün: <b>${todays.length}</b> müşteri</div>`;
+
+    todayListEl.innerHTML = "";
+    todayEmptyEl.style.display = todays.length ? "none" : "block";
+
+    todays.forEach(x => {
+      const div = document.createElement("div");
+      div.className = "item";
+
+      const budgetLine = x.budget ? `Bütçe: <b>${x.budgetFmt} ₺</b>` : `Bütçe: <span style="color:var(--muted)">—</span>`;
+      const phoneLine = x.phone ? `Tel: <b>${escapeHtml(x.phone)}</b>` : `Tel: <span style="color:var(--muted)">—</span>`;
+      const locLine = x.location ? `Mevkii: <b>${escapeHtml(x.location)}</b>` : `Mevkii: <span style="color:var(--muted)">—</span>`;
+
+      const tags = `
+        ${(x.deal ? `<span class="tag">${escapeHtml(x.deal)}</span>` : ``)}
+        ${(x.ptype ? `<span class="tag">${escapeHtml(x.ptype)}</span>` : ``)}
+      `.trim();
+
+      div.innerHTML = `
+        <div class="itemTop">
+          <div>
+            <div class="name">${escapeHtml(x.name || "—")}</div>
+            <div class="meta">
+              ${phoneLine} · ${budgetLine}<br/>
+              ${locLine}
+            </div>
+            ${tags ? `<div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${tags}</div>` : ``}
+          </div>
+          <div class="pill" title="Son güncelleme">${formatDate(x.updatedAt || x.createdAt)}</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="button" data-tmatch="${x.id}">Eşleştir</button>
+          <button class="btn" type="button" data-tcall="${x.id}">Ara</button>
+          <button class="btn" type="button" data-twa="${x.id}">WhatsApp</button>
+        </div>
+      `;
+      todayListEl.appendChild(div);
+    });
+  }
+
+  btnTodayClose?.addEventListener("click", closeToday);
+  btnTodayRefresh?.addEventListener("click", renderToday);
+
+  todayListEl?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if(!btn) return;
+
+    const mid = btn.getAttribute("data-tmatch");
+    const cid = btn.getAttribute("data-tcall");
+    const wid = btn.getAttribute("data-twa");
+
+    if(mid){
+      closeToday();
+      openMatch(mid);
+      return;
+    }
+
+    if(cid){
+      const item = load(LS_KEY_C).find(x => x.id === cid);
+      if(!item || !item.phone){ toast("Telefon yok."); return; }
+      window.location.href = `tel:${item.phone}`;
+      return;
+    }
+
+    if(wid){
+      const item = load(LS_KEY_C).find(x => x.id === wid);
+      if(!item || !item.phone){ toast("Telefon yok."); return; }
+      const digits = (item.phone||"").replace(/[^\d]/g,"");
+      if(!digits){ toast("Telefon formatı bozuk."); return; }
+      const clean = digits.replace(/^0/,"");
+      const msg = encodeURIComponent(`Merhaba ${item.name || ""}, kriterlerinize uygun portföyleri hazırladım. Uygun olduğunuzda paylaşabilirim.`);
+      window.open(`https://wa.me/90${clean}?text=${msg}`, "_blank");
+      return;
+    }
+  });
+
+  // ---- HAMBURGER MENU ----
+  const menuBtn = $("menuBtn");
+  const menuClose = $("menuClose");
+  const drawer = $("drawer");
+  const drawerOverlay = $("drawerOverlay");
+
+  function openDrawer(){
+    drawer.classList.add("open");
+    drawerOverlay.hidden = false;
+    drawer.setAttribute("aria-hidden","false");
+    menuBtn.setAttribute("aria-expanded","true");
+    document.body.style.overflow = "hidden";
+  }
+  function closeDrawer(){
+    drawer.classList.remove("open");
+    drawerOverlay.hidden = true;
+    drawer.setAttribute("aria-hidden","true");
+    menuBtn.setAttribute("aria-expanded","false");
+    document.body.style.overflow = "";
+  }
+
+  menuBtn?.addEventListener("click", () => {
+    if(drawer.classList.contains("open")) closeDrawer();
+    else openDrawer();
+  });
+  menuClose?.addEventListener("click", closeDrawer);
+  drawerOverlay?.addEventListener("click", closeDrawer);
+
+  window.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && drawer.classList.contains("open")) closeDrawer();
+  });
+
+  drawer?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if(!btn) return;
+
+    const goto = btn.getAttribute("data-goto");
+    if(goto){
+      const el = document.getElementById(goto);
+      if(el){
+        closeDrawer();
+        el.scrollIntoView({behavior:"smooth", block:"start"});
+      }
+      return;
+    }
+  });
+
+  $("mTodayMatch")?.addEventListener("click", () => { closeDrawer(); openToday(); });
+
+  $("mBackup")?.addEventListener("click", () => { closeDrawer(); $("btnBackup")?.click(); });
+  $("mRestore")?.addEventListener("click", () => { closeDrawer(); $("btnRestore")?.click(); });
+  $("mExportCustomers")?.addEventListener("click", () => { closeDrawer(); $("btnExport")?.click(); });
+  $("mExportPortfolios")?.addEventListener("click", () => { closeDrawer(); $("pBtnExport")?.click(); });
+  $("mWipeCustomers")?.addEventListener("click", () => { closeDrawer(); $("btnWipe")?.click(); });
+  $("mWipePortfolios")?.addEventListener("click", () => { closeDrawer(); $("pBtnWipe")?.click(); });
 
   // ---- INIT ----
   renderCustomers();
@@ -1446,7 +1772,6 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
   renderPortfolios();
   resetPortfolioForm();
   syncRoomsVisibility();
-
 })();
 </script>
 </body>
