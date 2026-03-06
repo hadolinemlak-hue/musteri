@@ -1,19 +1,18 @@
 (() => {
-  // ---- OFFLINE ----
-  const netEl = document.getElementById("net");
-  function paintNet(){ netEl.textContent = navigator.onLine ? "hazır" : "offline"; }
-  window.addEventListener("online", paintNet);
-  window.addEventListener("offline", paintNet);
-  paintNet();
-  if ("serviceWorker" in navigator) { navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
-
-  // ---- STORAGE ----
   const LS_KEY_C = "hadolin_customers_v2";
   const LS_KEY_P = "hadolin_portfolios_v1";
 
   const $ = (id) => document.getElementById(id);
 
-  // ---- TABS ----
+  // Offline indicator + SW
+  const netEl = $("net");
+  function paintNet(){ if(netEl) netEl.textContent = navigator.onLine ? "hazır" : "offline"; }
+  window.addEventListener("online", paintNet);
+  window.addEventListener("offline", paintNet);
+  paintNet();
+  if ("serviceWorker" in navigator) { navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+
+  // Tabs
   const tabButtons = Array.from(document.querySelectorAll("[data-tab-btn]"));
   const tabPanels = {
     customers: $("tab-customers"),
@@ -23,10 +22,7 @@
   };
 
   function showTab(name){
-    Object.entries(tabPanels).forEach(([k,el]) => {
-      if(!el) return;
-      el.classList.toggle("active", k === name);
-    });
+    Object.entries(tabPanels).forEach(([k,el]) => { if(el) el.classList.toggle("active", k === name); });
     tabButtons.forEach(btn => {
       const t = btn.getAttribute("data-tab-btn");
       const active = (t === name);
@@ -40,33 +36,25 @@
     btn.addEventListener("click", () => showTab(btn.getAttribute("data-tab-btn")));
   });
 
-  // ---- COMMON ----
+  // Toast
   const toastEl = $("toast");
   function toast(msg){
+    if(!toastEl) return;
     toastEl.textContent = msg;
     toastEl.classList.add("show");
     clearTimeout(toastEl._t);
     toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 1800);
   }
+
+  // Utils
   function nowISO(){ return new Date().toISOString(); }
   function uuid(){ return "c_" + Math.random().toString(16).slice(2) + Date.now().toString(16); }
-
-  function normalizeMoney(s){
-    if(!s) return "";
-    const digits = String(s).replace(/[^\d]/g, "");
-    return digits ? digits : "";
-  }
-  function formatMoney(digits){
-    if(!digits) return "";
-    return String(digits).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  }
+  function normalizeMoney(s){ return String(s||"").replace(/[^\d]/g,""); }
+  function formatMoney(d){ return d ? String(d).replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""; }
   function escapeHtml(s){
     return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
   function formatDate(iso){
     if(!iso) return "—";
@@ -74,18 +62,9 @@
     if(isNaN(d)) return "—";
     return d.toLocaleString("tr-TR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
   }
+  function load(key){ try{ const r=localStorage.getItem(key); return r?JSON.parse(r):[] }catch(e){return[]} }
+  function save(key, items){ localStorage.setItem(key, JSON.stringify(items)); }
 
-  function load(key){
-    try{
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : [];
-    }catch(e){ return []; }
-  }
-  function save(key, items){
-    localStorage.setItem(key, JSON.stringify(items));
-  }
-
-  // ---- UTIL: CSV / download ----
   function csvCell(v){
     const s = String(v ?? "");
     if(/[",\n]/.test(s)) return `"${s.replaceAll('"','""')}"`;
@@ -100,11 +79,11 @@
     URL.revokeObjectURL(url);
   }
 
-  // ---- BACKUP / RESTORE (customers + portfolios) ----
+  // Backup / Restore
   const btnBackup = $("btnBackup");
   const btnRestore = $("btnRestore");
 
-  btnBackup.addEventListener("click", async () => {
+  btnBackup?.addEventListener("click", async () => {
     const customers = load(LS_KEY_C);
     const portfolios = load(LS_KEY_P);
     const payload = { version: 1, exportedAt: nowISO(), customers, portfolios };
@@ -114,16 +93,11 @@
     if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
       try{ await navigator.share({ files:[file], title:"HADOLIN CRM Yedek" }); toast("Yedek paylaşıldı."); return; }catch(e){}
     }
-    const blob = new Blob([text], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "hadolin-crm-yedek.json";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+    downloadText(text, "hadolin-crm-yedek.json", "application/json");
     toast("Yedek indirildi.");
   });
 
-  btnRestore.addEventListener("click", () => {
+  btnRestore?.addEventListener("click", () => {
     const inp = document.createElement("input");
     inp.type = "file";
     inp.accept = "application/json";
@@ -136,7 +110,7 @@
           const data = JSON.parse(String(r.result||""));
           if(!data) throw new Error("invalid");
 
-          const customers = Array.isArray(data.customers) ? data.customers : (Array.isArray(data.items) ? data.items : []);
+          const customers = Array.isArray(data.customers) ? data.customers : [];
           const portfolios = Array.isArray(data.portfolios) ? data.portfolios : [];
 
           const ok = confirm("Bu yedek mevcut kayıtların ÜZERİNE yazacak. Emin misin?");
@@ -155,8 +129,7 @@
             createdAt: x.createdAt || nowISO(),
             updatedAt: nowISO()
           })).filter(x => x.name);
-
-          cItems.forEach(x => { x.budgetFmt = x.budget ? formatMoney(x.budget) : ""; });
+          cItems.forEach(x => x.budgetFmt = x.budget ? formatMoney(x.budget) : "");
 
           const pItems = portfolios.map(x => ({
             id: x.id || uuid(),
@@ -172,16 +145,15 @@
             createdAt: x.createdAt || nowISO(),
             updatedAt: nowISO()
           })).filter(x => x.title);
-
-          pItems.forEach(x => { x.priceFmt = x.price ? formatMoney(x.price) : ""; });
+          pItems.forEach(x => x.priceFmt = x.price ? formatMoney(x.price) : "");
 
           save(LS_KEY_C, cItems);
           save(LS_KEY_P, pItems);
 
           renderCustomers(); resetCustomerForm();
           renderPortfolios(); resetPortfolioForm();
-          closeMatch();
           renderToday();
+          closeMatch();
           toast("Geri yüklendi.");
         }catch(e){
           toast("Yedek okunamadı.");
@@ -192,7 +164,7 @@
     inp.click();
   });
 
-  // ---- CUSTOMERS ----
+  // Customers
   const form = $("form");
   const idEl = $("id");
   const nameEl = $("name");
@@ -209,23 +181,19 @@
   const searchEl = $("search");
   const fDealEl = $("fDeal");
   const fTypeEl = $("fType");
-  const btnResetFilters = $("btnResetFilters");
-
-  const btnClear = $("btnClear");
-  const btnExport = $("btnExport");
-  const btnWipe = $("btnWipe");
 
   function resetCustomerForm(){
-    idEl.value = "";
-    nameEl.value = "";
-    phoneEl.value = "";
-    demandEl.value = "";
-    budgetEl.value = "";
-    locationEl.value = "";
-    dealEl.value = "";
-    ptypeEl.value = "";
-    $("btnSave").textContent = "Kaydet";
-    nameEl.focus();
+    if(idEl) idEl.value = "";
+    if(nameEl) nameEl.value = "";
+    if(phoneEl) phoneEl.value = "";
+    if(demandEl) demandEl.value = "";
+    if(budgetEl) budgetEl.value = "";
+    if(locationEl) locationEl.value = "";
+    if(dealEl) dealEl.value = "";
+    if(ptypeEl) ptypeEl.value = "";
+    const bs = $("btnSave");
+    if(bs) bs.textContent = "Kaydet";
+    nameEl?.focus();
   }
 
   function upsertCustomer(item){
@@ -237,23 +205,21 @@
     renderCustomers();
     renderToday();
   }
+
   function removeCustomer(id){
-    const items = load(LS_KEY_C).filter(x => x.id !== id);
-    save(LS_KEY_C, items);
+    save(LS_KEY_C, load(LS_KEY_C).filter(x => x.id !== id));
     renderCustomers();
     renderToday();
   }
 
   function renderCustomers(){
-    const q = (searchEl.value || "").trim().toLowerCase();
+    if(!listEl || !countEl) return;
+    const q = (searchEl?.value || "").trim().toLowerCase();
     const items = load(LS_KEY_C);
-
-    const fd = fDealEl.value;
-    const ft = fTypeEl.value;
-
     let filtered = items;
-    if(fd) filtered = filtered.filter(x => (x.deal || "") === fd);
-    if(ft) filtered = filtered.filter(x => (x.ptype || "") === ft);
+
+    if(fDealEl?.value) filtered = filtered.filter(x => (x.deal||"") === fDealEl.value);
+    if(fTypeEl?.value) filtered = filtered.filter(x => (x.ptype||"") === fTypeEl.value);
 
     if(q){
       filtered = filtered.filter(x =>
@@ -261,15 +227,13 @@
         (x.phone||"").toLowerCase().includes(q) ||
         (x.location||"").toLowerCase().includes(q) ||
         (x.demand||"").toLowerCase().includes(q) ||
-        (x.budgetFmt||"").toLowerCase().includes(q) ||
-        (x.deal||"").toLowerCase().includes(q) ||
-        (x.ptype||"").toLowerCase().includes(q)
+        (x.budgetFmt||"").toLowerCase().includes(q)
       );
     }
 
     countEl.textContent = String(items.length);
     listEl.innerHTML = "";
-    emptyEl.style.display = (filtered.length === 0) ? "block" : "none";
+    if(emptyEl) emptyEl.style.display = (filtered.length === 0) ? "block" : "none";
 
     filtered.forEach(x => {
       const div = document.createElement("div");
@@ -279,20 +243,15 @@
       const phoneLine = x.phone ? `Tel: <b><a href="tel:${escapeHtml(x.phone)}" style="color:inherit;text-decoration:none">${escapeHtml(x.phone)}</a></b>` : `Tel: <span style="color:var(--muted)">—</span>`;
       const locLine = x.location ? `Mevkii: <b>${escapeHtml(x.location)}</b>` : `Mevkii: <span style="color:var(--muted)">—</span>`;
 
-      const tags = `
-        ${(x.deal ? `<span class="tag">${escapeHtml(x.deal)}</span>` : ``)}
-        ${(x.ptype ? `<span class="tag">${escapeHtml(x.ptype)}</span>` : ``)}
-      `.trim();
-
       div.innerHTML = `
         <div class="itemTop">
           <div>
             <div class="name">${escapeHtml(x.name || "—")}</div>
-            <div class="meta">
-              ${phoneLine} · ${budgetLine}<br/>
-              ${locLine}
+            <div class="meta">${phoneLine} · ${budgetLine}<br/>${locLine}</div>
+            <div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              ${x.deal ? `<span class="tag">${escapeHtml(x.deal)}</span>` : ``}
+              ${x.ptype ? `<span class="tag">${escapeHtml(x.ptype)}</span>` : ``}
             </div>
-            ${tags ? `<div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${tags}</div>` : ``}
           </div>
           <div class="pill" title="Son güncelleme">${formatDate(x.updatedAt || x.createdAt)}</div>
         </div>
@@ -312,46 +271,50 @@
     });
   }
 
-  form.addEventListener("submit", (e) => {
+  // IMPORTANT: Kaydet/Güncelle sonrası otomatik eşleşme aç
+  form?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = nameEl.value.trim();
-    if(!name){ toast("Ad soyad boş olamaz."); nameEl.focus(); return; }
+    const name = (nameEl?.value || "").trim();
+    if(!name){ toast("Ad soyad boş olamaz."); nameEl?.focus(); return; }
 
-    const budgetDigits = normalizeMoney(budgetEl.value);
-    const prev = idEl.value ? load(LS_KEY_C).find(x => x.id === idEl.value) : null;
+    const budgetDigits = normalizeMoney(budgetEl?.value || "");
+    const prev = idEl?.value ? load(LS_KEY_C).find(x => x.id === idEl.value) : null;
 
     const item = {
-      id: idEl.value || uuid(),
+      id: (idEl?.value) || uuid(),
       name,
-      phone: phoneEl.value.trim(),
-      demand: demandEl.value.trim(),
-      deal: dealEl.value,
-      ptype: ptypeEl.value,
+      phone: (phoneEl?.value || "").trim(),
+      demand: (demandEl?.value || "").trim(),
+      deal: (dealEl?.value || "").trim(),
+      ptype: (ptypeEl?.value || "").trim(),
       budget: budgetDigits,
       budgetFmt: budgetDigits ? formatMoney(budgetDigits) : "",
-      location: locationEl.value.trim(),
+      location: (locationEl?.value || "").trim(),
       createdAt: prev?.createdAt || nowISO(),
       updatedAt: nowISO()
     };
 
     upsertCustomer(item);
-    toast(idEl.value ? "Güncellendi." : "Kaydedildi.");
+    toast(idEl?.value ? "Güncellendi." : "Kaydedildi.");
+
     resetCustomerForm();
+    openMatch(item.id);
   });
 
-  btnClear.addEventListener("click", () => { resetCustomerForm(); toast("Form temizlendi."); });
+  $("btnClear")?.addEventListener("click", () => { resetCustomerForm(); toast("Form temizlendi."); });
 
-  searchEl.addEventListener("input", renderCustomers);
-  fDealEl.addEventListener("change", renderCustomers);
-  fTypeEl.addEventListener("change", renderCustomers);
-  btnResetFilters.addEventListener("click", () => {
-    fDealEl.value = "";
-    fTypeEl.value = "";
+  searchEl?.addEventListener("input", renderCustomers);
+  fDealEl?.addEventListener("change", renderCustomers);
+  fTypeEl?.addEventListener("change", renderCustomers);
+
+  $("btnResetFilters")?.addEventListener("click", () => {
+    if(fDealEl) fDealEl.value = "";
+    if(fTypeEl) fTypeEl.value = "";
     renderCustomers();
     toast("Filtre sıfırlandı.");
   });
 
-  listEl.addEventListener("click", (e) => {
+  listEl?.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if(!btn) return;
 
@@ -363,17 +326,17 @@
     if(editId){
       const item = load(LS_KEY_C).find(x => x.id === editId);
       if(!item) return;
-      idEl.value = item.id;
-      nameEl.value = item.name || "";
-      phoneEl.value = item.phone || "";
-      demandEl.value = item.demand || "";
-      dealEl.value = item.deal || "";
-      ptypeEl.value = item.ptype || "";
-      budgetEl.value = item.budgetFmt || (item.budget ? formatMoney(item.budget) : "");
-      locationEl.value = item.location || "";
-      $("btnSave").textContent = "Güncelle";
+      if(idEl) idEl.value = item.id;
+      if(nameEl) nameEl.value = item.name || "";
+      if(phoneEl) phoneEl.value = item.phone || "";
+      if(demandEl) demandEl.value = item.demand || "";
+      if(dealEl) dealEl.value = item.deal || "";
+      if(ptypeEl) ptypeEl.value = item.ptype || "";
+      if(budgetEl) budgetEl.value = item.budgetFmt || (item.budget ? formatMoney(item.budget) : "");
+      if(locationEl) locationEl.value = item.location || "";
+      const bs = $("btnSave");
+      if(bs) bs.textContent = "Güncelle";
       toast("Düzenleme modunda.");
-      nameEl.focus();
       showTab("customers");
       return;
     }
@@ -385,7 +348,7 @@
       if(!ok) return;
       removeCustomer(delId);
       toast("Silindi.");
-      if(idEl.value === delId) resetCustomerForm();
+      if(idEl?.value === delId) resetCustomerForm();
       if(selectedCustomerId === delId) closeMatch();
       return;
     }
@@ -412,10 +375,9 @@ Talep: ${item.demand || "-"}`;
     }
   });
 
-  btnExport.addEventListener("click", () => {
+  $("btnExport")?.addEventListener("click", () => {
     const items = load(LS_KEY_C);
     if(items.length === 0){ toast("Kayıt yok."); return; }
-
     const header = ["Ad Soyad","Telefon","İşlem","Tip","Talep","Bütçe","Mevkii","Oluşturma","Güncelleme"];
     const rows = items.map(x => ([
       x.name||"", x.phone||"", x.deal||"", x.ptype||"",
@@ -423,30 +385,28 @@ Talep: ${item.demand || "-"}`;
       x.budgetFmt ? (x.budgetFmt + " ₺") : "",
       x.location||"", x.createdAt||"", x.updatedAt||""
     ]));
-
     const csv = [header, ...rows].map(r => r.map(v => csvCell(v)).join(",")).join("\n");
     downloadText(csv, "hadolin-musteriler.csv", "text/csv;charset=utf-8");
     toast("Müşteri CSV indirildi.");
   });
 
-  btnWipe.addEventListener("click", () => {
+  $("btnWipe")?.addEventListener("click", () => {
     const items = load(LS_KEY_C);
     if(items.length === 0){ toast("Zaten boş."); return; }
     const ok = confirm("TÜM müşteri kayıtları silinecek. Emin misin?");
     if(!ok) return;
     localStorage.removeItem(LS_KEY_C);
     renderCustomers(); resetCustomerForm();
-    closeMatch();
-    renderToday();
+    closeMatch(); renderToday();
     toast("Hepsi silindi.");
   });
 
-  budgetEl.addEventListener("input", () => {
+  budgetEl?.addEventListener("input", () => {
     const digits = normalizeMoney(budgetEl.value);
     budgetEl.value = digits ? formatMoney(digits) : "";
   });
 
-  // ---- PORTFOLIOS ----
+  // Portfolios
   const pForm = $("pForm");
   const pIdEl = $("pId");
   const pDealEl = $("pDeal");
@@ -467,29 +427,25 @@ Talep: ${item.demand || "-"}`;
   const pfDealEl = $("pfDeal");
   const pfTypeEl = $("pfType");
   const pfRoomsEl = $("pfRooms");
-  const pBtnResetFilters = $("pBtnResetFilters");
-
-  const pBtnClear = $("pBtnClear");
-  const pBtnExport = $("pBtnExport");
-  const pBtnWipe = $("pBtnWipe");
 
   function syncRoomsVisibility(){
-    const isDaire = (pTypeEl.value === "Daire");
-    pRoomsWrapEl.style.display = isDaire ? "block" : "none";
-    if(!isDaire) pRoomsEl.value = "";
+    const isDaire = (pTypeEl?.value === "Daire");
+    if(pRoomsWrapEl) pRoomsWrapEl.style.display = isDaire ? "block" : "none";
+    if(!isDaire && pRoomsEl) pRoomsEl.value = "";
   }
 
   function resetPortfolioForm(){
-    pIdEl.value = "";
-    pDealEl.value = "";
-    pTypeEl.value = "";
-    pRoomsEl.value = "";
-    pTitleEl.value = "";
-    pPriceEl.value = "";
-    pLocationEl.value = "";
-    pDescEl.value = "";
-    pNotesEl.value = "";
-    $("pBtnSave").textContent = "Portföy Kaydet";
+    if(pIdEl) pIdEl.value = "";
+    if(pDealEl) pDealEl.value = "";
+    if(pTypeEl) pTypeEl.value = "";
+    if(pRoomsEl) pRoomsEl.value = "";
+    if(pTitleEl) pTitleEl.value = "";
+    if(pPriceEl) pPriceEl.value = "";
+    if(pLocationEl) pLocationEl.value = "";
+    if(pDescEl) pDescEl.value = "";
+    if(pNotesEl) pNotesEl.value = "";
+    const ps = $("pBtnSave");
+    if(ps) ps.textContent = "Portföy Kaydet";
     syncRoomsVisibility();
   }
 
@@ -502,25 +458,22 @@ Talep: ${item.demand || "-"}`;
     renderPortfolios();
     if(selectedCustomerId) renderMatch();
   }
+
   function removePortfolio(id){
-    const items = load(LS_KEY_P).filter(x => x.id !== id);
-    save(LS_KEY_P, items);
+    save(LS_KEY_P, load(LS_KEY_P).filter(x => x.id !== id));
     renderPortfolios();
     if(selectedCustomerId) renderMatch();
   }
 
   function renderPortfolios(){
-    const q = (pSearchEl.value || "").trim().toLowerCase();
+    if(!pListEl || !pCountEl) return;
+    const q = (pSearchEl?.value || "").trim().toLowerCase();
     const items = load(LS_KEY_P);
 
-    const fd = pfDealEl.value;
-    const ft = pfTypeEl.value;
-    const fr = pfRoomsEl.value;
-
     let filtered = items;
-    if(fd) filtered = filtered.filter(x => (x.deal || "") === fd);
-    if(ft) filtered = filtered.filter(x => (x.type || "") === ft);
-    if(fr) filtered = filtered.filter(x => (x.rooms || "") === fr);
+    if(pfDealEl?.value) filtered = filtered.filter(x => (x.deal||"") === pfDealEl.value);
+    if(pfTypeEl?.value) filtered = filtered.filter(x => (x.type||"") === pfTypeEl.value);
+    if(pfRoomsEl?.value) filtered = filtered.filter(x => (x.rooms||"") === pfRoomsEl.value);
 
     if(q){
       filtered = filtered.filter(x =>
@@ -528,16 +481,13 @@ Talep: ${item.demand || "-"}`;
         (x.location||"").toLowerCase().includes(q) ||
         (x.desc||"").toLowerCase().includes(q) ||
         (x.notes||"").toLowerCase().includes(q) ||
-        (x.type||"").toLowerCase().includes(q) ||
-        (x.deal||"").toLowerCase().includes(q) ||
-        (x.rooms||"").toLowerCase().includes(q) ||
         (x.priceFmt||"").toLowerCase().includes(q)
       );
     }
 
     pCountEl.textContent = String(items.length);
     pListEl.innerHTML = "";
-    pEmptyEl.style.display = (filtered.length === 0) ? "block" : "none";
+    if(pEmptyEl) pEmptyEl.style.display = (filtered.length === 0) ? "block" : "none";
 
     filtered.forEach(x => {
       const div = document.createElement("div");
@@ -546,31 +496,22 @@ Talep: ${item.demand || "-"}`;
       const priceLine = x.price ? `Fiyat: <b>${x.priceFmt} ₺</b>` : `Fiyat: <span style="color:var(--muted)">—</span>`;
       const locLine = x.location ? `Mevkii: <b>${escapeHtml(x.location)}</b>` : `Mevkii: <span style="color:var(--muted)">—</span>`;
 
-      const tags = `
-        ${x.deal ? `<span class="tag">${escapeHtml(x.deal)}</span>` : ``}
-        ${x.type ? `<span class="tag">${escapeHtml(x.type)}</span>` : ``}
-        ${(x.type === "Daire" && x.rooms) ? `<span class="tag">${escapeHtml(x.rooms)}</span>` : ``}
-      `.trim();
-
       div.innerHTML = `
         <div class="itemTop">
           <div>
             <div class="name">${escapeHtml(x.title || "—")}</div>
-            <div class="meta">
-              ${priceLine}<br/>
-              ${locLine}
+            <div class="meta">${priceLine}<br/>${locLine}</div>
+            <div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              ${x.deal ? `<span class="tag">${escapeHtml(x.deal)}</span>` : ``}
+              ${x.type ? `<span class="tag">${escapeHtml(x.type)}</span>` : ``}
+              ${(x.type==="Daire" && x.rooms) ? `<span class="tag">${escapeHtml(x.rooms)}</span>` : ``}
             </div>
-            ${tags ? `<div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${tags}</div>` : ``}
           </div>
           <div class="pill" title="Son güncelleme">${formatDate(x.updatedAt || x.createdAt)}</div>
         </div>
 
         <div class="meta" style="margin-top:8px">
           <b>Açıklama:</b> ${x.desc ? escapeHtml(x.desc).replace(/\n/g,"<br/>") : '<span style="color:var(--muted)">—</span>'}
-        </div>
-
-        <div class="meta" style="margin-top:8px">
-          <b>Notlar:</b> ${x.notes ? escapeHtml(x.notes).replace(/\n/g,"<br/>") : '<span style="color:var(--muted)">—</span>'}
         </div>
 
         <div class="actions">
@@ -583,55 +524,55 @@ Talep: ${item.demand || "-"}`;
     });
   }
 
-  pForm.addEventListener("submit", (e) => {
+  pForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const deal = pDealEl.value;
-    const type = pTypeEl.value;
-    const title = pTitleEl.value.trim();
+    const deal = (pDealEl?.value || "").trim();
+    const type = (pTypeEl?.value || "").trim();
+    const title = (pTitleEl?.value || "").trim();
     if(!deal || !type || !title){ toast("İşlem, tür ve başlık zorunlu."); return; }
 
-    const priceDigits = normalizeMoney(pPriceEl.value);
-    const prev = pIdEl.value ? load(LS_KEY_P).find(x => x.id === pIdEl.value) : null;
+    const priceDigits = normalizeMoney(pPriceEl?.value || "");
+    const prev = pIdEl?.value ? load(LS_KEY_P).find(x => x.id === pIdEl.value) : null;
 
     const item = {
-      id: pIdEl.value || uuid(),
+      id: (pIdEl?.value) || uuid(),
       deal,
       type,
-      rooms: (type === "Daire") ? (pRoomsEl.value || "") : "",
+      rooms: (type === "Daire") ? ((pRoomsEl?.value || "").trim()) : "",
       title,
       price: priceDigits,
       priceFmt: priceDigits ? formatMoney(priceDigits) : "",
-      location: pLocationEl.value.trim(),
-      desc: pDescEl.value.trim(),
-      notes: pNotesEl.value.trim(),
+      location: (pLocationEl?.value || "").trim(),
+      desc: (pDescEl?.value || "").trim(),
+      notes: (pNotesEl?.value || "").trim(),
       createdAt: prev?.createdAt || nowISO(),
       updatedAt: nowISO()
     };
 
     upsertPortfolio(item);
-    toast(pIdEl.value ? "Portföy güncellendi." : "Portföy kaydedildi.");
+    toast(pIdEl?.value ? "Portföy güncellendi." : "Portföy kaydedildi.");
     resetPortfolioForm();
   });
 
-  pTypeEl.addEventListener("change", syncRoomsVisibility);
-  pBtnClear.addEventListener("click", () => { resetPortfolioForm(); toast("Portföy formu temizlendi."); });
+  pTypeEl?.addEventListener("change", syncRoomsVisibility);
+  $("pBtnClear")?.addEventListener("click", () => { resetPortfolioForm(); toast("Portföy formu temizlendi."); });
 
-  pSearchEl.addEventListener("input", renderPortfolios);
-  pfDealEl.addEventListener("change", renderPortfolios);
-  pfTypeEl.addEventListener("change", renderPortfolios);
-  pfRoomsEl.addEventListener("change", renderPortfolios);
-  pBtnResetFilters.addEventListener("click", () => {
-    pfDealEl.value = "";
-    pfTypeEl.value = "";
-    pfRoomsEl.value = "";
+  pSearchEl?.addEventListener("input", renderPortfolios);
+  pfDealEl?.addEventListener("change", renderPortfolios);
+  pfTypeEl?.addEventListener("change", renderPortfolios);
+  pfRoomsEl?.addEventListener("change", renderPortfolios);
+
+  $("pBtnResetFilters")?.addEventListener("click", () => {
+    if(pfDealEl) pfDealEl.value = "";
+    if(pfTypeEl) pfTypeEl.value = "";
+    if(pfRoomsEl) pfRoomsEl.value = "";
     renderPortfolios();
     toast("Portföy filtresi sıfırlandı.");
   });
 
-  pListEl.addEventListener("click", (e) => {
+  pListEl?.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if(!btn) return;
-
     const editId = btn.getAttribute("data-pedit");
     const delId = btn.getAttribute("data-pdel");
     const copyId = btn.getAttribute("data-pcopy");
@@ -639,17 +580,18 @@ Talep: ${item.demand || "-"}`;
     if(editId){
       const item = load(LS_KEY_P).find(x => x.id === editId);
       if(!item) return;
-      pIdEl.value = item.id;
-      pDealEl.value = item.deal || "";
-      pTypeEl.value = item.type || "";
+      if(pIdEl) pIdEl.value = item.id;
+      if(pDealEl) pDealEl.value = item.deal || "";
+      if(pTypeEl) pTypeEl.value = item.type || "";
       syncRoomsVisibility();
-      pRoomsEl.value = item.rooms || "";
-      pTitleEl.value = item.title || "";
-      pPriceEl.value = item.priceFmt || (item.price ? formatMoney(item.price) : "");
-      pLocationEl.value = item.location || "";
-      pDescEl.value = item.desc || "";
-      pNotesEl.value = item.notes || "";
-      $("pBtnSave").textContent = "Portföy Güncelle";
+      if(pRoomsEl) pRoomsEl.value = item.rooms || "";
+      if(pTitleEl) pTitleEl.value = item.title || "";
+      if(pPriceEl) pPriceEl.value = item.priceFmt || (item.price ? formatMoney(item.price) : "");
+      if(pLocationEl) pLocationEl.value = item.location || "";
+      if(pDescEl) pDescEl.value = item.desc || "";
+      if(pNotesEl) pNotesEl.value = item.notes || "";
+      const ps = $("pBtnSave");
+      if(ps) ps.textContent = "Portföy Güncelle";
       toast("Portföy düzenleme modunda.");
       showTab("portfolios");
       return;
@@ -662,14 +604,13 @@ Talep: ${item.demand || "-"}`;
       if(!ok) return;
       removePortfolio(delId);
       toast("Portföy silindi.");
-      if(pIdEl.value === delId) resetPortfolioForm();
+      if(pIdEl?.value === delId) resetPortfolioForm();
       return;
     }
 
     if(copyId){
       const item = load(LS_KEY_P).find(x => x.id === copyId);
       if(!item) return;
-
       const text =
 `Portföy: ${item.title || "-"}
 İşlem: ${item.deal || "-"}
@@ -678,17 +619,15 @@ Fiyat: ${item.priceFmt ? item.priceFmt + " ₺" : "-"}
 Mevkii: ${item.location || "-"}
 Açıklama: ${item.desc || "-"}
 Notlar: ${item.notes || "-"}`;
-
       navigator.clipboard?.writeText(text).then(() => toast("Portföy kopyalandı."))
         .catch(() => prompt("Kopyala:", text));
       return;
     }
   });
 
-  pBtnExport.addEventListener("click", () => {
+  $("pBtnExport")?.addEventListener("click", () => {
     const items = load(LS_KEY_P);
     if(items.length === 0){ toast("Portföy yok."); return; }
-
     const header = ["Başlık","İşlem","Tür","Daire Tipi","Fiyat","Mevkii","Açıklama","Notlar","Oluşturma","Güncelleme"];
     const rows = items.map(x => ([
       x.title||"", x.deal||"", x.type||"", x.rooms||"",
@@ -698,13 +637,12 @@ Notlar: ${item.notes || "-"}`;
       (x.notes||"").replace(/\n/g," "),
       x.createdAt||"", x.updatedAt||""
     ]));
-
     const csv = [header, ...rows].map(r => r.map(v => csvCell(v)).join(",")).join("\n");
     downloadText(csv, "hadolin-portfoy.csv", "text/csv;charset=utf-8");
     toast("Portföy CSV indirildi.");
   });
 
-  pBtnWipe.addEventListener("click", () => {
+  $("pBtnWipe")?.addEventListener("click", () => {
     const items = load(LS_KEY_P);
     if(items.length === 0){ toast("Portföy zaten boş."); return; }
     const ok = confirm("TÜM portföy kayıtları silinecek. Emin misin?");
@@ -715,20 +653,15 @@ Notlar: ${item.notes || "-"}`;
     toast("Portföy temizlendi.");
   });
 
-  pPriceEl.addEventListener("input", () => {
+  pPriceEl?.addEventListener("input", () => {
     const digits = normalizeMoney(pPriceEl.value);
     pPriceEl.value = digits ? formatMoney(digits) : "";
   });
 
-  // ---- MATCHING ----
+  // Matching
   const matchListEl = $("matchList");
   const matchEmptyEl = $("matchEmpty");
   const matchMetaEl = $("matchMeta");
-
-  const btnMatchClose = $("btnMatchClose");
-  const btnMatchCopy = $("btnMatchCopy");
-  const btnMatchReset = $("btnMatchReset");
-
   const mBudgetEl = $("mBudget");
   const mLocEl = $("mLoc");
   const mSortEl = $("mSort");
@@ -737,32 +670,10 @@ Notlar: ${item.notes || "-"}`;
 
   function closeMatch(){
     selectedCustomerId = "";
-    matchListEl.innerHTML = "";
-    matchMetaEl.textContent = "";
-    matchEmptyEl.style.display = "block";
+    if(matchListEl) matchListEl.innerHTML = "";
+    if(matchMetaEl) matchMetaEl.textContent = "";
+    if(matchEmptyEl) matchEmptyEl.style.display = "block";
   }
-
-  function openMatch(customerId){
-    selectedCustomerId = customerId;
-    showTab("match");
-    mBudgetEl.value = "";
-    mLocEl.value = "";
-    mSortEl.value = "score";
-    renderMatch();
-  }
-
-  btnMatchClose.addEventListener("click", () => { closeMatch(); toast("Eşleşme kapatıldı."); });
-  btnMatchReset.addEventListener("click", () => {
-    mBudgetEl.value = "";
-    mLocEl.value = "";
-    mSortEl.value = "score";
-    renderMatch();
-    toast("Eşleşme filtresi sıfırlandı.");
-  });
-
-  mBudgetEl.addEventListener("change", renderMatch);
-  mLocEl.addEventListener("change", renderMatch);
-  mSortEl.addEventListener("change", renderMatch);
 
   function parseRoomsFromText(text){
     const t = (text||"").toLowerCase();
@@ -772,10 +683,11 @@ Notlar: ${item.notes || "-"}`;
     return "";
   }
 
+  // ✅ Safari uyumlu: Unicode \p{...} yok.
   function normalizeLocTokens(s){
     return (s||"")
       .toLowerCase()
-      .replace(/[^\p{L}\p{N}\s\/-]/gu, " ")
+      .replace(/[^a-z0-9ğüşöçı\s\/-]/gi, " ")
       .split(/\s+|\/|-/g)
       .filter(Boolean)
       .filter(tok => tok.length >= 3);
@@ -798,7 +710,6 @@ Notlar: ${item.notes || "-"}`;
 
     const cRooms = (customer.ptype === "Daire") ? parseRoomsFromText(customer.demand) : "";
     if(customer.ptype === "Daire" && cRooms && portfolio.rooms && cRooms === portfolio.rooms) score += 2;
-    if(customer.ptype === "Daire" && cRooms && !portfolio.rooms) score -= 0.5;
 
     const cb = customer.budget ? parseInt(customer.budget, 10) : 0;
     const pp = portfolio.price ? parseInt(portfolio.price, 10) : 0;
@@ -816,90 +727,72 @@ Notlar: ${item.notes || "-"}`;
     const ageDays = updated ? (Date.now() - updated) / (1000*60*60*24) : 999;
     if(ageDays <= 14) score += 0.5;
 
-    return { score, cRooms, sim, cb, pp };
+    return { score, sim, cb, pp, cRooms };
+  }
+
+  function openMatch(customerId){
+    selectedCustomerId = customerId;
+    showTab("match");
+    if(mBudgetEl) mBudgetEl.value = "";
+    if(mLocEl) mLocEl.value = "";
+    if(mSortEl) mSortEl.value = "score";
+    renderMatch();
   }
 
   function renderMatch(){
-    if(!selectedCustomerId){
-      matchEmptyEl.style.display = "block";
-      return;
-    }
-
+    if(!selectedCustomerId){ if(matchEmptyEl) matchEmptyEl.style.display="block"; return; }
     const customer = load(LS_KEY_C).find(x => x.id === selectedCustomerId);
-    if(!customer){
-      closeMatch();
-      return;
-    }
+    if(!customer){ closeMatch(); return; }
 
     const portfolios = load(LS_KEY_P);
     const baseRooms = (customer.ptype === "Daire") ? parseRoomsFromText(customer.demand) : "";
     const budgetText = customer.budgetFmt ? `${customer.budgetFmt} ₺` : "—";
 
-    matchMetaEl.innerHTML =
-      `<div class="meta">
-        <b>${escapeHtml(customer.name)}</b> · ${escapeHtml(customer.deal || "—")} · ${escapeHtml(customer.ptype || "—")}
+    if(matchMetaEl){
+      matchMetaEl.innerHTML =
+        `<div class="meta"><b>${escapeHtml(customer.name)}</b> · ${escapeHtml(customer.deal||"—")} · ${escapeHtml(customer.ptype||"—")}
         ${baseRooms ? ` · <span class="tag">${escapeHtml(baseRooms)}</span>` : ``}
-        <br/>
-        Bütçe: <b>${escapeHtml(budgetText)}</b> · Mevkii: <b>${escapeHtml(customer.location || "—")}</b>
-      </div>`;
+        <br/>Bütçe: <b>${escapeHtml(budgetText)}</b> · Mevkii: <b>${escapeHtml(customer.location||"—")}</b></div>`;
+    }
 
-    let scored = portfolios.map(p => {
-      const s = scoreMatch(customer, p);
-      return { p, ...s };
-    });
-
+    let scored = portfolios.map(p => ({ p, ...scoreMatch(customer,p) }));
     if(customer.deal) scored = scored.filter(x => x.p.deal === customer.deal);
     if(customer.ptype) scored = scored.filter(x => x.p.type === customer.ptype);
 
-    if(mBudgetEl.value === "Icinde"){
-      const cb = customer.budget ? parseInt(customer.budget, 10) : 0;
-      if(cb) scored = scored.filter(x => (x.pp ? x.pp <= cb : true));
+    if(mBudgetEl?.value === "Icinde" && customer.budget){
+      const cb = parseInt(customer.budget, 10);
+      scored = scored.filter(x => (x.pp ? x.pp <= cb : true));
     }
-    if(mLocEl.value === "Benzer"){
-      scored = scored.filter(x => x.sim >= 0.25);
-    }
+    if(mLocEl?.value === "Benzer") scored = scored.filter(x => x.sim >= 0.25);
 
-    const sort = mSortEl.value;
+    const sort = mSortEl?.value || "score";
     scored.sort((a,b) => {
-      if(sort === "priceAsc"){
-        const ap = a.pp || Number.MAX_SAFE_INTEGER;
-        const bp = b.pp || Number.MAX_SAFE_INTEGER;
-        return ap - bp;
-      }
-      if(sort === "priceDesc"){
-        const ap = a.pp || -1;
-        const bp = b.pp || -1;
-        return bp - ap;
-      }
+      if(sort === "priceAsc") return (a.pp||Number.MAX_SAFE_INTEGER) - (b.pp||Number.MAX_SAFE_INTEGER);
+      if(sort === "priceDesc") return (b.pp||-1) - (a.pp||-1);
       if(sort === "newest"){
         const au = new Date(a.p.updatedAt || a.p.createdAt || 0).getTime();
         const bu = new Date(b.p.updatedAt || b.p.createdAt || 0).getTime();
         return bu - au;
       }
-      if(b.score !== a.score) return b.score - a.score;
-      const bu = new Date(b.p.updatedAt || b.p.createdAt || 0).getTime();
-      const au = new Date(a.p.updatedAt || a.p.createdAt || 0).getTime();
-      return bu - au;
+      return (b.score - a.score);
     });
 
+    if(!matchListEl) return;
     matchListEl.innerHTML = "";
-    matchEmptyEl.style.display = (scored.length === 0) ? "block" : "none";
+    if(matchEmptyEl) matchEmptyEl.style.display = (scored.length === 0) ? "block" : "none";
 
-    scored.slice(0, 12).forEach(x => {
+    scored.slice(0,12).forEach(x => {
       const p = x.p;
-
       const priceLine = p.price ? `Fiyat: <b>${p.priceFmt} ₺</b>` : `Fiyat: <span style="color:var(--muted)">—</span>`;
       const locLine = p.location ? `Mevkii: <b>${escapeHtml(p.location)}</b>` : `Mevkii: <span style="color:var(--muted)">—</span>`;
-
       const inBudget = (x.cb && x.pp) ? (x.pp <= x.cb) : null;
       const budgetBadge = (inBudget === null) ? "" : (inBudget ? `<span class="tag" style="border-color:rgba(46,229,157,.45)">Bütçe İçinde</span>` : `<span class="tag" style="border-color:rgba(245,158,11,.5)">Bütçe Üstü</span>`);
-
       const tags = `
         ${p.deal ? `<span class="tag">${escapeHtml(p.deal)}</span>` : ``}
         ${p.type ? `<span class="tag">${escapeHtml(p.type)}</span>` : ``}
-        ${(p.type === "Daire" && p.rooms) ? `<span class="tag">${escapeHtml(p.rooms)}</span>` : ``}
+        ${(p.type==="Daire" && p.rooms) ? `<span class="tag">${escapeHtml(p.rooms)}</span>` : ``}
         ${budgetBadge}
-        ${(x.sim >= 0.25) ? `<span class="tag" style="border-color:rgba(255,255,255,.16)">Mevkii Benzer</span>` : ``}
+        ${(x.sim>=0.25) ? `<span class="tag" style="border-color:rgba(255,255,255,.16)">Mevkii Benzer</span>` : ``}
       `.trim();
 
       const div = document.createElement("div");
@@ -907,11 +800,8 @@ Notlar: ${item.notes || "-"}`;
       div.innerHTML = `
         <div class="itemTop">
           <div>
-            <div class="name">${escapeHtml(p.title || "—")}</div>
-            <div class="meta">
-              ${priceLine}<br/>
-              ${locLine}
-            </div>
+            <div class="name">${escapeHtml(p.title||"—")}</div>
+            <div class="meta">${priceLine}<br/>${locLine}</div>
             ${tags ? `<div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${tags}</div>` : ``}
           </div>
           <div class="row" style="justify-content:flex-end">
@@ -919,27 +809,20 @@ Notlar: ${item.notes || "-"}`;
             <span class="pill" title="Son güncelleme">${formatDate(p.updatedAt || p.createdAt)}</span>
           </div>
         </div>
-
-        <div class="meta" style="margin-top:8px">
-          <b>Açıklama:</b> ${p.desc ? escapeHtml(p.desc).replace(/\n/g,"<br/>") : '<span style="color:var(--muted)">—</span>'}
-        </div>
-
-        <div class="actions">
-          <button class="btn" data-mcopy="${p.id}">Bu Portföyü Kopyala</button>
-        </div>
+        <div class="meta" style="margin-top:8px"><b>Açıklama:</b> ${p.desc ? escapeHtml(p.desc).replace(/\n/g,"<br/>") : '<span style="color:var(--muted)">—</span>'}</div>
+        <div class="actions"><button class="btn" data-mcopy="${p.id}">Bu Portföyü Kopyala</button></div>
       `;
       matchListEl.appendChild(div);
     });
   }
 
-  matchListEl.addEventListener("click", (e) => {
+  matchListEl?.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if(!btn) return;
     const pid = btn.getAttribute("data-mcopy");
     if(!pid) return;
     const p = load(LS_KEY_P).find(x => x.id === pid);
     if(!p) return;
-
     const text =
 `Portföy: ${p.title || "-"}
 İşlem: ${p.deal || "-"}
@@ -948,12 +831,17 @@ Fiyat: ${p.priceFmt ? p.priceFmt + " ₺" : "-"}
 Mevkii: ${p.location || "-"}
 Açıklama: ${p.desc || "-"}
 Notlar: ${p.notes || "-"}`;
-
     navigator.clipboard?.writeText(text).then(() => toast("Kopyalandı."))
       .catch(() => prompt("Kopyala:", text));
   });
 
-  btnMatchCopy.addEventListener("click", () => {
+  $("btnMatchClose")?.addEventListener("click", () => { closeMatch(); toast("Eşleşme kapatıldı."); });
+  $("btnMatchReset")?.addEventListener("click", () => { if(mBudgetEl) mBudgetEl.value=""; if(mLocEl) mLocEl.value=""; if(mSortEl) mSortEl.value="score"; renderMatch(); toast("Eşleşme filtresi sıfırlandı."); });
+  mBudgetEl?.addEventListener("change", renderMatch);
+  mLocEl?.addEventListener("change", renderMatch);
+  mSortEl?.addEventListener("change", renderMatch);
+
+  $("btnMatchCopy")?.addEventListener("click", () => {
     if(!selectedCustomerId) return;
     const customer = load(LS_KEY_C).find(x => x.id === selectedCustomerId);
     if(!customer){ toast("Müşteri bulunamadı."); return; }
@@ -961,21 +849,14 @@ Notlar: ${p.notes || "-"}`;
     let scored = load(LS_KEY_P).map(p => ({ p, ...scoreMatch(customer,p) }));
     if(customer.deal) scored = scored.filter(x => x.p.deal === customer.deal);
     if(customer.ptype) scored = scored.filter(x => x.p.type === customer.ptype);
-    if(mBudgetEl.value === "Icinde"){
-      const cb = customer.budget ? parseInt(customer.budget, 10) : 0;
-      if(cb) scored = scored.filter(x => (x.pp ? x.pp <= cb : true));
-    }
-    if(mLocEl.value === "Benzer"){
-      scored = scored.filter(x => x.sim >= 0.25);
-    }
     scored.sort((a,b)=> (b.score - a.score));
 
-    const top = scored.slice(0, 5).map((x, i) => {
+    const top = scored.slice(0,5).map((x,i)=>{
       const p = x.p;
-      const linePrice = p.priceFmt ? `${p.priceFmt} ₺` : "—";
-      const lineRooms = (p.type === "Daire" && p.rooms) ? ` · ${p.rooms}` : "";
-      const lineLoc = p.location ? ` · ${p.location}` : "";
-      return `${i+1}) ${p.title || "Portföy"} — ${linePrice}${lineRooms}${lineLoc}`;
+      const price = p.priceFmt ? `${p.priceFmt} ₺` : "—";
+      const rooms = (p.type==="Daire" && p.rooms) ? ` · ${p.rooms}` : "";
+      const loc = p.location ? ` · ${p.location}` : "";
+      return `${i+1}) ${p.title || "Portföy"} — ${price}${rooms}${loc}`;
     }).join("\n");
 
     const msg =
@@ -985,17 +866,14 @@ Kriterlerinize uygun bazı portföyleri listeledim:
 ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen çıkarırım."}
 
 İsterseniz size uygun olanları seçip detaylarını paylaşayım.`;
-
     navigator.clipboard?.writeText(msg).then(() => toast("Mesaj kopyalandı."))
       .catch(() => prompt("Kopyala:", msg));
   });
 
-  // ---- TODAY ----
+  // Today
   const todayListEl = $("todayList");
   const todayEmptyEl = $("todayEmpty");
   const todayMetaEl = $("todayMeta");
-  const btnTodayClose = $("btnTodayClose");
-  const btnTodayRefresh = $("btnTodayRefresh");
 
   function ymdLocal(d){
     const y = d.getFullYear();
@@ -1011,74 +889,56 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
   }
 
   function renderToday(){
+    if(!todayListEl || !todayMetaEl) return;
     const items = load(LS_KEY_C);
     const todayStr = ymdLocal(new Date());
-
     const todays = items
       .filter(x => isoToLocalYmd(x.updatedAt || x.createdAt) === todayStr)
       .sort((a,b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
 
     todayMetaEl.innerHTML = `<div class="meta">Tarih: <b>${todayStr}</b> · Bugün: <b>${todays.length}</b> müşteri</div>`;
-
     todayListEl.innerHTML = "";
-    todayEmptyEl.style.display = todays.length ? "none" : "block";
+    if(todayEmptyEl) todayEmptyEl.style.display = todays.length ? "none" : "block";
 
     todays.forEach(x => {
       const div = document.createElement("div");
       div.className = "item";
-
-      const budgetLine = x.budget ? `Bütçe: <b>${x.budgetFmt} ₺</b>` : `Bütçe: <span style="color:var(--muted)">—</span>`;
-      const phoneLine = x.phone ? `Tel: <b>${escapeHtml(x.phone)}</b>` : `Tel: <span style="color:var(--muted)">—</span>`;
-      const locLine = x.location ? `Mevkii: <b>${escapeHtml(x.location)}</b>` : `Mevkii: <span style="color:var(--muted)">—</span>`;
-
-      const tags = `
-        ${(x.deal ? `<span class="tag">${escapeHtml(x.deal)}</span>` : ``)}
-        ${(x.ptype ? `<span class="tag">${escapeHtml(x.ptype)}</span>` : ``)}
-      `.trim();
-
       div.innerHTML = `
         <div class="itemTop">
           <div>
             <div class="name">${escapeHtml(x.name || "—")}</div>
             <div class="meta">
-              ${phoneLine} · ${budgetLine}<br/>
-              ${locLine}
+              Tel: <b>${escapeHtml(x.phone || "—")}</b> · Bütçe: <b>${escapeHtml(x.budgetFmt || "—")}${x.budgetFmt ? " ₺" : ""}</b><br/>
+              Mevkii: <b>${escapeHtml(x.location || "—")}</b>
             </div>
-            ${tags ? `<div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${tags}</div>` : ``}
+            <div class="meta" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              ${x.deal ? `<span class="tag">${escapeHtml(x.deal)}</span>` : ``}
+              ${x.ptype ? `<span class="tag">${escapeHtml(x.ptype)}</span>` : ``}
+            </div>
           </div>
-          <div class="pill" title="Son güncelleme">${formatDate(x.updatedAt || x.createdAt)}</div>
+          <div class="pill">${formatDate(x.updatedAt || x.createdAt)}</div>
         </div>
-
         <div class="actions">
-          <button class="btn primary" type="button" data-tmatch="${x.id}">Eşleştir</button>
-          <button class="btn" type="button" data-tcall="${x.id}">Ara</button>
-          <button class="btn" type="button" data-twa="${x.id}">WhatsApp</button>
+          <button class="btn primary" data-tmatch="${x.id}">Eşleştir</button>
+          <button class="btn" data-tcall="${x.id}">Ara</button>
+          <button class="btn" data-twa="${x.id}">WhatsApp</button>
         </div>
       `;
       todayListEl.appendChild(div);
     });
   }
 
-  function openToday(){
-    showTab("today");
-    renderToday();
-  }
-
-  btnTodayClose?.addEventListener("click", () => { showTab("customers"); toast("Bugün kapatıldı."); });
-  btnTodayRefresh?.addEventListener("click", renderToday);
+  $("btnTodayRefresh")?.addEventListener("click", renderToday);
+  $("btnTodayClose")?.addEventListener("click", () => showTab("customers"));
 
   todayListEl?.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if(!btn) return;
-
     const mid = btn.getAttribute("data-tmatch");
     const cid = btn.getAttribute("data-tcall");
     const wid = btn.getAttribute("data-twa");
 
-    if(mid){
-      openMatch(mid);
-      return;
-    }
+    if(mid){ openMatch(mid); return; }
 
     if(cid){
       const item = load(LS_KEY_C).find(x => x.id === cid);
@@ -1095,67 +955,60 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
       const clean = digits.replace(/^0/,"");
       const msg = encodeURIComponent(`Merhaba ${item.name || ""}, kriterlerinize uygun portföyleri hazırladım. Uygun olduğunuzda paylaşabilirim.`);
       window.open(`https://wa.me/90${clean}?text=${msg}`, "_blank");
-      return;
     }
   });
 
-  // ---- Drawer (hamburger) ----
+  // Drawer
   const menuBtn = $("menuBtn");
   const menuClose = $("menuClose");
   const drawer = $("drawer");
   const drawerOverlay = $("drawerOverlay");
 
   function openDrawer(){
-    drawer.classList.add("open");
-    drawerOverlay.hidden = false;
-    drawer.setAttribute("aria-hidden","false");
-    menuBtn.setAttribute("aria-expanded","true");
+    drawer?.classList.add("open");
+    if(drawerOverlay) drawerOverlay.hidden = false;
+    drawer?.setAttribute("aria-hidden","false");
+    menuBtn?.setAttribute("aria-expanded","true");
     document.body.style.overflow = "hidden";
   }
   function closeDrawer(){
-    drawer.classList.remove("open");
-    drawerOverlay.hidden = true;
-    drawer.setAttribute("aria-hidden","true");
-    menuBtn.setAttribute("aria-expanded","false");
+    drawer?.classList.remove("open");
+    if(drawerOverlay) drawerOverlay.hidden = true;
+    drawer?.setAttribute("aria-hidden","true");
+    menuBtn?.setAttribute("aria-expanded","false");
     document.body.style.overflow = "";
   }
 
-  menuBtn?.addEventListener("click", () => drawer.classList.contains("open") ? closeDrawer() : openDrawer());
+  menuBtn?.addEventListener("click", () => drawer?.classList.contains("open") ? closeDrawer() : openDrawer());
   menuClose?.addEventListener("click", closeDrawer);
   drawerOverlay?.addEventListener("click", closeDrawer);
-  window.addEventListener("keydown", (e) => {
-    if(e.key === "Escape" && drawer.classList.contains("open")) closeDrawer();
-  });
+  window.addEventListener("keydown", (e) => { if(e.key==="Escape" && drawer?.classList.contains("open")) closeDrawer(); });
 
   drawer?.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if(!btn) return;
-
     const tab = btn.getAttribute("data-tab");
     if(tab){
       closeDrawer();
       showTab(tab);
       if(tab === "today") renderToday();
-      return;
     }
   });
 
-  $("mTodayMatch")?.addEventListener("click", () => { closeDrawer(); openToday(); });
+  $("mTodayMatch")?.addEventListener("click", () => { closeDrawer(); showTab("today"); renderToday(); });
   $("mOpenMatch")?.addEventListener("click", () => { closeDrawer(); showTab("match"); });
 
-  $("mBackup")?.addEventListener("click", () => { closeDrawer(); $("btnBackup")?.click(); });
-  $("mRestore")?.addEventListener("click", () => { closeDrawer(); $("btnRestore")?.click(); });
+  $("mBackup")?.addEventListener("click", () => { closeDrawer(); btnBackup?.click(); });
+  $("mRestore")?.addEventListener("click", () => { closeDrawer(); btnRestore?.click(); });
   $("mExportCustomers")?.addEventListener("click", () => { closeDrawer(); $("btnExport")?.click(); });
   $("mExportPortfolios")?.addEventListener("click", () => { closeDrawer(); $("pBtnExport")?.click(); });
   $("mWipeCustomers")?.addEventListener("click", () => { closeDrawer(); $("btnWipe")?.click(); });
   $("mWipePortfolios")?.addEventListener("click", () => { closeDrawer(); $("pBtnWipe")?.click(); });
 
-  // ---- Missing button refs for portfolio form ----
-  const pBtnClear = $("pBtnClear");
-  const pBtnExport = $("pBtnExport");
-  const pBtnWipe = $("pBtnWipe");
+  // Portfolio UI
+  $("pBtnClear")?.addEventListener("click", () => { resetPortfolioForm(); toast("Portföy formu temizlendi."); });
 
-  // ---- Init ----
+  // Init
   renderCustomers();
   resetCustomerForm();
   renderPortfolios();
