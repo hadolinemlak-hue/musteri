@@ -8,12 +8,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="HADOLIN CRM" />
   <title>HADOLIN CRM</title>
-  <link rel="manifest" href="./manifest.webmanifest">
+
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop stop-color='%23083b31'/%3E%3Cstop offset='1' stop-color='%23052b23'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='96' fill='url(%23g)'/%3E%3Ctext x='50%25' y='52%25' text-anchor='middle' dominant-baseline='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial' font-size='92' fill='%23ffffff'%3EHADOLIN%3C/text%3E%3Ctext x='50%25' y='68%25' text-anchor='middle' dominant-baseline='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial' font-size='64' fill='%23ffffff'%3ECRM%3C/text%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-  <meta name="apple-mobile-web-app-title" content="HADOLIN CRM">
+
   <style>
     :root{
       --bg:#052b23;
@@ -36,7 +33,7 @@
         linear-gradient(180deg,var(--bg),var(--bg2));
       color:var(--txt);
     }
-    .wrap{max-width:1040px;margin:0 auto;padding:16px 16px calc(22px + env(safe-area-inset-bottom));}
+    .wrap{max-width:1120px;margin:0 auto;padding:16px 16px calc(22px + env(safe-area-inset-bottom));}
     .top{
       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
       margin-bottom:12px;padding-top:env(safe-area-inset-top);
@@ -45,6 +42,7 @@
     h1{margin:0;font-size:18px;letter-spacing:.35px}
     .sub{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.35}
     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:rgba(255,255,255,.85)}
+
     .card{
       background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
       border:1px solid var(--line2);
@@ -67,6 +65,7 @@
       border-color:rgba(46,229,157,.55);
       box-shadow:0 0 0 3px rgba(46,229,157,.14);
     }
+
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .btn{
       border:1px solid var(--line);
@@ -89,9 +88,25 @@
     .btn.ghost{background:rgba(255,255,255,.04)}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:12px}
     .search{flex:1;min-width:220px}
-    .split{display:grid;grid-template-columns:1fr;gap:12px}
-    @media(min-width:980px){.split{grid-template-columns:420px 1fr;align-items:start}}
+
+    .twoCol{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:980px){.twoCol{grid-template-columns:420px 1fr;align-items:start}}
+
     .list{margin-top:12px;display:grid;gap:10px}
+    .scrollList{
+      max-height:52vh;
+      overflow:auto;
+      padding-right:6px;
+      scrollbar-gutter: stable;
+    }
+    @media(min-width:980px){
+      .scrollList{max-height:70vh;}
+    }
+    /* nicer scroll */
+    .scrollList::-webkit-scrollbar{width:10px}
+    .scrollList::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:999px;border:2px solid rgba(0,0,0,0)}
+    .scrollList::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:999px}
+
     .item{background:rgba(8,59,49,.55);border:1px solid var(--line2);border-radius:16px;padding:12px;}
     .itemTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
     .name{font-weight:900;letter-spacing:.2px}
@@ -134,6 +149,39 @@
       padding:4px 8px;border-radius:999px;
       font-size:12px;
     }
+
+    /* --- Tabs --- */
+    .tabBar{
+      position:sticky;
+      top:0;
+      z-index:30;
+      background:linear-gradient(180deg, rgba(5,43,35,.92), rgba(5,43,35,.66));
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      padding:10px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 18px 42px rgba(0,0,0,.28);
+      margin-bottom:12px;
+    }
+    .tabRow{display:flex;gap:8px;flex-wrap:wrap}
+    .tabBtn{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      color:var(--txt);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:13px;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .tabBtn.active{
+      border-color:rgba(46,229,157,.55);
+      background:rgba(46,229,157,.14);
+      box-shadow:0 0 0 3px rgba(46,229,157,.10);
+    }
+    .tabHint{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.35}
+    .tabPanel{display:none}
+    .tabPanel.active{display:block}
 
     /* --- Hamburger / Drawer --- */
     .iconBtn{
@@ -222,20 +270,20 @@
 
     <div class="drawerBody">
       <div class="drawerSection">
-        <div class="drawerSectionTitle">Bugün</div>
+        <div class="drawerSectionTitle">Sekmeler</div>
         <div class="drawerGrid">
-          <button class="drawerBtn" type="button" id="mTodayMatch">Bugün Eşleşme Yap</button>
-          <button class="drawerBtn" type="button" data-goto="matchCard">Eşleşme Paneli</button>
+          <button class="drawerBtn" type="button" data-tab="customers">Müşteri</button>
+          <button class="drawerBtn" type="button" data-tab="portfolios">Portföy</button>
+          <button class="drawerBtn" type="button" data-tab="match">Eşleşme</button>
+          <button class="drawerBtn" type="button" data-tab="today">Bugün</button>
         </div>
       </div>
 
       <div class="drawerSection">
-        <div class="drawerSectionTitle">Git</div>
+        <div class="drawerSectionTitle">Bugün</div>
         <div class="drawerGrid">
-          <button class="drawerBtn" type="button" data-goto="customerForm">Müşteri Ekle</button>
-          <button class="drawerBtn" type="button" data-goto="portfolioForm">Portföy Ekle</button>
-          <button class="drawerBtn" type="button" data-goto="customerList">Müşteri Listesi</button>
-          <button class="drawerBtn" type="button" data-goto="portfolioList">Portföy Listesi</button>
+          <button class="drawerBtn" type="button" id="mTodayMatch">Bugün Eşleşme Yap</button>
+          <button class="drawerBtn" type="button" id="mOpenMatch">Eşleşme Paneli</button>
         </div>
       </div>
 
@@ -282,10 +330,23 @@
       </div>
     </div>
 
-    <div class="split">
-      <!-- LEFT: FORMS -->
-      <div>
-        <!-- CUSTOMER FORM -->
+    <!-- TABS -->
+    <div class="tabBar">
+      <div class="tabRow" role="tablist" aria-label="HADOLIN CRM Sekmeler">
+        <button class="tabBtn active" type="button" data-tab-btn="customers" role="tab" aria-selected="true">Müşteri</button>
+        <button class="tabBtn" type="button" data-tab-btn="portfolios" role="tab" aria-selected="false">Portföy</button>
+        <button class="tabBtn" type="button" data-tab-btn="match" role="tab" aria-selected="false">Eşleşme</button>
+        <button class="tabBtn" type="button" data-tab-btn="today" role="tab" aria-selected="false">Bugün</button>
+      </div>
+      <div class="tabHint">
+        Kaydırma derdini gömdük: her iş ayrı sekmede. Listeler kutu içinde kayar, sayfa uzasa bile sen yerinden oynamazsın.
+      </div>
+    </div>
+
+    <!-- TAB: CUSTOMERS -->
+    <section class="tabPanel active" id="tab-customers" role="tabpanel" aria-label="Müşteri">
+      <div class="twoCol">
+        <!-- LEFT: customer form -->
         <div class="card" id="customerForm">
           <div class="sectionTitle">
             <div class="t">Müşteri</div>
@@ -356,13 +417,65 @@
             </div>
 
             <div class="hint">
-              Burada yazdığın her satır, sonra seni arayıp “hatırlıyor musun?” diye soracak bir geçmiş. Düzenli tut.
+              “Kaydet” bir düğme değil; bir disiplin. Bugün kaydedersen, yarın hatırlamazsın diye korkmazsın.
             </div>
           </form>
         </div>
 
-        <!-- PORTFOLIO FORM -->
-        <div class="card" id="portfolioForm" style="margin-top:12px">
+        <!-- RIGHT: customer list -->
+        <div class="card" id="customerList">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div class="pill">Müşteri Listesi</div>
+            <input class="search" id="search" placeholder="Ara: ad, telefon, mevkii, talep..." />
+          </div>
+
+          <div class="filters">
+            <div>
+              <label>Filtre: İşlem</label>
+              <select id="fDeal">
+                <option value="">Hepsi</option>
+                <option value="Satılık">Satılık</option>
+                <option value="Kiralık">Kiralık</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Filtre: Tip</label>
+              <select id="fType">
+                <option value="">Hepsi</option>
+                <option value="Daire">Daire</option>
+                <option value="Fabrika">Fabrika</option>
+                <option value="Arsa">Arsa</option>
+                <option value="İşyeri">İşyeri</option>
+              </select>
+            </div>
+
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn warn" id="btnResetFilters" type="button">Filtreyi Sıfırla</button>
+            </div>
+
+            <div>
+              <label>&nbsp;</label>
+              <div class="pill" style="justify-content:center">Seç & Eşleştir</div>
+            </div>
+          </div>
+
+          <div class="list scrollList" id="list"></div>
+          <div id="empty" class="empty" style="display:none">Kayıt yok (veya filtre çok dar).</div>
+
+          <div class="hint">
+            Liste uzar, sen uzamazsın. Artık sadece kutu kayar.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: PORTFOLIOS -->
+    <section class="tabPanel" id="tab-portfolios" role="tabpanel" aria-label="Portföy">
+      <div class="twoCol">
+        <!-- LEFT: portfolio form -->
+        <div class="card" id="portfolioForm">
           <div class="sectionTitle">
             <div class="t">Portföy</div>
             <div class="pill"><span id="pCount">0</span> portföy</div>
@@ -444,134 +557,13 @@
             </div>
 
             <div class="hint">
-              Portföy: vitrin değil. Müşterinin aynası. Yanlış portföy gösterirsen, müşteri senden şüphe eder.
+              Portföy: mermi değil, hedef. Doğru müşteriye giderse sonuç verir.
             </div>
           </form>
         </div>
-      </div>
 
-      <!-- RIGHT: TODAY + MATCH + LISTS -->
-      <div>
-        <!-- MATCH PANEL -->
-        <div class="card" id="matchCard" style="display:none">
-          <div class="sectionTitle">
-            <div class="t">Eşleşen Portföyler</div>
-            <div class="row">
-              <button class="btn ghost" type="button" id="btnMatchCopy">Mesajı Kopyala</button>
-              <button class="btn warn" type="button" id="btnMatchClose">Kapat</button>
-            </div>
-          </div>
-
-          <div class="meta" id="matchMeta" style="margin-top:8px"></div>
-
-          <div class="filters" style="margin-top:12px">
-            <div>
-              <label>Filtre: Sadece bütçe içi</label>
-              <select id="mBudget">
-                <option value="">Hepsi</option>
-                <option value="Icinde">Bütçe İçinde</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Filtre: Mevkii benzer</label>
-              <select id="mLoc">
-                <option value="">Hepsi</option>
-                <option value="Benzer">Benzer</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Liste: Sıralama</label>
-              <select id="mSort">
-                <option value="score">Skor</option>
-                <option value="priceAsc">Fiyat (artan)</option>
-                <option value="priceDesc">Fiyat (azalan)</option>
-                <option value="newest">En yeni</option>
-              </select>
-            </div>
-
-            <div>
-              <label>&nbsp;</label>
-              <button class="btn warn" type="button" id="btnMatchReset">Filtreyi Sıfırla</button>
-            </div>
-          </div>
-
-          <div class="list" id="matchList"></div>
-          <div id="matchEmpty" class="empty" style="display:none">Eşleşme yok. Ya portföy az, ya müşteri kriteri belirsiz.</div>
-
-          <div class="hint">
-            Eşleşme bir sihir değil; disiplin. Kriteri netleştirirsen, sistem sana hız verir.
-          </div>
-        </div>
-
-        <!-- TODAY MATCH -->
-        <div class="card" id="todayCard" style="display:none; margin-top:12px">
-          <div class="sectionTitle">
-            <div class="t">Bugün Eşleşme Yap</div>
-            <div class="row">
-              <button class="btn ghost" type="button" id="btnTodayRefresh">Yenile</button>
-              <button class="btn warn" type="button" id="btnTodayClose">Kapat</button>
-            </div>
-          </div>
-
-          <div class="meta" id="todayMeta" style="margin-top:8px"></div>
-
-          <div class="list" id="todayList"></div>
-          <div id="todayEmpty" class="empty" style="display:none">
-            Bugün güncellenen müşteri yok. O zaman iş basit: bugün müşteri çıkar.
-          </div>
-
-          <div class="hint">
-            Bugünün eşleşmesi: yarının randevusu. Randevu: paranın sessiz yürüyüşü.
-          </div>
-        </div>
-
-        <!-- CUSTOMER LIST -->
-        <div class="card" id="customerList" style="margin-top:12px">
-          <div class="row" style="justify-content:space-between;align-items:center">
-            <div class="pill">Müşteri Listesi</div>
-            <input class="search" id="search" placeholder="Ara: ad, telefon, mevkii, talep..." />
-          </div>
-
-          <div class="filters">
-            <div>
-              <label>Filtre: İşlem</label>
-              <select id="fDeal">
-                <option value="">Hepsi</option>
-                <option value="Satılık">Satılık</option>
-                <option value="Kiralık">Kiralık</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Filtre: Tip</label>
-              <select id="fType">
-                <option value="">Hepsi</option>
-                <option value="Daire">Daire</option>
-                <option value="Fabrika">Fabrika</option>
-                <option value="Arsa">Arsa</option>
-                <option value="İşyeri">İşyeri</option>
-              </select>
-            </div>
-
-            <div>
-              <label>&nbsp;</label>
-              <button class="btn warn" id="btnResetFilters" type="button">Filtreyi Sıfırla</button>
-            </div>
-
-            <div>
-              <label>&nbsp;</label>
-              <div class="pill" style="justify-content:center">Seç & Eşleştir</div>
-            </div>
-          </div>
-
-          <div class="list" id="list"></div>
-          <div id="empty" class="empty" style="display:none">Kayıt yok (veya filtre çok dar).</div>
-        </div>
-
-        <!-- PORTFOLIO LIST -->
-        <div class="card" id="portfolioList" style="margin-top:12px">
+        <!-- RIGHT: portfolio list -->
+        <div class="card" id="portfolioList">
           <div class="row" style="justify-content:space-between;align-items:center">
             <div class="pill">Portföy Listesi</div>
             <input class="search" id="pSearch" placeholder="Ara: başlık, mevkii, açıklama..." />
@@ -616,11 +608,94 @@
             </div>
           </div>
 
-          <div class="list" id="pList"></div>
+          <div class="list scrollList" id="pList"></div>
           <div id="pEmpty" class="empty" style="display:none">Portföy yok (veya filtre çok dar).</div>
+
+          <div class="hint">
+            Vitrin taşmaz. Sadece raf kayar.
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- TAB: MATCH -->
+    <section class="tabPanel" id="tab-match" role="tabpanel" aria-label="Eşleşme">
+      <div class="card" id="matchCard" style="display:block">
+        <div class="sectionTitle">
+          <div class="t">Eşleşen Portföyler</div>
+          <div class="row">
+            <button class="btn ghost" type="button" id="btnMatchCopy">Mesajı Kopyala</button>
+            <button class="btn warn" type="button" id="btnMatchClose">Kapat</button>
+          </div>
+        </div>
+
+        <div class="meta" id="matchMeta" style="margin-top:8px"></div>
+
+        <div class="filters" style="margin-top:12px">
+          <div>
+            <label>Filtre: Sadece bütçe içi</label>
+            <select id="mBudget">
+              <option value="">Hepsi</option>
+              <option value="Icinde">Bütçe İçinde</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Filtre: Mevkii benzer</label>
+            <select id="mLoc">
+              <option value="">Hepsi</option>
+              <option value="Benzer">Benzer</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Liste: Sıralama</label>
+            <select id="mSort">
+              <option value="score">Skor</option>
+              <option value="priceAsc">Fiyat (artan)</option>
+              <option value="priceDesc">Fiyat (azalan)</option>
+              <option value="newest">En yeni</option>
+            </select>
+          </div>
+
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn warn" type="button" id="btnMatchReset">Filtreyi Sıfırla</button>
+          </div>
+        </div>
+
+        <div class="list scrollList" id="matchList"></div>
+        <div id="matchEmpty" class="empty" style="display:none">Henüz eşleşme yok. Müşteri sekmesinden bir müşteri seç → Eşleştir.</div>
+
+        <div class="hint">
+          Eşleşme burada yaşar. Kaydırma değil, karar verir.
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: TODAY -->
+    <section class="tabPanel" id="tab-today" role="tabpanel" aria-label="Bugün">
+      <div class="card" id="todayCard" style="display:block">
+        <div class="sectionTitle">
+          <div class="t">Bugün Eşleşme Yap</div>
+          <div class="row">
+            <button class="btn ghost" type="button" id="btnTodayRefresh">Yenile</button>
+            <button class="btn warn" type="button" id="btnTodayClose">Kapat</button>
+          </div>
+        </div>
+
+        <div class="meta" id="todayMeta" style="margin-top:8px"></div>
+
+        <div class="list scrollList" id="todayList"></div>
+        <div id="todayEmpty" class="empty" style="display:none">
+          Bugün güncellenen müşteri yok. O zaman iş basit: bugün müşteri çıkar.
+        </div>
+
+        <div class="hint">
+          Bugün temas kur. Yarın takip kolaylaşır.
+        </div>
+      </div>
+    </section>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -640,6 +715,33 @@
   const LS_KEY_P = "hadolin_portfolios_v1";
 
   const $ = (id) => document.getElementById(id);
+
+  // ---- TABS ----
+  const tabButtons = Array.from(document.querySelectorAll("[data-tab-btn]"));
+  const tabPanels = {
+    customers: $("tab-customers"),
+    portfolios: $("tab-portfolios"),
+    match: $("tab-match"),
+    today: $("tab-today"),
+  };
+
+  function showTab(name){
+    Object.entries(tabPanels).forEach(([k,el]) => {
+      if(!el) return;
+      el.classList.toggle("active", k === name);
+    });
+    tabButtons.forEach(btn => {
+      const t = btn.getAttribute("data-tab-btn");
+      const active = (t === name);
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => showTab(btn.getAttribute("data-tab-btn")));
+  });
 
   // ---- COMMON ----
   const toastEl = $("toast");
@@ -782,8 +884,7 @@
           renderCustomers(); resetCustomerForm();
           renderPortfolios(); resetPortfolioForm();
           closeMatch();
-          if(todayCard && todayCard.style.display !== "none") renderToday();
-
+          renderToday();
           toast("Geri yüklendi.");
         }catch(e){
           toast("Yedek okunamadı.");
@@ -837,13 +938,13 @@
     else items.unshift(item);
     save(LS_KEY_C, items);
     renderCustomers();
-    if(todayCard && todayCard.style.display !== "none") renderToday();
+    renderToday();
   }
   function removeCustomer(id){
     const items = load(LS_KEY_C).filter(x => x.id !== id);
     save(LS_KEY_C, items);
     renderCustomers();
-    if(todayCard && todayCard.style.display !== "none") renderToday();
+    renderToday();
   }
 
   function renderCustomers(){
@@ -976,7 +1077,7 @@
       $("btnSave").textContent = "Güncelle";
       toast("Düzenleme modunda.");
       nameEl.focus();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      showTab("customers");
       return;
     }
 
@@ -1039,7 +1140,7 @@ Talep: ${item.demand || "-"}`;
     localStorage.removeItem(LS_KEY_C);
     renderCustomers(); resetCustomerForm();
     closeMatch();
-    if(todayCard && todayCard.style.display !== "none") renderToday();
+    renderToday();
     toast("Hepsi silindi.");
   });
 
@@ -1216,7 +1317,6 @@ Talep: ${item.demand || "-"}`;
   });
 
   pTypeEl.addEventListener("change", syncRoomsVisibility);
-
   pBtnClear.addEventListener("click", () => { resetPortfolioForm(); toast("Portföy formu temizlendi."); });
 
   pSearchEl.addEventListener("input", renderPortfolios);
@@ -1254,7 +1354,7 @@ Talep: ${item.demand || "-"}`;
       pNotesEl.value = item.notes || "";
       $("pBtnSave").textContent = "Portföy Güncelle";
       toast("Portföy düzenleme modunda.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      showTab("portfolios");
       return;
     }
 
@@ -1324,7 +1424,6 @@ Notlar: ${item.notes || "-"}`;
   });
 
   // ---- MATCHING ----
-  const matchCard = $("matchCard");
   const matchListEl = $("matchList");
   const matchEmptyEl = $("matchEmpty");
   const matchMetaEl = $("matchMeta");
@@ -1341,24 +1440,21 @@ Notlar: ${item.notes || "-"}`;
 
   function closeMatch(){
     selectedCustomerId = "";
-    matchCard.style.display = "none";
     matchListEl.innerHTML = "";
     matchMetaEl.textContent = "";
+    matchEmptyEl.style.display = "block";
   }
 
   function openMatch(customerId){
     selectedCustomerId = customerId;
-    matchCard.style.display = "block";
-    // Today panel açıksa kapat: odağı eşleşmeye al
-    if(todayCard && todayCard.style.display !== "none") closeToday();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    showTab("match");
     mBudgetEl.value = "";
     mLocEl.value = "";
     mSortEl.value = "score";
     renderMatch();
   }
 
-  btnMatchClose.addEventListener("click", closeMatch);
+  btnMatchClose.addEventListener("click", () => { closeMatch(); toast("Eşleşme kapatıldı."); });
   btnMatchReset.addEventListener("click", () => {
     mBudgetEl.value = "";
     mLocEl.value = "";
@@ -1427,13 +1523,18 @@ Notlar: ${item.notes || "-"}`;
   }
 
   function renderMatch(){
-    if(!selectedCustomerId){ closeMatch(); return; }
+    if(!selectedCustomerId){
+      matchEmptyEl.style.display = "block";
+      return;
+    }
 
     const customer = load(LS_KEY_C).find(x => x.id === selectedCustomerId);
-    if(!customer){ closeMatch(); return; }
+    if(!customer){
+      closeMatch();
+      return;
+    }
 
     const portfolios = load(LS_KEY_P);
-
     const baseRooms = (customer.ptype === "Daire") ? parseRoomsFromText(customer.demand) : "";
     const budgetText = customer.budgetFmt ? `${customer.budgetFmt} ₺` : "—";
 
@@ -1592,8 +1693,7 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
       .catch(() => prompt("Kopyala:", msg));
   });
 
-  // ---- TODAY MATCH ----
-  const todayCard = $("todayCard");
+  // ---- TODAY ----
   const todayListEl = $("todayList");
   const todayEmptyEl = $("todayEmpty");
   const todayMetaEl = $("todayMeta");
@@ -1611,20 +1711,6 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
     const d = new Date(iso);
     if(isNaN(d)) return "";
     return ymdLocal(d);
-  }
-
-  function openToday(){
-    todayCard.style.display = "block";
-    // eşleşme açıksa kapat: odağı bugüne al
-    closeMatch();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    renderToday();
-  }
-
-  function closeToday(){
-    todayCard.style.display = "none";
-    todayListEl.innerHTML = "";
-    todayMetaEl.textContent = "";
   }
 
   function renderToday(){
@@ -1676,7 +1762,12 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
     });
   }
 
-  btnTodayClose?.addEventListener("click", closeToday);
+  function openToday(){
+    showTab("today");
+    renderToday();
+  }
+
+  btnTodayClose?.addEventListener("click", () => { showTab("customers"); toast("Bugün kapatıldı."); });
   btnTodayRefresh?.addEventListener("click", renderToday);
 
   todayListEl?.addEventListener("click", (e) => {
@@ -1688,7 +1779,6 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
     const wid = btn.getAttribute("data-twa");
 
     if(mid){
-      closeToday();
       openMatch(mid);
       return;
     }
@@ -1712,7 +1802,10 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
     }
   });
 
-  // ---- HAMBURGER MENU ----
+  // ---- LIST ACTIONS: CUSTOMER MATCH ----
+  // (already wired in customer list click -> openMatch)
+
+  // ---- Drawer (hamburger) ----
   const menuBtn = $("menuBtn");
   const menuClose = $("menuClose");
   const drawer = $("drawer");
@@ -1733,13 +1826,9 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
     document.body.style.overflow = "";
   }
 
-  menuBtn?.addEventListener("click", () => {
-    if(drawer.classList.contains("open")) closeDrawer();
-    else openDrawer();
-  });
+  menuBtn?.addEventListener("click", () => drawer.classList.contains("open") ? closeDrawer() : openDrawer());
   menuClose?.addEventListener("click", closeDrawer);
   drawerOverlay?.addEventListener("click", closeDrawer);
-
   window.addEventListener("keydown", (e) => {
     if(e.key === "Escape" && drawer.classList.contains("open")) closeDrawer();
   });
@@ -1748,18 +1837,17 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
     const btn = e.target.closest("button");
     if(!btn) return;
 
-    const goto = btn.getAttribute("data-goto");
-    if(goto){
-      const el = document.getElementById(goto);
-      if(el){
-        closeDrawer();
-        el.scrollIntoView({behavior:"smooth", block:"start"});
-      }
+    const tab = btn.getAttribute("data-tab");
+    if(tab){
+      closeDrawer();
+      showTab(tab);
+      if(tab === "today") renderToday();
       return;
     }
   });
 
   $("mTodayMatch")?.addEventListener("click", () => { closeDrawer(); openToday(); });
+  $("mOpenMatch")?.addEventListener("click", () => { closeDrawer(); showTab("match"); });
 
   $("mBackup")?.addEventListener("click", () => { closeDrawer(); $("btnBackup")?.click(); });
   $("mRestore")?.addEventListener("click", () => { closeDrawer(); $("btnRestore")?.click(); });
@@ -1768,13 +1856,29 @@ ${top || "Şu an birebir uyan portföy bulamadım. Kriteri netleştirirsek hemen
   $("mWipeCustomers")?.addEventListener("click", () => { closeDrawer(); $("btnWipe")?.click(); });
   $("mWipePortfolios")?.addEventListener("click", () => { closeDrawer(); $("pBtnWipe")?.click(); });
 
-  // ---- INIT ----
+  // ---- Missing button refs for portfolio form ----
+  const pBtnClear = $("pBtnClear");
+  const pBtnExport = $("pBtnExport");
+  const pBtnWipe = $("pBtnWipe");
+
+  // ---- EXPORT / WIPE Buttons already exist in DOM ----
+  // Just ensure they exist (they do)
+
+  // ---- Customer list: match ----
+  // (openMatch already)
+
+  // ---- Budget formatting ----
+  // already wired above
+
+  // ---- Init ----
   renderCustomers();
   resetCustomerForm();
-
   renderPortfolios();
   resetPortfolioForm();
   syncRoomsVisibility();
+  renderToday();
+  closeMatch();                 // start with empty match state
+  showTab("customers");         // default tab
 })();
 </script>
 </body>
