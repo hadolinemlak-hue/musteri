@@ -25,9 +25,7 @@
       --blue:#3b82f6;
     }
 
-    *{
-      box-sizing:border-box;
-    }
+    *{box-sizing:border-box}
 
     html,body{
       width:100%;
@@ -290,8 +288,6 @@
       -webkit-overflow-scrolling:touch;
     }
 
-    .lockIn{width:min(420px,100%)}
-
     .form{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -511,6 +507,367 @@
   </style>
 </head>
 <body>
-  <!-- Buradan sonrası body -->
+  <div id="menuOverlay" class="menuOverlay"></div>
+  <div class="toastWrap" id="toastWrap"></div>
+
+  <div class="app">
+    <aside class="side" id="sideMenu" aria-label="Yan Menü">
+      <div class="brand">HADOLİN CRM</div>
+      <div class="subtitle">Portföy ve müşteri yönetimi</div>
+
+      <div class="nav">
+        <button class="active" data-page="dashboard" type="button">Dashboard</button>
+        <button data-page="portfolios" type="button">Portföy</button>
+        <button data-page="customers" type="button">Müşteriler</button>
+        <button data-page="matches" type="button">Eşleştirme</button>
+        <button data-page="tasks" type="button">Görevler</button>
+        <button data-page="history" type="button">Geçmiş</button>
+        <button data-page="pipeline" type="button">Pipeline</button>
+        <button data-page="backup" type="button">Yedekleme</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="mobileBar">
+        <button class="btn s" id="menuBtn" type="button" aria-label="Menüyü aç">☰</button>
+        <div class="brand">HADOLİN CRM</div>
+        <button class="btn p" id="mobileQuickAdd" type="button" aria-label="Hızlı ekle">＋</button>
+      </div>
+
+      <section class="top">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="toolbar" id="pageActions">
+          <button class="btn p" type="button" onclick="openQuickAdd()">Yeni Ekle</button>
+        </div>
+      </section>
+
+      <section id="page-dashboard" class="pageSection">
+        <div class="stats">
+          <div class="box">
+            <div class="small">Toplam Portföy</div>
+            <div class="stat" id="statPortfolio">0</div>
+          </div>
+          <div class="box">
+            <div class="small">Toplam Müşteri</div>
+            <div class="stat" id="statCustomer">0</div>
+          </div>
+          <div class="box">
+            <div class="small">Aktif Görev</div>
+            <div class="stat" id="statTask">0</div>
+          </div>
+          <div class="box">
+            <div class="small">Eşleşme</div>
+            <div class="stat" id="statMatch">0</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Genel Bakış</h3>
+          <div class="muted">Buraya dashboard özetlerini koy.</div>
+        </div>
+      </section>
+
+      <section id="page-portfolios" class="pageSection hidden">
+        <div class="filters">
+          <div>
+            <label>Arama</label>
+            <input id="portfolioSearch" type="text" placeholder="Başlık, konum, açıklama">
+          </div>
+          <div>
+            <label>Durum</label>
+            <select id="portfolioDealFilter">
+              <option value="">Tümü</option>
+              <option value="Satılık">Satılık</option>
+              <option value="Kiralık">Kiralık</option>
+            </select>
+          </div>
+          <div>
+            <label>Tür</label>
+            <select id="portfolioTypeFilter">
+              <option value="">Tümü</option>
+              <option value="Daire">Daire</option>
+              <option value="Villa">Villa</option>
+              <option value="Arsa">Arsa</option>
+              <option value="Dükkan">Dükkan</option>
+              <option value="Ofis">Ofis</option>
+              <option value="Fabrika">Fabrika</option>
+              <option value="Ticari (Fabrika/Depo)">Ticari (Fabrika/Depo)</option>
+            </select>
+          </div>
+          <div>
+            <label>Etiket</label>
+            <select id="portfolioLabelFilter">
+              <option value="">Tümü</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Satıldı">Satıldı</option>
+              <option value="Kiralandı">Kiralandı</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" id="portfolioGrid"></div>
+        <div class="empty hidden" id="portfolioEmpty">Henüz portföy yok.</div>
+      </section>
+
+      <section id="page-customers" class="pageSection hidden">
+        <div class="filters">
+          <div>
+            <label>Arama</label>
+            <input id="customerSearch" type="text" placeholder="Ad, telefon, not">
+          </div>
+          <div>
+            <label>Arama Türü</label>
+            <select id="customerDealFilter">
+              <option value="">Tümü</option>
+              <option value="Alıcı">Alıcı</option>
+              <option value="Kiracı">Kiracı</option>
+            </select>
+          </div>
+          <div>
+            <label>Tür</label>
+            <select id="customerTypeFilter">
+              <option value="">Tümü</option>
+              <option value="Daire">Daire</option>
+              <option value="Villa">Villa</option>
+              <option value="Arsa">Arsa</option>
+              <option value="Dükkan">Dükkan</option>
+              <option value="Ofis">Ofis</option>
+              <option value="Fabrika">Fabrika</option>
+              <option value="Ticari (Fabrika/Depo)">Ticari (Fabrika/Depo)</option>
+            </select>
+          </div>
+          <div>
+            <label>Durum</label>
+            <select id="customerStatusFilter">
+              <option value="">Tümü</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Pasif">Pasif</option>
+              <option value="Tamamlandı">Tamamlandı</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" id="customerGrid"></div>
+        <div class="empty hidden" id="customerEmpty">Henüz müşteri yok.</div>
+      </section>
+
+      <section id="page-matches" class="pageSection hidden">
+        <div class="panel">
+          <h3>Eşleştirmeler</h3>
+          <div class="stack" id="matchList"></div>
+        </div>
+      </section>
+
+      <section id="page-tasks" class="pageSection hidden">
+        <div class="panel">
+          <div class="row" style="justify-content:space-between">
+            <h3 style="margin:0">Görevler</h3>
+            <button class="btn p" type="button" onclick="openTaskModal()">Yeni Görev</button>
+          </div>
+          <div class="stack" id="taskList"></div>
+        </div>
+      </section>
+
+      <section id="page-history" class="pageSection hidden">
+        <div class="panel">
+          <h3>Geçmiş</h3>
+          <div class="stack" id="historyList"></div>
+        </div>
+      </section>
+
+      <section id="page-pipeline" class="pageSection hidden">
+        <div class="kanban" id="pipelineBoard">
+          <div class="panel">
+            <h3>Yeni</h3>
+            <div id="pipe-new"></div>
+          </div>
+          <div class="panel">
+            <h3>Görüşme</h3>
+            <div id="pipe-contact"></div>
+          </div>
+          <div class="panel">
+            <h3>Teklif</h3>
+            <div id="pipe-offer"></div>
+          </div>
+          <div class="panel">
+            <h3>Kapanış</h3>
+            <div id="pipe-close"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-backup" class="pageSection hidden">
+        <div class="panel">
+          <h3>Yedekleme</h3>
+          <div class="row">
+            <button class="btn p" type="button" onclick="downloadBackup()">Yedeği İndir</button>
+            <button class="btn s" type="button" onclick="document.getElementById('backupFile').click()">Yedek Yükle</button>
+            <input id="backupFile" type="file" accept=".json" class="hidden">
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="quickAddModal" aria-hidden="true">
+    <div class="modalIn">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">Hızlı Ekle</h3>
+        <button class="btn s" type="button" onclick="closeQuickAdd()">Kapat</button>
+      </div>
+
+      <div class="form" style="margin-top:12px">
+        <div>
+          <label>Ne eklemek istiyorsun?</label>
+          <select id="quickAddType">
+            <option value="portfolio">Portföy</option>
+            <option value="customer">Müşteri</option>
+            <option value="task">Görev</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px;justify-content:flex-end">
+        <button class="btn p" type="button" onclick="handleQuickAdd()">Devam Et</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const side = document.getElementById('sideMenu');
+    const menuBtn = document.getElementById('menuBtn');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const mobileQuickAdd = document.getElementById('mobileQuickAdd');
+    const pageTitle = document.getElementById('pageTitle');
+    const quickAddModal = document.getElementById('quickAddModal');
+    const quickAddType = document.getElementById('quickAddType');
+
+    function toast(message) {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }
+
+    function openMenu() {
+      if (!side) return;
+      side.classList.add('open');
+      menuOverlay?.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      if (!side) return;
+      side.classList.remove('open');
+      menuOverlay?.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    function toggleMenu() {
+      if (!side) return;
+      if (side.classList.contains('open')) closeMenu();
+      else openMenu();
+    }
+
+    function switchPage(page) {
+      document.querySelectorAll('.pageSection').forEach(el => el.classList.add('hidden'));
+      document.getElementById('page-' + page)?.classList.remove('hidden');
+
+      document.querySelectorAll('.nav button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.page === page);
+      });
+
+      const titles = {
+        dashboard: 'Dashboard',
+        portfolios: 'Portföy',
+        customers: 'Müşteriler',
+        matches: 'Eşleştirme',
+        tasks: 'Görevler',
+        history: 'Geçmiş',
+        pipeline: 'Pipeline',
+        backup: 'Yedekleme'
+      };
+
+      pageTitle.textContent = titles[page] || 'Dashboard';
+
+      if (window.innerWidth <= 900) closeMenu();
+    }
+
+    function openQuickAdd() {
+      quickAddModal?.classList.add('show');
+      quickAddModal?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeQuickAdd() {
+      quickAddModal?.classList.remove('show');
+      quickAddModal?.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function handleQuickAdd() {
+      const type = quickAddType?.value;
+      closeQuickAdd();
+
+      if (type === 'portfolio') {
+        switchPage('portfolios');
+        toast('Portföy sayfasına geçildi');
+        return;
+      }
+
+      if (type === 'customer') {
+        switchPage('customers');
+        toast('Müşteri sayfasına geçildi');
+        return;
+      }
+
+      if (type === 'task') {
+        switchPage('tasks');
+        toast('Görev sayfasına geçildi');
+      }
+    }
+
+    function downloadBackup() {
+      toast('Yedek indirme fonksiyonunu mevcut sistemine bağla');
+    }
+
+    function openTaskModal() {
+      toast('Görev modalını mevcut sistemine bağla');
+    }
+
+    menuBtn?.addEventListener('click', toggleMenu);
+    menuOverlay?.addEventListener('click', closeMenu);
+    mobileQuickAdd?.addEventListener('click', openQuickAdd);
+
+    document.querySelectorAll('.nav button').forEach(btn => {
+      btn.addEventListener('click', () => switchPage(btn.dataset.page));
+    });
+
+    document.getElementById('backupFile')?.addEventListener('change', e => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      toast('Yedek seçildi: ' + file.name);
+      e.target.value = '';
+    });
+
+    quickAddModal?.addEventListener('click', (e) => {
+      if (e.target === quickAddModal) closeQuickAdd();
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) closeMenu();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+        closeQuickAdd();
+      }
+    });
+
+    switchPage('dashboard');
+  </script>
 </body>
 </html>
