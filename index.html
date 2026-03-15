@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HADOLİN CRM">
   <title>HADOLİN CRM</title>
-  <link rel="manifest" href="./manifest_best.json">
+  <link rel="manifest" href="./manifest.json">
   <style>
     :root{--o:#ff7a00;--o2:#e66a00;--bg:#141423;--bg2:#1d1d31;--card:#23233a;--line:#3a3a52;--txt:#fff;--muted:#a7b0c2;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444;--blue:#3b82f6}
     *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}button,input,select,textarea{font:inherit}a{color:inherit}
@@ -172,7 +172,7 @@ function attachGlobalEvents(){document.addEventListener('click',async e=>{const 
 });
 $('#closeModalBtn').onclick=closeModal; $('#modal').addEventListener('click',e=>{if(e.target.id==='modal') closeModal()}); $('#lockBtn').onclick=handleLock; $('#resetLockBtn').onclick=resetLock; $('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open'); $('#importInput').addEventListener('change',e=>{const file=e.target.files[0]; if(file) importBackup(file); e.target.value=''});
 }
-async function init(){await openDb(); await loadState(); await seedIfEmpty(); recomputeMatches(); await persistAll(); drawNav(); attachGlobalEvents(); render(); $('#lockInfo').textContent=localStorage.getItem(lockStorageKey)?'Cihaz kilidi aktif. Giriş yap.':'İlk girişte yazdığın kullanıcı ve PIN bu cihaza kaydedilir.'; if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw_best.js').catch(()=>{}))}}
+async function init(){await openDb(); await loadState(); await seedIfEmpty(); recomputeMatches(); await persistAll(); drawNav(); attachGlobalEvents(); render(); $('#lockInfo').textContent=localStorage.getItem(lockStorageKey)?'Cihaz kilidi aktif. Giriş yap.':'İlk girişte yazdığın kullanıcı ve PIN bu cihaza kaydedilir.'; if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}}
 init().catch(err=>{console.error(err); alert('Uygulama başlatılamadı: '+err.message)});
 </script>
 </body>
