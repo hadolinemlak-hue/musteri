@@ -1,557 +1,870 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ff7a00">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="HADOLİN CRM">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ff7a00" />
   <title>HADOLİN CRM</title>
-  <link rel="manifest" href="./manifest.json">
- <style>
-  :root{
-    --o:#ff7a00;--o2:#e66a00;--bg:#141423;--bg2:#1d1d31;--card:#23233a;--line:#3a3a52;
-    --txt:#fff;--muted:#a7b0c2;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444;--blue:#3b82f6
-  }
 
-  *{box-sizing:border-box}
+  <style>
+    :root{
+      --o:#ff7a00;
+      --o2:#e66a00;
+      --bg:#141423;
+      --bg2:#1d1d31;
+      --card:#23233a;
+      --line:#3a3a52;
+      --txt:#fff;
+      --muted:#a7b0c2;
+      --ok:#10b981;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --blue:#3b82f6;
+    }
 
-  html,body{
-    margin:0;
-    padding:0;
-    background:var(--bg);
-    color:var(--txt);
-    font-family:Inter,Segoe UI,Arial,sans-serif;
-    height:100%;
-    overflow-x:hidden;
-  }
+    *{box-sizing:border-box}
 
-  body{
-    min-height:100dvh;
-  }
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--txt);
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      min-height:100%;
+      overflow-x:hidden;
+      -webkit-text-size-adjust:100%;
+    }
 
-  button,input,select,textarea{font:inherit}
-  a{color:inherit;text-decoration:none}
+    body{
+      min-height:100dvh;
+    }
 
-  .app{
-    display:grid;
-    grid-template-columns:260px 1fr;
-    min-height:100dvh;
-  }
+    button,input,select,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
 
-  .side{
-    background:linear-gradient(180deg,#1a1a2e,#171729);
-    border-right:1px solid var(--line);
-    padding:18px;
-    position:sticky;
-    top:0;
-    height:100dvh;
-    overflow:auto;
-    -webkit-overflow-scrolling:touch;
-    padding-top:calc(18px + env(safe-area-inset-top));
-    padding-bottom:calc(24px + env(safe-area-inset-bottom));
-  }
-
-  .brand{font-size:24px;font-weight:800;letter-spacing:.3px}
-  .subtitle{color:var(--muted);font-size:12px;margin-top:6px}
-
-  .nav{margin-top:18px;display:grid;gap:8px}
-  .nav button{
-    padding:13px 14px;
-    text-align:left;
-    border-radius:14px;
-    border:1px solid var(--line);
-    background:transparent;
-    color:var(--txt);
-    cursor:pointer;
-  }
-  .nav button:hover,.nav button.active{
-    background:linear-gradient(135deg,var(--o),var(--o2));
-    border-color:transparent;
-  }
-
-  .main{padding:24px}
-  .top{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    flex-wrap:wrap;
-    margin-bottom:18px;
-  }
-  .top h1{margin:0;font-size:30px}
-
-  .toolbar,.row{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    flex-wrap:wrap;
-  }
-
-  .btn{
-    padding:11px 14px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-  }
-  .btn:hover{filter:brightness(1.05)}
-  .p{background:linear-gradient(135deg,var(--o),var(--o2));color:#fff}
-  .s{background:#2a2a44;border:1px solid var(--line);color:#fff}
-  .g{background:var(--ok);color:#fff}
-  .r{background:var(--bad);color:#fff}
-  .b{background:var(--blue);color:#fff}
-
-  .stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-    gap:12px;
-    margin-bottom:18px;
-  }
-
-  .box,.card,.panel{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:18px;
-    padding:16px;
-  }
-
-  .stat{font-size:34px;color:var(--o);font-weight:800}
-  .muted{color:var(--muted)}
-  .small{font-size:12px;color:var(--muted)}
-
-  .filters{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:10px;
-    margin-bottom:16px;
-  }
-
-  .filters .full{grid-column:1/-1}
-
-  input,select,textarea{
-    width:100%;
-    background:#151526;
-    border:1px solid var(--line);
-    color:#fff;
-    border-radius:12px;
-    padding:11px 12px;
-  }
-
-  textarea{
-    resize:vertical;
-    min-height:96px;
-  }
-
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:12px;
-  }
-
-  .card h3{margin:0 0 8px}
-
-  .cardTop{
-    display:flex;
-    justify-content:space-between;
-    gap:8px;
-    align-items:flex-start;
-  }
-
-  .tag{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    border:1px solid var(--line);
-    border-radius:999px;
-    padding:5px 10px;
-    font-size:12px;
-  }
-
-  .ok{color:var(--ok);border-color:var(--ok)}
-  .warn{color:var(--warn);border-color:var(--warn)}
-  .bad{color:var(--bad);border-color:var(--bad)}
-  .blue{color:var(--blue);border-color:var(--blue)}
-
-  .price{
-    color:var(--o);
-    font-size:24px;
-    font-weight:800;
-    margin-top:12px;
-  }
-
-  .stack{display:grid;gap:8px}
-
-  .actions{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    margin-top:14px;
-    padding-top:14px;
-    border-top:1px solid var(--line);
-  }
-
-  .empty{
-    padding:50px 16px;
-    text-align:center;
-    color:var(--muted);
-  }
-
-  .modal,.sheet,.lock{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:14px;
-    z-index:30;
-  }
-
-  .modal.show,.sheet.show,.lock.show{display:flex}
-
-  .modalIn,.sheetIn,.lockIn{
-    width:min(1080px,100%);
-    max-height:92dvh;
-    overflow:auto;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:18px;
-    -webkit-overflow-scrolling:touch;
-  }
-
-  .lockIn{width:min(420px,100%)}
-
-  .form{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:10px;
-  }
-
-  .full{grid-column:1/-1}
-  label{display:block;margin-bottom:5px;font-size:12px;color:var(--muted)}
-  .hidden{display:none!important}
-
-  .score{
-    height:10px;
-    background:#111;
-    border-radius:999px;
-    overflow:hidden;
-  }
-
-  .fill{height:100%}
-  .high{background:var(--ok)}
-  .mid{background:var(--warn)}
-  .low{background:var(--bad)}
-
-  .kanban{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:10px;
-  }
-
-  .deal{
-    background:#171729;
-    border:1px solid var(--line);
-    padding:10px;
-    border-radius:12px;
-    margin-bottom:10px;
-  }
-
-  .historyItem,.taskItem{
-    background:#171729;
-    border:1px solid var(--line);
-    padding:12px;
-    border-radius:12px;
-  }
-
-  .two{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-  }
-
-  .toastWrap{
-    position:fixed;
-    top:calc(16px + env(safe-area-inset-top));
-    right:16px;
-    display:grid;
-    gap:8px;
-    z-index:60;
-  }
-
-  .toast{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-left:4px solid var(--o);
-    padding:12px 14px;
-    border-radius:12px;
-    min-width:260px;
-    box-shadow:0 12px 30px rgba(0,0,0,.35);
-  }
-
-  .mobileBar{display:none}
-  .menuOverlay{display:none}
-
-  @media (max-width:900px){
     .app{
-      grid-template-columns:1fr;
+      display:grid;
+      grid-template-columns:260px 1fr;
       min-height:100dvh;
     }
 
     .side{
-      display:block;
-      position:fixed;
-      left:0;
-      top:0;
-      bottom:0;
-      width:85vw;
-      max-width:320px;
-      height:100dvh;
-      z-index:25;
-      transform:translateX(-100%);
-      transition:transform .28s ease;
-      box-shadow:12px 0 30px rgba(0,0,0,.35);
-    }
-
-    .side.open{
-      transform:translateX(0);
-    }
-
-    .menuOverlay.show{
-      display:block;
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.45);
-      z-index:24;
-    }
-
-    .main{
-      padding:16px 14px calc(18px + env(safe-area-inset-bottom));
-    }
-
-    .mobileBar{
-      display:flex;
+      background:linear-gradient(180deg,#1a1a2e,#171729);
+      border-right:1px solid var(--line);
+      padding:18px;
       position:sticky;
       top:0;
-      background:rgba(20,20,35,.92);
-      backdrop-filter:blur(10px);
-      padding:calc(10px + env(safe-area-inset-top)) 0 10px 0;
-      z-index:10;
-      margin-bottom:10px;
+      height:100dvh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      padding-top:calc(18px + env(safe-area-inset-top));
+      padding-bottom:calc(28px + env(safe-area-inset-bottom));
+      z-index:25;
     }
 
-    .top{
-      gap:12px;
-      margin-bottom:14px;
-    }
-
-    .top h1{
-      font-size:22px;
+    .brand{
+      font-size:24px;
+      font-weight:800;
+      letter-spacing:.3px;
       line-height:1.2;
     }
 
-    .toolbar,.row{
-      width:100%;
+    .subtitle{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.4;
     }
 
-    .toolbar .btn,.row .btn{
-      min-height:44px;
-    }
-
-    .stats{
-      grid-template-columns:1fr;
-    }
-
-    .filters{
-      grid-template-columns:1fr;
-    }
-
-    .grid{
-      grid-template-columns:1fr;
-    }
-
-    .two{
-      grid-template-columns:1fr;
-    }
-
-    .kanban{
-      grid-template-columns:1fr;
-    }
-
-    .modal,.sheet,.lock{
-      padding:0;
-    }
-
-    .modalIn,.sheetIn,.lockIn{
-      width:100%;
-      max-width:none;
-      max-height:100dvh;
-      min-height:100dvh;
-      border-radius:0;
-      padding:16px;
-      padding-top:calc(16px + env(safe-area-inset-top));
+    .nav{
+      margin-top:18px;
+      display:grid;
+      gap:8px;
       padding-bottom:calc(16px + env(safe-area-inset-bottom));
     }
 
+    .nav button{
+      width:100%;
+      padding:13px 14px;
+      text-align:left;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:transparent;
+      color:var(--txt);
+      cursor:pointer;
+      min-height:46px;
+    }
+
+    .nav button:hover,
+    .nav button.active{
+      background:linear-gradient(135deg,var(--o),var(--o2));
+      border-color:transparent;
+    }
+
+    .main{
+      padding:24px;
+      min-width:0;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .top h1{
+      margin:0;
+      font-size:30px;
+      line-height:1.2;
+      min-width:0;
+    }
+
+    .toolbar,.row{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      padding:11px 14px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      min-height:44px;
+    }
+
+    .btn:hover{filter:brightness(1.05)}
+
+    .p{background:linear-gradient(135deg,var(--o),var(--o2));color:#fff}
+    .s{background:#2a2a44;border:1px solid var(--line);color:#fff}
+    .g{background:var(--ok);color:#fff}
+    .r{background:var(--bad);color:#fff}
+    .b{background:var(--blue);color:#fff}
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .box,.card,.panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      min-width:0;
+    }
+
+    .stat{
+      font-size:34px;
+      color:var(--o);
+      font-weight:800;
+      line-height:1.1;
+    }
+
+    .muted{color:var(--muted)}
+    .small{font-size:12px;color:var(--muted)}
+
+    .filters{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .filters .full{grid-column:1/-1}
+
+    input,select,textarea{
+      width:100%;
+      background:#151526;
+      border:1px solid var(--line);
+      color:#fff;
+      border-radius:12px;
+      padding:11px 12px;
+      min-height:44px;
+    }
+
+    textarea{
+      resize:vertical;
+      min-height:96px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      gap:12px;
+    }
+
+    .card h3{
+      margin:0 0 8px;
+      line-height:1.3;
+      word-break:break-word;
+    }
+
+    .cardTop{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:flex-start;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:12px;
+      line-height:1.2;
+      white-space:nowrap;
+    }
+
+    .ok{color:var(--ok);border-color:var(--ok)}
+    .warn{color:var(--warn);border-color:var(--warn)}
+    .bad{color:var(--bad);border-color:var(--bad)}
+    .blue{color:var(--blue);border-color:var(--blue)}
+
+    .price{
+      color:var(--o);
+      font-size:24px;
+      font-weight:800;
+      margin-top:12px;
+      line-height:1.2;
+      word-break:break-word;
+    }
+
+    .stack{display:grid;gap:8px}
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px solid var(--line);
+    }
+
+    .empty{
+      padding:50px 16px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .modal,.sheet,.lock{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.7);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+      z-index:30;
+    }
+
+    .modal.show,.sheet.show,.lock.show{
+      display:flex;
+    }
+
+    .modalIn,.sheetIn,.lockIn{
+      width:min(1080px,100%);
+      max-height:92dvh;
+      overflow:auto;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .lockIn{width:min(420px,100%)}
+
     .form{
-      grid-template-columns:1fr;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:10px;
+    }
+
+    .full{grid-column:1/-1}
+
+    label{
+      display:block;
+      margin-bottom:5px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .hidden{display:none!important}
+
+    .score{
+      height:10px;
+      background:#111;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .fill{height:100%}
+    .high{background:var(--ok)}
+    .mid{background:var(--warn)}
+    .low{background:var(--bad)}
+
+    .kanban{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:10px;
+    }
+
+    .deal{
+      background:#171729;
+      border:1px solid var(--line);
+      padding:10px;
+      border-radius:12px;
+      margin-bottom:10px;
+    }
+
+    .historyItem,.taskItem{
+      background:#171729;
+      border:1px solid var(--line);
+      padding:12px;
+      border-radius:12px;
+    }
+
+    .two{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
     }
 
     .toastWrap{
-      left:12px;
-      right:12px;
-      top:calc(12px + env(safe-area-inset-top));
+      position:fixed;
+      top:calc(16px + env(safe-area-inset-top));
+      right:16px;
+      display:grid;
+      gap:8px;
+      z-index:60;
+      max-width:min(360px, calc(100vw - 32px));
     }
 
     .toast{
-      min-width:0;
-      width:100%;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-left:4px solid var(--o);
+      padding:12px 14px;
+      border-radius:12px;
+      min-width:260px;
+      max-width:100%;
+      box-shadow:0 12px 30px rgba(0,0,0,.35);
+      word-break:break-word;
     }
-  }
-</style>
+
+    .mobileBar{display:none}
+    .menuOverlay{display:none}
+
+    @media (max-width:900px){
+      .app{
+        grid-template-columns:1fr;
+        min-height:100dvh;
+      }
+
+      .side{
+        position:fixed;
+        left:0;
+        top:0;
+        width:86vw;
+        max-width:320px;
+        height:100dvh;
+        transform:translateX(-100%);
+        transition:transform .28s ease;
+        box-shadow:12px 0 30px rgba(0,0,0,.35);
+        display:block;
+        z-index:25;
+        border-right:1px solid var(--line);
+      }
+
+      .side.open{
+        transform:translateX(0);
+      }
+
+      .menuOverlay.show{
+        display:block;
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.45);
+        z-index:24;
+      }
+
+      .main{
+        padding:14px 14px calc(20px + env(safe-area-inset-bottom));
+      }
+
+      .mobileBar{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        position:sticky;
+        top:0;
+        z-index:12;
+        background:rgba(20,20,35,.92);
+        backdrop-filter:blur(10px);
+        padding:calc(10px + env(safe-area-inset-top)) 0 10px;
+        margin-bottom:10px;
+      }
+
+      .mobileBar .btn{
+        min-width:44px;
+        min-height:44px;
+        padding:10px 12px;
+        flex-shrink:0;
+      }
+
+      .mobileBar .brand{
+        font-size:18px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+
+      .top{
+        gap:12px;
+        margin-bottom:14px;
+      }
+
+      .top h1{
+        font-size:22px;
+        line-height:1.25;
+        width:100%;
+      }
+
+      .toolbar,.row{
+        width:100%;
+        gap:8px;
+      }
+
+      .toolbar .btn,.row .btn{
+        min-height:44px;
+      }
+
+      .stats,.filters,.grid,.two,.kanban{
+        grid-template-columns:1fr;
+      }
+
+      .cardTop{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .actions .btn{
+        width:100%;
+      }
+
+      .modal,.sheet,.lock{
+        padding:0;
+      }
+
+      .modalIn,.sheetIn,.lockIn{
+        width:100%;
+        max-width:none;
+        max-height:100dvh;
+        min-height:100dvh;
+        border-radius:0;
+        padding:16px;
+        padding-top:calc(16px + env(safe-area-inset-top));
+        padding-bottom:calc(16px + env(safe-area-inset-bottom));
+      }
+
+      .form{
+        grid-template-columns:1fr;
+      }
+
+      .toastWrap{
+        left:12px;
+        right:12px;
+        top:calc(12px + env(safe-area-inset-top));
+        max-width:none;
+      }
+
+      .toast{
+        min-width:0;
+        width:100%;
+      }
+    }
+  </style>
 </head>
 <body>
-<div id="menuOverlay" class="menuOverlay"></div>
-<div class="toastWrap" id="toastWrap"></div>
-<div class="lock show" id="lockView">
-  <div class="lockIn">
-    <h2 style="margin-top:0">HADOLİN CRM</h2>
-    <div class="small">Bu sürüm tek cihazlık güçlü saha CRM’idir. Gerçek çok kullanıcılı sunucu girişi değildir.</div>
-    <div style="margin-top:12px"><label>Kullanıcı</label><input id="lockUser" value="admin"></div>
-    <div style="margin-top:10px"><label>PIN / Şifre</label><input id="lockPass" type="password" placeholder="En az 4 karakter"></div>
-    <div class="row" style="margin-top:14px">
-      <button class="btn p" id="lockBtn">Devam Et</button>
-      <button class="btn s" id="resetLockBtn">Kilidi Sıfırla</button>
-    </div>
-    <div class="small" id="lockInfo" style="margin-top:10px"></div>
+  <div id="menuOverlay" class="menuOverlay"></div>
+  <div class="toastWrap" id="toastWrap"></div>
+
+  <div class="app">
+    <aside class="side" id="sideMenu" aria-label="Yan Menü">
+      <div class="brand">HADOLİN CRM</div>
+      <div class="subtitle">Portföy ve müşteri yönetimi</div>
+
+      <div class="nav">
+        <button class="active" data-page="dashboard" type="button">Dashboard</button>
+        <button data-page="portfolios" type="button">Portföy</button>
+        <button data-page="customers" type="button">Müşteriler</button>
+        <button data-page="matches" type="button">Eşleştirme</button>
+        <button data-page="tasks" type="button">Görevler</button>
+        <button data-page="history" type="button">Geçmiş</button>
+        <button data-page="pipeline" type="button">Pipeline</button>
+        <button data-page="backup" type="button">Yedekleme</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="mobileBar">
+        <button class="btn s" id="menuBtn" type="button" aria-label="Menüyü aç">☰</button>
+        <div class="brand">HADOLİN CRM</div>
+        <button class="btn p" id="mobileQuickAdd" type="button" aria-label="Hızlı ekle">＋</button>
+      </div>
+
+      <section class="top">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="toolbar" id="pageActions">
+          <button class="btn p" type="button" onclick="openQuickAdd()">Yeni Ekle</button>
+        </div>
+      </section>
+
+      <section id="page-dashboard" class="pageSection">
+        <div class="stats">
+          <div class="box">
+            <div class="small">Toplam Portföy</div>
+            <div class="stat" id="statPortfolio">0</div>
+          </div>
+          <div class="box">
+            <div class="small">Toplam Müşteri</div>
+            <div class="stat" id="statCustomer">0</div>
+          </div>
+          <div class="box">
+            <div class="small">Aktif Görev</div>
+            <div class="stat" id="statTask">0</div>
+          </div>
+          <div class="box">
+            <div class="small">Eşleşme</div>
+            <div class="stat" id="statMatch">0</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Genel Bakış</h3>
+          <div class="muted">Buraya dashboard özetlerini koy.</div>
+        </div>
+      </section>
+
+      <section id="page-portfolios" class="pageSection hidden">
+        <div class="filters">
+          <div>
+            <label>Arama</label>
+            <input id="portfolioSearch" type="text" placeholder="Başlık, konum, açıklama">
+          </div>
+          <div>
+            <label>Durum</label>
+            <select id="portfolioDealFilter">
+              <option value="">Tümü</option>
+              <option value="Satılık">Satılık</option>
+              <option value="Kiralık">Kiralık</option>
+            </select>
+          </div>
+          <div>
+            <label>Tür</label>
+            <select id="portfolioTypeFilter">
+              <option value="">Tümü</option>
+              <option value="Daire">Daire</option>
+              <option value="Villa">Villa</option>
+              <option value="Arsa">Arsa</option>
+              <option value="Dükkan">Dükkan</option>
+              <option value="Ofis">Ofis</option>
+              <option value="Fabrika">Fabrika</option>
+              <option value="Ticari (Fabrika/Depo)">Ticari (Fabrika/Depo)</option>
+            </select>
+          </div>
+          <div>
+            <label>Etiket</label>
+            <select id="portfolioLabelFilter">
+              <option value="">Tümü</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Satıldı">Satıldı</option>
+              <option value="Kiralandı">Kiralandı</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" id="portfolioGrid"></div>
+        <div class="empty hidden" id="portfolioEmpty">Henüz portföy yok.</div>
+      </section>
+
+      <section id="page-customers" class="pageSection hidden">
+        <div class="filters">
+          <div>
+            <label>Arama</label>
+            <input id="customerSearch" type="text" placeholder="Ad, telefon, not">
+          </div>
+          <div>
+            <label>Arama Türü</label>
+            <select id="customerDealFilter">
+              <option value="">Tümü</option>
+              <option value="Alıcı">Alıcı</option>
+              <option value="Kiracı">Kiracı</option>
+            </select>
+          </div>
+          <div>
+            <label>Tür</label>
+            <select id="customerTypeFilter">
+              <option value="">Tümü</option>
+              <option value="Daire">Daire</option>
+              <option value="Villa">Villa</option>
+              <option value="Arsa">Arsa</option>
+              <option value="Dükkan">Dükkan</option>
+              <option value="Ofis">Ofis</option>
+              <option value="Fabrika">Fabrika</option>
+              <option value="Ticari (Fabrika/Depo)">Ticari (Fabrika/Depo)</option>
+            </select>
+          </div>
+          <div>
+            <label>Durum</label>
+            <select id="customerStatusFilter">
+              <option value="">Tümü</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Pasif">Pasif</option>
+              <option value="Tamamlandı">Tamamlandı</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" id="customerGrid"></div>
+        <div class="empty hidden" id="customerEmpty">Henüz müşteri yok.</div>
+      </section>
+
+      <section id="page-matches" class="pageSection hidden">
+        <div class="panel">
+          <h3>Eşleştirmeler</h3>
+          <div class="stack" id="matchList"></div>
+        </div>
+      </section>
+
+      <section id="page-tasks" class="pageSection hidden">
+        <div class="panel">
+          <div class="row" style="justify-content:space-between">
+            <h3 style="margin:0">Görevler</h3>
+            <button class="btn p" type="button" onclick="openTaskModal()">Yeni Görev</button>
+          </div>
+          <div class="stack" id="taskList"></div>
+        </div>
+      </section>
+
+      <section id="page-history" class="pageSection hidden">
+        <div class="panel">
+          <h3>Geçmiş</h3>
+          <div class="stack" id="historyList"></div>
+        </div>
+      </section>
+
+      <section id="page-pipeline" class="pageSection hidden">
+        <div class="kanban" id="pipelineBoard">
+          <div class="panel">
+            <h3>Yeni</h3>
+            <div id="pipe-new"></div>
+          </div>
+          <div class="panel">
+            <h3>Görüşme</h3>
+            <div id="pipe-contact"></div>
+          </div>
+          <div class="panel">
+            <h3>Teklif</h3>
+            <div id="pipe-offer"></div>
+          </div>
+          <div class="panel">
+            <h3>Kapanış</h3>
+            <div id="pipe-close"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-backup" class="pageSection hidden">
+        <div class="panel">
+          <h3>Yedekleme</h3>
+          <div class="row">
+            <button class="btn p" type="button" onclick="downloadBackup()">Yedeği İndir</button>
+            <button class="btn s" type="button" onclick="document.getElementById('backupFile').click()">Yedek Yükle</button>
+            <input id="backupFile" type="file" accept=".json" class="hidden">
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
-</div>
-<div class="app">
-  <aside class="side" id="sidebar">
-    <div class="brand">HADOLİN CRM</div>
-    <div class="subtitle">Offline PWA • IndexedDB • Saha sürümü</div>
-    <div class="nav" id="nav"></div>
-  </aside>
-  <main class="main">
-    <div class="mobileBar row"><button class="btn s" id="menuBtn">Menü</button><strong>HADOLİN CRM</strong></div>
-    <div class="top">
-      <h1 id="pageTitle">Dashboard</h1>
-      <div class="toolbar" id="topActions"></div>
+
+  <div class="modal" id="quickAddModal" aria-hidden="true">
+    <div class="modalIn">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">Hızlı Ekle</h3>
+        <button class="btn s" type="button" onclick="closeQuickAdd()">Kapat</button>
+      </div>
+
+      <div class="form" style="margin-top:12px">
+        <div>
+          <label>Ne eklemek istiyorsun?</label>
+          <select id="quickAddType">
+            <option value="portfolio">Portföy</option>
+            <option value="customer">Müşteri</option>
+            <option value="task">Görev</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px;justify-content:flex-end">
+        <button class="btn p" type="button" onclick="handleQuickAdd()">Devam Et</button>
+      </div>
     </div>
-    <div id="content"></div>
-  </main>
-</div>
-<div class="modal" id="modal"><div class="modalIn"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 id="modalTitle" style="margin:0"></h2><button class="btn s" id="closeModalBtn">Kapat</button></div><div id="modalBody"></div></div></div>
-<input type="file" id="importInput" accept="application/json" class="hidden">
-<script>
-const APP_VERSION='3.0.0';
-const TYPES=['Daire','Villa','Arsa','Dükkan','Ofis','Fabrika','Ticari (Fabrika/Depo)'];
-const SEARCH_TYPES=['Alıcı','Kiracı'];
-const PORTFOLIO_LABELS=['Aktif','Satıldı','Kiralandı'];
-const CUSTOMER_STATUSES=['Aktif','Pasif','Tamamlandı'];
-const STAGES=['Lead','İlk Temas','Teklif','Pazarlık','Sözlü Anlaşma','Kazanıldı','Kaybedildi'];
-const TASK_PRIORITIES=['Düşük','Orta','Yüksek'];
-const TASK_STATUSES=['Açık','Beklemede','Tamamlandı'];
-const lockStorageKey='hadolin-device-lock-v3';
-const dbName='hadolin-crm-v3';
-const dbVersion=1;
-const stores=['meta','portfolios','customers','tasks','interactions','deals','matches'];
-const state={portfolios:[],customers:[],tasks:[],interactions:[],deals:[],matches:[],meta:{brand:'HADOLİN CRM',lastBackup:''}};
-let currentPage='dashboard';
-let db=null;
+  </div>
 
-const $=sel=>document.querySelector(sel);
-const escapeHtml=v=>String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-const cleanText=v=>String(v??'').replace(/\s+/g,' ').trim();
-const normalizePhone=v=>String(v??'').replace(/[^\d+]/g,'');
-const pureDigits=v=>String(v??'').replace(/\D/g,'');
-const money=v=>Number(v||0).toLocaleString('tr-TR')+' ₺';
-const uid=()=>crypto.randomUUID?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(16).slice(2);
-const telLink=v=>'tel:'+normalizePhone(v);
-const waLink=v=>`https://wa.me/${pureDigits(v).replace(/^0/,'90')}`;
-const today=()=>new Date().toISOString().slice(0,10);
-function toast(msg,type='info'){const t=document.createElement('div');t.className='toast';if(type==='error')t.style.borderLeftColor='var(--bad)';if(type==='success')t.style.borderLeftColor='var(--ok)';t.innerHTML=escapeHtml(msg);$('#toastWrap').appendChild(t);setTimeout(()=>t.remove(),3000)}
-function isCommercialType(type){return ['Arsa','Fabrika','Ticari (Fabrika/Depo)'].includes(type)}
-function safeEmail(v){return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}
-function validPhone(v){const d=pureDigits(v);return d.length>=10 && d.length<=13}
-function requireNumber(value,min=0){const n=Number(value);return Number.isFinite(n) && n>=min?n:null}
-async function sha256(text){const data=new TextEncoder().encode(text);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+  <script>
+    const side = document.getElementById('sideMenu');
+    const menuBtn = document.getElementById('menuBtn');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const mobileQuickAdd = document.getElementById('mobileQuickAdd');
+    const pageTitle = document.getElementById('pageTitle');
+    const quickAddModal = document.getElementById('quickAddModal');
+    const quickAddType = document.getElementById('quickAddType');
 
-function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(dbName,dbVersion);req.onupgradeneeded=e=>{const d=e.target.result;stores.forEach(s=>{if(!d.objectStoreNames.contains(s)){d.createObjectStore(s,{keyPath:'id'})}})};req.onsuccess=e=>{db=e.target.result;resolve(db)};req.onerror=()=>reject(req.error)})}
-function tx(store,mode='readonly'){return db.transaction(store,mode).objectStore(store)}
-function getAll(store){return new Promise((res,rej)=>{const r=tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
-function put(store,item){return new Promise((res,rej)=>{const r=tx(store,'readwrite').put(item);r.onsuccess=()=>res(item);r.onerror=()=>rej(r.error)})}
-function bulkPut(store,items){return Promise.all(items.map(item=>put(store,item)))}
-function del(store,id){return new Promise((res,rej)=>{const r=tx(store,'readwrite').delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
-async function loadState(){for(const s of stores){const rows=await getAll(s);if(s==='meta'){state.meta=rows[0]||state.meta}else{state[s]=rows}}
-  if(!state.meta.brand)state.meta.brand='HADOLİN CRM';
-}
-async function saveMeta(){await put('meta',{id:'app',...state.meta})}
-async function replaceStore(storeName,items){const old=[...state[storeName]]; for(const row of old){await del(storeName,row.id)}; state[storeName]=[]; await bulkPut(storeName,items); state[storeName]=items}
-function cascadeDeleteCustomer(customerId){state.tasks=state.tasks.filter(x=>x.customerId!==customerId);state.interactions=state.interactions.filter(x=>x.customerId!==customerId);state.deals=state.deals.filter(x=>x.customerId!==customerId);state.matches=state.matches.filter(x=>x.customerId!==customerId)}
-function cascadeDeletePortfolio(portfolioId){state.tasks=state.tasks.filter(x=>x.portfolioId!==portfolioId);state.interactions=state.interactions.filter(x=>x.portfolioId!==portfolioId);state.deals=state.deals.filter(x=>x.portfolioId!==portfolioId);state.matches=state.matches.filter(x=>x.propertyId!==portfolioId)}
-async function persistAll(){await saveMeta();for(const s of ['portfolios','customers','tasks','interactions','deals','matches']){await replaceStore(s,state[s])}}
-function seedIfEmpty(){if(state.portfolios.length || state.customers.length) return Promise.resolve();
-  const cId=uid(), pId=uid();
-  state.customers.push({id:cId,number:'M-100001',name:'Mehmet Kaya',phone:'0532 111 22 33',email:'',searchType:'Alıcı',propertyType:'Daire',temperature:'Sıcak',minBudget:4500000,maxBudget:6500000,city:'Tekirdağ',district:'Çerkezköy',minArea:120,roomPreference:'3+1',status:'Aktif',notes:'Acil taşınmak istiyor',createdAt:new Date().toISOString()});
-  state.portfolios.push({id:pId,number:'IL-100001',title:'Tepe Country 3+1 Daire',type:'Daire',status:'Satılık',price:5580000,area:160,rooms:'3+1',city:'Tekirdağ',district:'Çerkezköy',neighborhood:'',floor:'5',buildingAge:3,heating:'Doğalgaz',label:'Aktif',commercialSpecs:'',description:'Örnek başlangıç portföyü',createdAt:new Date().toISOString()});
-  state.tasks.push({id:uid(),title:'Mehmet Bey’i ara',priority:'Yüksek',status:'Açık',dueDate:today(),customerId:cId,portfolioId:pId,description:'Randevu saati netleştir'});
-  state.interactions.push({id:uid(),customerId:cId,portfolioId:pId,type:'Arama',date:new Date().toISOString().slice(0,16),note:'İlk görüşme yapıldı.'});
-  state.deals.push({id:uid(),title:'Tepe Country Teklif',customerId:cId,portfolioId:pId,stage:'Teklif',value:5500000,probability:60,notes:'İlk teklif verildi'});
-  return persistAll();
-}
-function getCustomer(id){return state.customers.find(x=>x.id===id)}
-function getPortfolio(id){return state.portfolios.find(x=>x.id===id)}
-function budgetScore(price,min,max){if(price>=min&&price<=max)return 40; const tol=Math.max(max*0.1,250000); if(price<min && min-price<=tol)return 20; if(price>max && price-max<=tol)return 18; return 0}
-function matchReasons(property,customer){let score=0,reasons=[]; const b=budgetScore(property.price,customer.minBudget,customer.maxBudget); if(!b) return {score:0,reasons:['Bütçe çok uzak']}; score+=b; reasons.push(b===40?'Bütçe tam uyumlu':'Bütçe yakın toleransta'); if(property.type===customer.propertyType){score+=20; reasons.push('Tür uyumlu')} const st=(property.status==='Satılık'&&customer.searchType==='Alıcı')||(property.status==='Kiralık'&&customer.searchType==='Kiracı'); if(st){score+=18; reasons.push('İşlem türü uyumlu')} if(customer.city && property.city.toLowerCase()===customer.city.toLowerCase()){score+=7; reasons.push('İl uyumlu'); if(customer.district && property.district && property.district.toLowerCase()===customer.district.toLowerCase()){score+=5; reasons[reasons.length-1]='Konum güçlü'}} if(customer.minArea && property.area>=customer.minArea){score+=5; reasons.push('Metrekare uygun')} if(customer.roomPreference && property.rooms && property.rooms===customer.roomPreference){score+=5; reasons.push('Oda uyumlu')} if(customer.temperature==='Sıcak') score+=2; return {score:Math.min(100,score),reasons}}
-function recomputeMatches(){const confirmedMap=new Map(state.matches.filter(m=>m.confirmed).map(m=>[`${m.customerId}_${m.propertyId}`,m])); const fresh=[]; for(const customer of state.customers.filter(c=>c.status==='Aktif')){ for(const property of state.portfolios.filter(p=>p.label==='Aktif')){ const r=matchReasons(property,customer); if(r.score>0){const key=`${customer.id}_${property.id}`; fresh.push({id:confirmedMap.get(key)?.id||uid(),customerId:customer.id,propertyId:property.id,score:r.score,reasons:r.reasons,confirmed:Boolean(confirmedMap.get(key)),confirmedAt:confirmedMap.get(key)?.confirmedAt||''})}}} state.matches=fresh.sort((a,b)=>b.score-a.score)}
-function statCards(cards){return `<div class="stats">${cards.map(c=>`<div class="box"><div class="stat">${c.value}</div><div class="muted">${escapeHtml(c.label)}</div></div>`).join('')}</div>`}
-function pageDashboard(){ $('#pageTitle').textContent='Dashboard'; $('#topActions').innerHTML=''; const openTasks=state.tasks.filter(t=>t.status!=='Tamamlandı').length; const hot=state.customers.filter(c=>c.temperature==='Sıcak'&&c.status==='Aktif').length; const openDeals=state.deals.filter(d=>!['Kazanıldı','Kaybedildi'].includes(d.stage)).length; const revenue=state.deals.filter(d=>d.stage==='Kazanıldı').reduce((a,b)=>a+Number(b.value||0),0); return `${statCards([{value:state.portfolios.filter(x=>x.label==='Aktif').length,label:'Aktif Portföy'},{value:state.customers.filter(x=>x.status==='Aktif').length,label:'Aktif Müşteri'},{value:openTasks,label:'Açık Görev'},{value:openDeals,label:'Açık Fırsat'}])}<div class="grid"><div class="panel"><h3>Bugün öne çıkanlar</h3><div class="stack">${state.tasks.filter(t=>t.status!=='Tamamlandı').slice(0,5).map(t=>`<div class="taskItem"><strong>${escapeHtml(t.title)}</strong><div class="small">${escapeHtml(t.priority)} • ${escapeHtml(t.dueDate)}</div></div>`).join('')||'<div class="small">Açık görev yok</div>'}</div></div><div class="panel"><h3>Satış nabzı</h3><div class="stack"><div class="historyItem"><strong>Sıcak müşteri</strong><div class="small">${hot} kişi</div></div><div class="historyItem"><strong>Onaylı eşleşme</strong><div class="small">${state.matches.filter(m=>m.confirmed).length} adet</div></div><div class="historyItem"><strong>Kapanan hacim</strong><div class="small">${money(revenue)}</div></div></div></div><div class="panel"><h3>Son müşteri hareketleri</h3><div class="stack">${state.interactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6).map(i=>`<div class="historyItem"><strong>${escapeHtml(getCustomer(i.customerId)?.name||'Silinmiş müşteri')}</strong><div class="small">${escapeHtml(i.type)} • ${escapeHtml(i.date.replace('T',' '))}</div><div>${escapeHtml(i.note)}</div></div>`).join('')||'<div class="small">Hareket yok</div>'}</div></div></div>`}
-function pagePortfolios(){ $('#pageTitle').textContent='Portföy'; $('#topActions').innerHTML=`<button class="btn p" data-act="newPortfolio">Yeni İlan</button>`; const q=cleanText($('#fltPq')?.value||'').toLowerCase(); const type=$('#fltPt')?.value||''; const status=$('#fltPs')?.value||''; const label=$('#fltPl')?.value||''; const list=state.portfolios.filter(p=>(!q||[p.title,p.city,p.district,p.number,p.neighborhood].join(' ').toLowerCase().includes(q))&&(!type||p.type===type)&&(!status||p.status===status)&&(!label||p.label===label)); return `${statCards([{value:state.portfolios.length,label:'Toplam İlan'},{value:state.portfolios.filter(x=>x.label==='Aktif').length,label:'Aktif İlan'},{value:state.portfolios.filter(x=>x.label!=='Aktif').length,label:'Kapanan İlan'}])}<div class="filters"><div><label>Ara</label><input id="fltPq" value="${escapeHtml(q)}" placeholder="Başlık, no, konum"></div><div><label>Tür</label><select id="fltPt"><option value="">Tümü</option>${TYPES.map(t=>`<option ${type===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label>Durum</label><select id="fltPs"><option value="">Tümü</option><option ${status==='Satılık'?'selected':''}>Satılık</option><option ${status==='Kiralık'?'selected':''}>Kiralık</option></select></div><div><label>Etiket</label><select id="fltPl"><option value="">Tümü</option>${PORTFOLIO_LABELS.map(t=>`<option ${label===t?'selected':''}>${t}</option>`).join('')}</select></div></div>${list.length?`<div class="grid">${list.map(p=>`<div class="card"><div class="cardTop"><div><div class="small">${escapeHtml(p.number)}</div><h3>${escapeHtml(p.title)}</h3></div><span class="tag ${p.label==='Aktif'?'ok':p.label==='Satıldı'?'bad':'warn'}">${escapeHtml(p.label)}</span></div><div class="stack"><div>${escapeHtml(p.type)} • ${escapeHtml(p.status)}</div><div>${escapeHtml(p.city)}${p.district?` / ${escapeHtml(p.district)}`:''}</div><div>${p.area} m² ${p.rooms?` • ${escapeHtml(p.rooms)}`:''}</div>${p.commercialSpecs?`<div class="small">${escapeHtml(p.commercialSpecs)}</div>`:''}</div><div class="price">${money(p.price)}</div><div class="actions"><button class="btn s" data-act="editPortfolio" data-id="${p.id}">Düzenle</button><button class="btn r" data-act="deletePortfolio" data-id="${p.id}">Sil</button></div></div>`).join('')}</div>`:'<div class="empty">Portföy bulunamadı.</div>'}`}
-function pageCustomers(){ $('#pageTitle').textContent='Müşteriler'; $('#topActions').innerHTML=`<button class="btn p" data-act="newCustomer">Yeni Müşteri</button>`; const q=cleanText($('#fltCq')?.value||'').toLowerCase(); const type=$('#fltCt')?.value||''; const status=$('#fltCs')?.value||''; const list=state.customers.filter(c=>(!q||[c.name,c.phone,c.email,c.number].join(' ').toLowerCase().includes(q))&&(!type||c.searchType===type)&&(!status||c.status===status)); return `${statCards([{value:state.customers.length,label:'Toplam Müşteri'},{value:state.customers.filter(x=>x.status==='Aktif').length,label:'Aktif Müşteri'},{value:state.customers.filter(x=>x.searchType==='Alıcı').length,label:'Alıcı'}])}<div class="filters"><div><label>Ara</label><input id="fltCq" value="${escapeHtml(q)}" placeholder="Ad, telefon, müşteri no"></div><div><label>Arama Türü</label><select id="fltCt"><option value="">Tümü</option>${SEARCH_TYPES.map(t=>`<option ${type===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label>Durum</label><select id="fltCs"><option value="">Tümü</option>${CUSTOMER_STATUSES.map(t=>`<option ${status===t?'selected':''}>${t}</option>`).join('')}</select></div></div>${list.length?`<div class="grid">${list.map(c=>`<div class="card"><div class="cardTop"><div><div class="small">${escapeHtml(c.number)}</div><h3>${escapeHtml(c.name)}</h3></div><span class="tag ${c.status==='Aktif'?'ok':c.status==='Tamamlandı'?'bad':'warn'}">${escapeHtml(c.status)}</span></div><div class="stack"><div><a href="${telLink(c.phone)}" style="text-decoration:none;color:var(--o);font-weight:700">${escapeHtml(c.phone)}</a></div>${c.email?`<div>${escapeHtml(c.email)}</div>`:''}<div>${escapeHtml(c.searchType)} • ${escapeHtml(c.propertyType)}</div><div>${money(c.minBudget)} - ${money(c.maxBudget)}</div>${c.city?`<div>${escapeHtml(c.city)}${c.district?` / ${escapeHtml(c.district)}`:''}</div>`:''}<div class="small">${escapeHtml(c.temperature||'Ilık')} müşteri</div></div><div class="actions"><a class="btn g" href="${waLink(c.phone)}" target="_blank" rel="noreferrer">WhatsApp</a><button class="btn b" data-act="logInteractionForCustomer" data-id="${c.id}">Hareket Ekle</button><button class="btn s" data-act="editCustomer" data-id="${c.id}">Düzenle</button><button class="btn r" data-act="deleteCustomer" data-id="${c.id}">Sil</button></div></div>`).join('')}</div>`:'<div class="empty">Müşteri bulunamadı.</div>'}`}
-function pageMatches(){ recomputeMatches(); $('#pageTitle').textContent='Eşleştirme'; $('#topActions').innerHTML=`<button class="btn s" data-act="refreshMatches">Yenile</button>`; return `${statCards([{value:state.matches.length,label:'Toplam Eşleşme'},{value:state.matches.filter(m=>m.score>=80).length,label:'Yüksek Skor'},{value:state.matches.filter(m=>m.confirmed).length,label:'Onaylı'}])}${state.matches.length?state.matches.map((m,i)=>{const c=getCustomer(m.customerId),p=getPortfolio(m.propertyId); if(!c||!p) return ''; const cl=m.score>=80?'high':m.score>=55?'mid':'low'; return `<div class="panel" style="margin-bottom:12px"><div class="row" style="justify-content:space-between"><div><strong>Eşleşme #${i+1}</strong><div class="small">${escapeHtml(m.reasons.join(' • '))}</div></div>${m.confirmed?`<span class="tag ok">Onaylandı</span>`:`<button class="btn g" data-act="confirmMatch" data-customer="${c.id}" data-portfolio="${p.id}">Onayla</button>`}</div><div class="row" style="margin-top:12px"><div style="flex:1"><div class="score"><div class="fill ${cl}" style="width:${m.score}%"></div></div></div><strong>${m.score}/100</strong></div><div class="two" style="margin-top:12px"><div class="historyItem"><strong>${escapeHtml(c.name)}</strong><div class="small">${escapeHtml(c.searchType)} • ${escapeHtml(c.propertyType)}</div><div>${money(c.minBudget)} - ${money(c.maxBudget)}</div></div><div class="historyItem"><strong>${escapeHtml(p.title)}</strong><div class="small">${escapeHtml(p.type)} • ${escapeHtml(p.status)}</div><div>${money(p.price)}</div></div></div></div>`}).join(''):'<div class="empty">Eşleşme yok.</div>'}`}
-function pageTasks(){ $('#pageTitle').textContent='Görevler'; $('#topActions').innerHTML=`<button class="btn p" data-act="newTask">Yeni Görev</button>`; const list=state.tasks.slice().sort((a,b)=>a.dueDate.localeCompare(b.dueDate)); return `${statCards([{value:state.tasks.length,label:'Toplam Görev'},{value:state.tasks.filter(x=>x.status==='Açık').length,label:'Açık'},{value:state.tasks.filter(x=>x.status==='Tamamlandı').length,label:'Tamamlandı'}])}<div class="stack">${list.length?list.map(t=>`<div class="taskItem"><div class="row" style="justify-content:space-between"><div><strong>${escapeHtml(t.title)}</strong><div class="small">${escapeHtml(t.priority)} • ${escapeHtml(t.status)} • ${escapeHtml(t.dueDate)}</div></div><div class="row">${t.status!=='Tamamlandı'?`<button class="btn g" data-act="doneTask" data-id="${t.id}">Tamamla</button>`:''}<button class="btn s" data-act="editTask" data-id="${t.id}">Düzenle</button><button class="btn r" data-act="deleteTask" data-id="${t.id}">Sil</button></div></div><div class="small" style="margin-top:6px">${escapeHtml(t.description||'')}</div></div>`).join(''):'<div class="empty">Görev yok.</div>'}</div>`}
-function pageHistory(){ $('#pageTitle').textContent='Müşteri Geçmişi'; $('#topActions').innerHTML=`<button class="btn p" data-act="newHistory">Yeni Hareket</button>`; const items=state.interactions.slice().sort((a,b)=>b.date.localeCompare(a.date)); return `${items.length?`<div class="stack">${items.map(i=>`<div class="historyItem"><div class="row" style="justify-content:space-between"><div><strong>${escapeHtml(getCustomer(i.customerId)?.name||'Silinmiş müşteri')}</strong><div class="small">${escapeHtml(i.type)} • ${escapeHtml(i.date.replace('T',' '))}</div></div><div class="row"><button class="btn r" data-act="deleteHistory" data-id="${i.id}">Sil</button></div></div><div style="margin-top:6px">${escapeHtml(i.note)}</div>${i.portfolioId?`<div class="small" style="margin-top:6px">İlgili portföy: ${escapeHtml(getPortfolio(i.portfolioId)?.title||'Silinmiş portföy')}</div>`:''}</div>`).join('')}</div>`:'<div class="empty">Kayıtlı hareket yok.</div>'}`}
-function pagePipeline(){ $('#pageTitle').textContent='Teklif Pipeline'; $('#topActions').innerHTML=`<button class="btn p" data-act="newDeal">Yeni Fırsat</button>`; return `<div class="kanban">${STAGES.map(stage=>`<div class="panel"><h3>${escapeHtml(stage)}</h3>${state.deals.filter(d=>d.stage===stage).map(d=>`<div class="deal"><strong>${escapeHtml(d.title)}</strong><div class="small">${escapeHtml(getCustomer(d.customerId)?.name||'Müşteri yok')}</div><div style="margin:8px 0">${money(d.value||0)}</div><div class="small">Olasılık: ${d.probability||0}%</div><div class="actions"><button class="btn s" data-act="editDeal" data-id="${d.id}">Düzenle</button><button class="btn r" data-act="deleteDeal" data-id="${d.id}">Sil</button></div></div>`).join('')||'<div class="small">Boş</div>'}</div>`).join('')}</div>`}
-function pageBackup(){ $('#pageTitle').textContent='Yedek / Ayarlar'; $('#topActions').innerHTML=''; const data=JSON.stringify({meta:state.meta,portfolios:state.portfolios,customers:state.customers,tasks:state.tasks,interactions:state.interactions,deals:state.deals,matches:state.matches}); const kb=(new Blob([data]).size/1024).toFixed(2); return `<div class="grid"><div class="panel"><h3>Yedekleme</h3><div class="stack"><div>Son yedek: <strong>${escapeHtml(state.meta.lastBackup||'Henüz yok')}</strong></div><div>Veri boyutu: <strong>${kb} KB</strong></div><div class="row"><button class="btn p" data-act="exportBackup">Yedeği İndir</button><button class="btn s" data-act="importBackup">Yedek Yükle</button></div></div></div><div class="panel"><h3>Ayarlar</h3><div class="form"><div class="full"><label>Marka adı</label><input id="brandInput" value="${escapeHtml(state.meta.brand||'HADOLİN CRM')}"></div></div><div class="actions"><button class="btn p" data-act="saveBrand">Kaydet</button></div></div><div class="panel"><h3>Ne var?</h3><div class="stack"><div class="small">• IndexedDB veri saklama</div><div class="small">• PWA kurulabilir yapı</div><div class="small">• Telefon ve WhatsApp bağlantısı</div><div class="small">• Görev, geçmiş, pipeline</div><div class="small">• Ticari portföy desteği</div></div></div></div>`}
-function render(){ document.title=state.meta.brand||'HADOLİN CRM'; $('.brand').textContent=state.meta.brand||'HADOLİN CRM'; const map={dashboard:pageDashboard,portfolios:pagePortfolios,customers:pageCustomers,matches:pageMatches,tasks:pageTasks,history:pageHistory,pipeline:pagePipeline,backup:pageBackup}; $('#content').innerHTML=map[currentPage](); bindFilterRenders(); drawNav() }
-function bindFilterRenders(){ ['#fltPq','#fltPt','#fltPs','#fltPl','#fltCq','#fltCt','#fltCs'].forEach(sel=>{const el=$(sel); if(el){el.oninput=()=>render(); el.onchange=()=>render()}}) }
-function drawNav(){const items=[['dashboard','Dashboard'],['portfolios','Portföy'],['customers','Müşteriler'],['matches','Eşleştirme'],['tasks','Görevler'],['history','Müşteri Geçmişi'],['pipeline','Teklif Pipeline'],['backup','Yedek / Ayarlar']]; $('#nav').innerHTML=items.map(([k,v])=>`<button class="${currentPage===k?'active':''}" data-nav="${k}">${v}</button>`).join('')}
-function openModal(title,body){$('#modalTitle').textContent=title; $('#modalBody').innerHTML=body; $('#modal').classList.add('show'); bindDynamicFormLogic()}
-function closeModal(){$('#modal').classList.remove('show')}
-function bindDynamicFormLogic(){const type=$('#pf_type'); const roomsWrap=$('#roomsWrap'); const commercialWrap=$('#commercialWrap'); if(type && roomsWrap && commercialWrap){const refresh=()=>{const commercial=isCommercialType(type.value); roomsWrap.classList.toggle('hidden',commercial); commercialWrap.classList.toggle('hidden',!commercial)}; type.onchange=refresh; refresh()}}
-function portfolioForm(id=''){const p=state.portfolios.find(x=>x.id===id)||{status:'Satılık',label:'Aktif'}; openModal(id?'İlan Düzenle':'Yeni İlan',`<div class="form"><div><label>Başlık *</label><input id="pf_title" value="${escapeHtml(p.title||'')}"></div><div><label>Tür *</label><select id="pf_type">${TYPES.map(t=>`<option ${p.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label>Durum *</label><select id="pf_status"><option ${p.status==='Satılık'?'selected':''}>Satılık</option><option ${p.status==='Kiralık'?'selected':''}>Kiralık</option></select></div><div><label>Fiyat *</label><input id="pf_price" type="number" min="0" value="${escapeHtml(p.price||'')}"></div><div><label>Metrekare *</label><input id="pf_area" type="number" min="1" value="${escapeHtml(p.area||'')}"></div><div id="roomsWrap"><label>Oda Sayısı</label><input id="pf_rooms" value="${escapeHtml(p.rooms||'')}"></div><div><label>İl *</label><input id="pf_city" value="${escapeHtml(p.city||'')}"></div><div><label>İlçe</label><input id="pf_district" value="${escapeHtml(p.district||'')}"></div><div><label>Mahalle</label><input id="pf_neighborhood" value="${escapeHtml(p.neighborhood||'')}"></div><div><label>Kat</label><input id="pf_floor" value="${escapeHtml(p.floor||'')}"></div><div><label>Bina Yaşı</label><input id="pf_age" type="number" min="0" value="${escapeHtml(p.buildingAge||'')}"></div><div><label>Isıtma</label><input id="pf_heat" value="${escapeHtml(p.heating||'')}"></div><div><label>Etiket</label><select id="pf_label">${PORTFOLIO_LABELS.map(t=>`<option ${p.label===t?'selected':''}>${t}</option>`).join('')}</select></div><div id="commercialWrap" class="full hidden"><label>Ticari Özellikler</label><textarea id="pf_commercial" placeholder="Kapalı alan, açık alan, yükseklik, trafo, rampa, tır yanaşma...">${escapeHtml(p.commercialSpecs||'')}</textarea></div><div class="full"><label>Açıklama</label><textarea id="pf_desc">${escapeHtml(p.description||'')}</textarea></div></div><div class="actions"><button class="btn p" data-save="portfolio" data-id="${id}">Kaydet</button></div>`)}
-async function savePortfolio(id=''){const type=$('#pf_type').value; const item={id:id||uid(),number:(state.portfolios.find(x=>x.id===id)?.number)||'IL-'+String(Date.now()).slice(-6),title:cleanText($('#pf_title').value),type,status:$('#pf_status').value,price:requireNumber($('#pf_price').value,1),area:requireNumber($('#pf_area').value,1),rooms:isCommercialType(type)?'':cleanText($('#pf_rooms').value),city:cleanText($('#pf_city').value),district:cleanText($('#pf_district').value),neighborhood:cleanText($('#pf_neighborhood').value),floor:cleanText($('#pf_floor').value),buildingAge:$('#pf_age').value?requireNumber($('#pf_age').value,0):'',heating:cleanText($('#pf_heat').value),label:$('#pf_label').value,commercialSpecs:isCommercialType(type)?cleanText($('#pf_commercial').value):'',description:cleanText($('#pf_desc').value),createdAt:state.portfolios.find(x=>x.id===id)?.createdAt||new Date().toISOString()}; if(item.title.length<3||!item.price||!item.area||item.city.length<2) return toast('Portföy alanları eksik veya hatalı','error'); if(!isCommercialType(type) && !item.rooms) return toast('Konut tipi için oda sayısı gir','error'); if(id){state.portfolios=state.portfolios.map(x=>x.id===id?item:x)} else state.portfolios.push(item); await persistAll(); closeModal(); toast('Portföy kaydedildi','success'); render()}
-function customerForm(id=''){const c=state.customers.find(x=>x.id===id)||{searchType:'Alıcı',propertyType:'Daire',temperature:'Ilık',status:'Aktif'}; openModal(id?'Müşteri Düzenle':'Yeni Müşteri',`<div class="form"><div><label>Ad Soyad *</label><input id="cf_name" value="${escapeHtml(c.name||'')}"></div><div><label>Telefon *</label><input id="cf_phone" value="${escapeHtml(c.phone||'')}"></div><div><label>E-posta</label><input id="cf_email" value="${escapeHtml(c.email||'')}"></div><div><label>Arama Türü *</label><select id="cf_search">${SEARCH_TYPES.map(t=>`<option ${c.searchType===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label>İlgilenilen Tür *</label><select id="cf_type">${TYPES.map(t=>`<option ${c.propertyType===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label>Müşteri Sıcaklığı</label><select id="cf_temp">${['Soğuk','Ilık','Sıcak'].map(t=>`<option ${c.temperature===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label>Min Bütçe *</label><input id="cf_min" type="number" min="0" value="${escapeHtml(c.minBudget||'')}"></div><div><label>Max Bütçe *</label><input id="cf_max" type="number" min="0" value="${escapeHtml(c.maxBudget||'')}"></div><div><label>Tercih İl</label><input id="cf_city" value="${escapeHtml(c.city||'')}"></div><div><label>Tercih İlçe</label><input id="cf_district" value="${escapeHtml(c.district||'')}"></div><div><label>Min m²</label><input id="cf_area" type="number" min="0" value="${escapeHtml(c.minArea||'')}"></div><div><label>Oda Tercihi</label><input id="cf_room" value="${escapeHtml(c.roomPreference||'')}"></div><div><label>Durum</label><select id="cf_status">${CUSTOMER_STATUSES.map(t=>`<option ${c.status===t?'selected':''}>${t}</option>`).join('')}</select></div><div class="full"><label>Notlar</label><textarea id="cf_notes">${escapeHtml(c.notes||'')}</textarea></div></div><div class="actions"><button class="btn p" data-save="customer" data-id="${id}">Kaydet</button></div>`)}
-async function saveCustomer(id=''){const item={id:id||uid(),number:(state.customers.find(x=>x.id===id)?.number)||'M-'+String(Date.now()).slice(-6),name:cleanText($('#cf_name').value),phone:cleanText($('#cf_phone').value),email:cleanText($('#cf_email').value),searchType:$('#cf_search').value,propertyType:$('#cf_type').value,temperature:$('#cf_temp').value,minBudget:requireNumber($('#cf_min').value,0),maxBudget:requireNumber($('#cf_max').value,0),city:cleanText($('#cf_city').value),district:cleanText($('#cf_district').value),minArea:$('#cf_area').value?requireNumber($('#cf_area').value,0):'',roomPreference:cleanText($('#cf_room').value),status:$('#cf_status').value,notes:cleanText($('#cf_notes').value),createdAt:state.customers.find(x=>x.id===id)?.createdAt||new Date().toISOString()}; if(item.name.length<3||!validPhone(item.phone)||item.minBudget===null||item.maxBudget===null||item.minBudget>item.maxBudget||!safeEmail(item.email)) return toast('Müşteri bilgileri hatalı','error'); if(id){state.customers=state.customers.map(x=>x.id===id?item:x)} else state.customers.push(item); await persistAll(); closeModal(); toast('Müşteri kaydedildi','success'); render()}
-function taskForm(id=''){const t=state.tasks.find(x=>x.id===id)||{priority:'Orta',status:'Açık',dueDate:today()}; openModal(id?'Görev Düzenle':'Yeni Görev',`<div class="form"><div><label>Görev *</label><input id="tf_title" value="${escapeHtml(t.title||'')}"></div><div><label>Öncelik</label><select id="tf_priority">${TASK_PRIORITIES.map(v=>`<option ${t.priority===v?'selected':''}>${v}</option>`).join('')}</select></div><div><label>Durum</label><select id="tf_status">${TASK_STATUSES.map(v=>`<option ${t.status===v?'selected':''}>${v}</option>`).join('')}</select></div><div><label>Son Tarih *</label><input id="tf_due" type="date" value="${escapeHtml(t.dueDate||today())}"></div><div><label>Müşteri</label><select id="tf_customer"><option value="">Seç</option>${state.customers.map(c=>`<option value="${c.id}" ${t.customerId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></div><div><label>Portföy</label><select id="tf_portfolio"><option value="">Seç</option>${state.portfolios.map(p=>`<option value="${p.id}" ${t.portfolioId===p.id?'selected':''}>${escapeHtml(p.title)}</option>`).join('')}</select></div><div class="full"><label>Açıklama</label><textarea id="tf_desc">${escapeHtml(t.description||'')}</textarea></div></div><div class="actions"><button class="btn p" data-save="task" data-id="${id}">Kaydet</button></div>`)}
-async function saveTask(id=''){const item={id:id||uid(),title:cleanText($('#tf_title').value),priority:$('#tf_priority').value,status:$('#tf_status').value,dueDate:$('#tf_due').value,customerId:$('#tf_customer').value,portfolioId:$('#tf_portfolio').value,description:cleanText($('#tf_desc').value)}; if(item.title.length<3||!item.dueDate) return toast('Görev bilgisi eksik','error'); if(id){state.tasks=state.tasks.map(x=>x.id===id?item:x)} else state.tasks.push(item); await persistAll(); closeModal(); toast('Görev kaydedildi','success'); render()}
-function historyForm(customerId=''){openModal('Hareket Ekle',`<div class="form"><div><label>Müşteri *</label><select id="hf_customer">${state.customers.map(c=>`<option value="${c.id}" ${customerId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></div><div><label>Kanal *</label><select id="hf_type">${['Arama','WhatsApp','E-posta','Toplantı','Not'].map(v=>`<option>${v}</option>`).join('')}</select></div><div><label>Tarih *</label><input id="hf_date" type="datetime-local" value="${new Date().toISOString().slice(0,16)}"></div><div><label>İlgili Portföy</label><select id="hf_portfolio"><option value="">Seç</option>${state.portfolios.map(p=>`<option value="${p.id}">${escapeHtml(p.title)}</option>`).join('')}</select></div><div class="full"><label>Detay *</label><textarea id="hf_note"></textarea></div></div><div class="actions"><button class="btn p" data-save="history">Kaydet</button></div>`)}
-async function saveHistory(){const item={id:uid(),customerId:$('#hf_customer').value,portfolioId:$('#hf_portfolio').value,type:$('#hf_type').value,date:$('#hf_date').value,note:cleanText($('#hf_note').value)}; if(!item.customerId||!item.date||item.note.length<3) return toast('Hareket bilgisi eksik','error'); state.interactions.push(item); await persistAll(); closeModal(); toast('Hareket kaydedildi','success'); render()}
-function dealForm(id=''){const d=state.deals.find(x=>x.id===id)||{stage:'Lead',probability:30}; openModal(id?'Fırsat Düzenle':'Yeni Fırsat',`<div class="form"><div><label>Başlık *</label><input id="df_title" value="${escapeHtml(d.title||'')}"></div><div><label>Müşteri *</label><select id="df_customer">${state.customers.map(c=>`<option value="${c.id}" ${d.customerId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></div><div><label>Portföy</label><select id="df_portfolio"><option value="">Seç</option>${state.portfolios.map(p=>`<option value="${p.id}" ${d.portfolioId===p.id?'selected':''}>${escapeHtml(p.title)}</option>`).join('')}</select></div><div><label>Aşama *</label><select id="df_stage">${STAGES.map(v=>`<option ${d.stage===v?'selected':''}>${v}</option>`).join('')}</select></div><div><label>Tutar</label><input id="df_value" type="number" min="0" value="${escapeHtml(d.value||'')}"></div><div><label>Olasılık %</label><input id="df_prob" type="number" min="0" max="100" value="${escapeHtml(d.probability||0)}"></div><div class="full"><label>Notlar</label><textarea id="df_notes">${escapeHtml(d.notes||'')}</textarea></div></div><div class="actions"><button class="btn p" data-save="deal" data-id="${id}">Kaydet</button></div>`)}
-async function saveDeal(id=''){const prob=requireNumber($('#df_prob').value,0); const item={id:id||uid(),title:cleanText($('#df_title').value),customerId:$('#df_customer').value,portfolioId:$('#df_portfolio').value,stage:$('#df_stage').value,value:requireNumber($('#df_value').value,0)||0,probability:prob,notes:cleanText($('#df_notes').value)}; if(item.title.length<3||!item.customerId||prob===null||prob>100) return toast('Fırsat bilgisi hatalı','error'); if(id){state.deals=state.deals.map(x=>x.id===id?item:x)} else state.deals.push(item); await persistAll(); closeModal(); toast('Fırsat kaydedildi','success'); render()}
-async function exportBackup(){recomputeMatches(); const backup={version:APP_VERSION,exportDate:new Date().toISOString(),meta:state.meta,portfolios:state.portfolios,customers:state.customers,tasks:state.tasks,interactions:state.interactions,deals:state.deals,matches:state.matches}; const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hadolin_crm_${new Date().toISOString().slice(0,10)}.json`; a.click(); state.meta.lastBackup=new Date().toLocaleString('tr-TR'); await saveMeta(); render(); toast('Yedek indirildi','success')}
-function askImport(){$('#importInput').click()}
-async function importBackup(file){try{const j=JSON.parse(await file.text()); const needed=['portfolios','customers','tasks','interactions','deals','matches']; if(!j || !needed.every(k=>Array.isArray(j[k]))) throw new Error('bad'); // lightweight schema checks
-  for(const p of j.portfolios){ if(!p.id || !p.title || !p.type) throw new Error('badP') }
-  for(const c of j.customers){ if(!c.id || !c.name || !c.phone) throw new Error('badC') }
-  if(!confirm('Mevcut veriler silinip yedek yüklenecek. Emin misin?')) return; state.portfolios=j.portfolios; state.customers=j.customers; state.tasks=j.tasks; state.interactions=j.interactions; state.deals=j.deals; state.matches=j.matches; state.meta={...(j.meta||{}),brand:(j.meta?.brand||'HADOLİN CRM'),lastBackup:state.meta.lastBackup}; await persistAll(); render(); toast('Yedek yüklendi','success')
-}catch(e){toast('Yedek dosyası geçersiz','error')}}
-async function confirmMatch(customerId,propertyId){recomputeMatches(); const m=state.matches.find(x=>x.customerId===customerId && x.propertyId===propertyId); if(!m) return; m.confirmed=true; m.confirmedAt=new Date().toISOString(); await persistAll(); toast('Eşleşme onaylandı','success'); render()}
-async function markTaskDone(id){const t=state.tasks.find(x=>x.id===id); if(!t) return; t.status='Tamamlandı'; await persistAll(); render()}
-async function deleteEntity(type,id){const label={portfolio:'Portföy',customer:'Müşteri',task:'Görev',history:'Hareket',deal:'Fırsat'}[type]||'Kayıt'; if(!confirm(`${label} silinsin mi?`)) return; if(type==='portfolio'){state.portfolios=state.portfolios.filter(x=>x.id!==id); cascadeDeletePortfolio(id)} if(type==='customer'){state.customers=state.customers.filter(x=>x.id!==id); cascadeDeleteCustomer(id)} if(type==='task') state.tasks=state.tasks.filter(x=>x.id!==id); if(type==='history') state.interactions=state.interactions.filter(x=>x.id!==id); if(type==='deal') state.deals=state.deals.filter(x=>x.id!==id); await persistAll(); render(); toast(`${label} silindi`,'success')}
-async function saveBrand(){const v=cleanText($('#brandInput').value); if(v.length<2) return toast('Marka adı çok kısa','error'); state.meta.brand=v; await saveMeta(); render(); toast('Marka adı kaydedildi','success')}
-async function handleLock(){const user=cleanText($('#lockUser').value); const pass=$('#lockPass').value; if(user.length<3||pass.length<4) return toast('Kullanıcı veya PIN zayıf','error'); let stored=JSON.parse(localStorage.getItem(lockStorageKey)||'null'); const hash=await sha256(user+'::'+pass); if(!stored){stored={user,hash}; localStorage.setItem(lockStorageKey,JSON.stringify(stored))} if(stored.user!==user || stored.hash!==hash) return toast('Bilgiler yanlış','error'); $('#lockView').classList.remove('show')}
-function resetLock(){if(confirm('Cihaz kilidi sıfırlansın mı?')){localStorage.removeItem(lockStorageKey); $('#lockInfo').textContent='Kilit silindi. Yeni girişte yeni PIN oluşturabilirsin.'}}
-function attachGlobalEvents(){document.addEventListener('click',async e=>{const btn=e.target.closest('[data-nav],[data-act],[data-save]'); if(!btn) return; if(btn.dataset.nav){currentPage=btn.dataset.nav; render(); if(window.innerWidth<900) $('#sidebar').classList.remove('open'); return}
-  const act=btn.dataset.act; if(act==='newPortfolio') return portfolioForm(); if(act==='editPortfolio') return portfolioForm(btn.dataset.id); if(act==='deletePortfolio') return deleteEntity('portfolio',btn.dataset.id); if(act==='newCustomer') return customerForm(); if(act==='editCustomer') return customerForm(btn.dataset.id); if(act==='deleteCustomer') return deleteEntity('customer',btn.dataset.id); if(act==='logInteractionForCustomer') return historyForm(btn.dataset.id); if(act==='refreshMatches'){recomputeMatches(); await persistAll(); render(); return toast('Eşleşmeler yenilendi','success')} if(act==='confirmMatch') return confirmMatch(btn.dataset.customer,btn.dataset.portfolio); if(act==='newTask') return taskForm(); if(act==='editTask') return taskForm(btn.dataset.id); if(act==='doneTask') return markTaskDone(btn.dataset.id); if(act==='deleteTask') return deleteEntity('task',btn.dataset.id); if(act==='newHistory') return historyForm(); if(act==='deleteHistory') return deleteEntity('history',btn.dataset.id); if(act==='newDeal') return dealForm(); if(act==='editDeal') return dealForm(btn.dataset.id); if(act==='deleteDeal') return deleteEntity('deal',btn.dataset.id); if(act==='exportBackup') return exportBackup(); if(act==='importBackup') return askImport(); if(act==='saveBrand') return saveBrand();
-  const save=btn.dataset.save; if(save==='portfolio') return savePortfolio(btn.dataset.id); if(save==='customer') return saveCustomer(btn.dataset.id); if(save==='task') return saveTask(btn.dataset.id); if(save==='history') return saveHistory(); if(save==='deal') return saveDeal(btn.dataset.id);
-});
-$('#closeModalBtn').onclick=closeModal; $('#modal').addEventListener('click',e=>{if(e.target.id==='modal') closeModal()}); $('#lockBtn').onclick=handleLock; $('#resetLockBtn').onclick=resetLock; $('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open'); $('#importInput').addEventListener('change',e=>{const file=e.target.files[0]; if(file) importBackup(file); e.target.value=''});
-}
-async function init(){await openDb(); await loadState(); await seedIfEmpty(); recomputeMatches(); await persistAll(); drawNav(); attachGlobalEvents(); render(); $('#lockInfo').textContent=localStorage.getItem(lockStorageKey)?'Cihaz kilidi aktif. Giriş yap.':'İlk girişte yazdığın kullanıcı ve PIN bu cihaza kaydedilir.'; if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}}
-init().catch(err=>{console.error(err); alert('Uygulama başlatılamadı: '+err.message)});
-</script>
+    function toast(message) {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }
+
+    function openMenu() {
+      if (!side) return;
+      side.classList.add('open');
+      menuOverlay?.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      if (!side) return;
+      side.classList.remove('open');
+      menuOverlay?.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    function toggleMenu() {
+      if (!side) return;
+      if (side.classList.contains('open')) closeMenu();
+      else openMenu();
+    }
+
+    function switchPage(page) {
+      document.querySelectorAll('.pageSection').forEach(el => el.classList.add('hidden'));
+      document.getElementById('page-' + page)?.classList.remove('hidden');
+
+      document.querySelectorAll('.nav button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.page === page);
+      });
+
+      const titles = {
+        dashboard: 'Dashboard',
+        portfolios: 'Portföy',
+        customers: 'Müşteriler',
+        matches: 'Eşleştirme',
+        tasks: 'Görevler',
+        history: 'Geçmiş',
+        pipeline: 'Pipeline',
+        backup: 'Yedekleme'
+      };
+
+      pageTitle.textContent = titles[page] || 'Dashboard';
+
+      if (window.innerWidth <= 900) closeMenu();
+    }
+
+    function openQuickAdd() {
+      quickAddModal?.classList.add('show');
+      quickAddModal?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeQuickAdd() {
+      quickAddModal?.classList.remove('show');
+      quickAddModal?.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function handleQuickAdd() {
+      const type = quickAddType?.value;
+      closeQuickAdd();
+
+      if (type === 'portfolio') {
+        switchPage('portfolios');
+        toast('Portföy sayfasına geçildi');
+        return;
+      }
+
+      if (type === 'customer') {
+        switchPage('customers');
+        toast('Müşteri sayfasına geçildi');
+        return;
+      }
+
+      if (type === 'task') {
+        switchPage('tasks');
+        toast('Görev sayfasına geçildi');
+      }
+    }
+
+    function downloadBackup() {
+      toast('Yedek indirme fonksiyonunu mevcut sistemine bağla');
+    }
+
+    function openTaskModal() {
+      toast('Görev modalını mevcut sistemine bağla');
+    }
+
+    menuBtn?.addEventListener('click', toggleMenu);
+    menuOverlay?.addEventListener('click', closeMenu);
+    mobileQuickAdd?.addEventListener('click', openQuickAdd);
+
+    document.querySelectorAll('.nav button').forEach(btn => {
+      btn.addEventListener('click', () => switchPage(btn.dataset.page));
+    });
+
+    document.getElementById('backupFile')?.addEventListener('change', e => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      toast('Yedek seçildi: ' + file.name);
+      e.target.value = '';
+    });
+
+    quickAddModal?.addEventListener('click', (e) => {
+      if (e.target === quickAddModal) closeQuickAdd();
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) closeMenu();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+        closeQuickAdd();
+      }
+    });
+
+    switchPage('dashboard');
+  </script>
 </body>
 </html>
