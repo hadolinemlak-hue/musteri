@@ -1,5 +1,5 @@
 const CACHE='hadolin-crm-v3-cache';
-const ASSETS=['./','./index_best.html','./manifest_best.json','./sw_best.js'];
+const ASSETS=['./','./index.html','./manifest.json','./sw.js'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
@@ -13,6 +13,6 @@ self.addEventListener('fetch',event=>{
       const clone=resp.clone();
       caches.open(CACHE).then(cache=>cache.put(event.request,clone));
       return resp;
-    }).catch(()=>caches.match('./index_best.html')))
+    }).catch(()=>caches.match('./index.html')))
   );
 });
