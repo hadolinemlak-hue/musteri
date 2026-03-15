@@ -2,7 +2,7 @@
   "name": "HADOLİN CRM",
   "short_name": "HADOLİN CRM",
   "description": "Offline çalışan emlak CRM PWA uygulaması",
-  "start_url": "./index_best.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#141423",
   "theme_color": "#ff7a00",
