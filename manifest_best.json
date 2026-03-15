@@ -1,0 +1,24 @@
+{
+  "name": "HADOLİN CRM",
+  "short_name": "HADOLİN CRM",
+  "description": "Offline çalışan emlak CRM PWA uygulaması",
+  "start_url": "./index_best.html",
+  "display": "standalone",
+  "background_color": "#141423",
+  "theme_color": "#ff7a00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%23ff7a00'/%3E%3Cpath d='M40 124V80l56-40 56 40v44h-20V90L96 64 60 90v34H40zm30 28v-44h52v44H70zm14-14h24v-16H84v16z' fill='white'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%23ff7a00'/%3E%3Cpath d='M106 332V214l150-106 150 106v118h-54V241L256 172 160 241v91h-54zm80 74V286h140v120H186zm40-38h60v-42h-60v42z' fill='white'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
