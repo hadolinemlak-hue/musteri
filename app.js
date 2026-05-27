@@ -519,3 +519,58 @@ window.addEventListener(
 
   }
 );
+function bindEditButtons(){
+
+  const buttons =
+    document.querySelectorAll(".edit-btn");
+
+  buttons.forEach(btn => {
+
+    btn.addEventListener(
+      "click",
+      function(){
+
+        const id =
+          Number(btn.dataset.id);
+
+        const item =
+          state.portfolio.find(
+            x => x.id === id
+          );
+
+        if(!item) return;
+
+        editingId = id;
+
+        document.getElementById(
+          "titleInput"
+        ).value = item.title;
+
+        document.getElementById(
+          "priceInput"
+        ).value = item.price;
+
+        document.getElementById(
+          "cityInput"
+        ).value = item.city;
+
+        currentPhoto = item.photo || "";
+
+        if(currentPhoto){
+
+          document.getElementById(
+            "preview"
+          ).innerHTML = `
+            <img src="${currentPhoto}">
+          `;
+
+        }
+
+        openModal();
+
+      }
+    );
+
+  });
+
+}
