@@ -24,6 +24,7 @@ const closeModalBtn = document.getElementById("closeModal");
 const saveBtn = document.getElementById("saveBtn");
 const photoInput = document.getElementById("photoInput");
 const searchInput = document.getElementById("searchInput");
+const preview = document.getElementById("preview");
 
 /* =========================
    TOAST
@@ -37,7 +38,7 @@ function toast(text) {
 
   wrap.appendChild(el);
 
-  setTimeout(() => el.remove(), 2000);
+  setTimeout(() => el.remove(), 2200);
 }
 
 /* =========================
@@ -66,6 +67,14 @@ function openModal() {
 function closeModal() {
   modal.classList.remove("open");
   document.body.style.overflow = "auto";
+
+  editingId = null;
+  currentPhoto = "";
+  preview.innerHTML = "";
+
+  document.getElementById("titleInput").value = "";
+  document.getElementById("priceInput").value = "";
+  document.getElementById("cityInput").value = "";
 }
 
 /* =========================
@@ -76,10 +85,12 @@ function render() {
 
   const q = searchInput.value.toLowerCase();
 
-  const filtered = state.portfolio.filter((item) =>
-    item.title.toLowerCase().includes(q) ||
-    item.city.toLowerCase().includes(q)
-  );
+  const filtered = state.portfolio.filter(item => {
+    return (
+      item.title.toLowerCase().includes(q) ||
+      item.city.toLowerCase().includes(q)
+    );
+  });
 
   document.getElementById("portfolioCount").innerText =
     state.portfolio.length;
@@ -96,13 +107,13 @@ function render() {
     return;
   }
 
-  filtered.forEach((item) => {
+  filtered.forEach(item => {
     const card = document.createElement("div");
     card.className = "card";
 
     card.innerHTML = `
       <div class="thumb">
-        <img src="${item.photo || "https://placehold.co/600x400"}" />
+        <img src="${item.photo || "https://placehold.co/600x400"}">
       </div>
 
       <div class="info">
@@ -125,31 +136,38 @@ function render() {
     portfolioList.appendChild(card);
   });
 
-  bindActions();
+  bindDeleteButtons();
+  bindEditButtons();
 }
 
 /* =========================
-   EVENT DELEGATION (FIX)
+   DELETE
 ========================= */
-function bindActions() {
-  document.querySelectorAll(".delete-btn").forEach((btn) => {
-    btn.onclick = function () {
-      const id = Number(this.dataset.id);
+function bindDeleteButtons() {
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.onclick = () => {
+      const id = Number(btn.dataset.id);
 
       if (!confirm("İlan silinsin mi?")) return;
 
-      state.portfolio = state.portfolio.filter((x) => x.id !== id);
+      state.portfolio = state.portfolio.filter(x => x.id !== id);
+
       saveDB();
       render();
       toast("İlan silindi");
     };
   });
+}
 
-  document.querySelectorAll(".edit-btn").forEach((btn) => {
-    btn.onclick = function () {
-      const id = Number(this.dataset.id);
+/* =========================
+   EDIT
+========================= */
+function bindEditButtons() {
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.onclick = () => {
+      const id = Number(btn.dataset.id);
 
-      const item = state.portfolio.find((x) => x.id === id);
+      const item = state.portfolio.find(x => x.id === id);
       if (!item) return;
 
       editingId = id;
@@ -160,9 +178,9 @@ function bindActions() {
 
       currentPhoto = item.photo || "";
 
-      document.getElementById("preview").innerHTML = currentPhoto
-        ? `<img src="${currentPhoto}">`
-        : "";
+      if (currentPhoto) {
+        preview.innerHTML = `<img src="${currentPhoto}">`;
+      }
 
       openModal();
     };
@@ -172,27 +190,25 @@ function bindActions() {
 /* =========================
    PHOTO
 ========================= */
-photoInput.addEventListener("change", function (e) {
+photoInput.addEventListener("change", e => {
   const file = e.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
 
-  reader.onload = function (ev) {
+  reader.onload = ev => {
     currentPhoto = ev.target.result;
 
-    document.getElementById("preview").innerHTML = `
-      <img src="${currentPhoto}">
-    `;
+    preview.innerHTML = `<img src="${currentPhoto}">`;
   };
 
   reader.readAsDataURL(file);
 });
 
 /* =========================
-   SAVE (FIXED - DUPLICATE REMOVED)
+   SAVE (FIXED - TEK VERSION)
 ========================= */
-saveBtn.addEventListener("click", function () {
+saveBtn.addEventListener("click", () => {
   const title = document.getElementById("titleInput").value.trim();
   const price = document.getElementById("priceInput").value.trim();
   const city = document.getElementById("cityInput").value.trim();
@@ -211,25 +227,31 @@ saveBtn.addEventListener("click", function () {
   };
 
   if (editingId) {
-    const index = state.portfolio.findIndex((x) => x.id === editingId);
-    state.portfolio[index] = itemData;
-    toast("Portföy güncellendi");
+    const index = state.portfolio.findIndex(x => x.id === editingId);
+    if (index !== -1) state.portfolio[index] = itemData;
+    toast("Güncellendi");
   } else {
     state.portfolio.unshift(itemData);
-    toast("Portföy eklendi");
+    toast("Kaydedildi");
   }
 
   saveDB();
   render();
   closeModal();
+});
 
-  editingId = null;
-  currentPhoto = "";
+/* =========================
+   FAB
+========================= */
+fabBtn.addEventListener("click", openModal);
 
-  document.getElementById("titleInput").value = "";
-  document.getElementById("priceInput").value = "";
-  document.getElementById("cityInput").value = "";
-  document.getElementById("preview").innerHTML = "";
+/* =========================
+   CLOSE
+========================= */
+closeModalBtn.addEventListener("click", closeModal);
+
+modal.addEventListener("click", e => {
+  if (e.target === modal) closeModal();
 });
 
 /* =========================
@@ -238,41 +260,9 @@ saveBtn.addEventListener("click", function () {
 searchInput.addEventListener("input", render);
 
 /* =========================
-   FAB (FIX iOS)
-========================= */
-fabBtn.addEventListener("click", openModal);
-fabBtn.addEventListener("touchend", function (e) {
-  e.preventDefault();
-  openModal();
-});
-
-/* =========================
-   CLOSE MODAL
-========================= */
-closeModalBtn.addEventListener("click", closeModal);
-
-modal.addEventListener("click", function (e) {
-  if (e.target === modal) closeModal();
-});
-
-/* =========================
-   NAV
-========================= */
-document.querySelectorAll(".nav-btn").forEach((btn) => {
-  btn.addEventListener("click", function () {
-    document.querySelectorAll(".nav-btn").forEach((x) =>
-      x.classList.remove("active")
-    );
-
-    this.classList.add("active");
-    toast(this.innerText.trim());
-  });
-});
-
-/* =========================
    START
 ========================= */
-window.addEventListener("load", function () {
+window.addEventListener("load", () => {
   loadDB();
   render();
   toast("Emlak CRM hazır");
