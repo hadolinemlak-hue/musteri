@@ -40,6 +40,27 @@ function toast(text) {
 
   setTimeout(() => el.remove(), 2200);
 }
+function switchPage(page) {
+  console.log("PAGE:", page);
+
+  // tüm sayfaları gizle
+  document.querySelectorAll(".container > div").forEach(el => {
+    el.style.display = "none";
+  });
+
+  // sayfa göster
+  if (page === "portfolio") {
+    document.querySelector(".container").style.display = "block";
+  }
+
+  if (page === "customers") {
+    toast("Müşteri ekranı (henüz UI yok)");
+  }
+
+  if (page === "match") {
+    toast("Eşleşme ekranı (henüz UI yok)");
+  }
+}
 
 /* =========================
    STORAGE
