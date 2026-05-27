@@ -204,6 +204,7 @@ function render(){
   });
 
   bindDeleteButtons();
+  bindEditButtons();
 
 }
 
