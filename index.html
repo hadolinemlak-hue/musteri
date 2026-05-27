@@ -214,8 +214,11 @@
     #bottomNav{display:block;}
     .fab{display:flex;}
     /* modal full screen on mobile */
-    .modal{max-width:100%!important;width:100%!important;max-height:100vh!important;border-radius:var(--radius-lg) var(--radius-lg) 0 0!important;margin-top:auto;}
     .modal-overlay{align-items:flex-end!important;padding:0!important;}
+    .modal{max-width:100%!important;width:100%!important;max-height:92vh!important;border-radius:var(--radius-lg) var(--radius-lg) 0 0!important;margin-top:auto;}
+    .modal-body{padding:16px!important;-webkit-overflow-scrolling:touch;}
+    .modal-footer{padding:12px 16px!important;padding-bottom:calc(max(env(safe-area-inset-bottom),16px) + 4px)!important;background:var(--bg-sidebar);position:sticky;bottom:0;}
+    .modal-footer .btn{min-height:48px;font-size:15px;flex:1;justify-content:center;}
     /* match cards */
     .match-card{padding:14px;}
     .criteria-list{gap:4px;}
