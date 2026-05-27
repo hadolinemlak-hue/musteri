@@ -348,6 +348,38 @@ if(editingId){
 }
 
     saveDB();
+    const itemData = {
+
+  id: editingId || Date.now(),
+
+  title,
+
+  price,
+
+  city,
+
+  photo: currentPhoto
+
+};
+
+if(editingId){
+
+  const index =
+    state.portfolio.findIndex(
+      x => x.id === editingId
+    );
+
+  state.portfolio[index] = itemData;
+
+  toast("Portföy güncellendi");
+
+}else{
+
+  state.portfolio.unshift(itemData);
+
+  toast("Portföy kaydedildi");
+
+}
 
     render();
 
