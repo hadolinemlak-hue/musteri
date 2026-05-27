@@ -1,309 +1,466 @@
+/* =========================
+   IOS FIX
+========================= */
+
 document.addEventListener(
-'touchstart',
-() => {},
-{ passive:true }
+  "touchstart",
+  function(){},
+  { passive:true }
 );
 
+/* =========================
+   STATE
+========================= */
+
 const state = {
-portfolio:[]
+  portfolio:[]
 };
 
-let currentPhoto = '';
+let currentPhoto = "";
 
-const modal = document.getElementById('modal');
-const portfolioList = document.getElementById('portfolioList');
+/* =========================
+   ELEMENTS
+========================= */
+
+const modal = document.getElementById("modal");
+const portfolioList = document.getElementById("portfolioList");
+const fabBtn = document.getElementById("fabBtn");
+const closeModalBtn = document.getElementById("closeModal");
+const saveBtn = document.getElementById("saveBtn");
+const photoInput = document.getElementById("photoInput");
+const searchInput = document.getElementById("searchInput");
+
+/* =========================
+   TOAST
+========================= */
 
 function toast(text){
 
-const wrap = document.getElementById('toastWrap');
+  const wrap = document.getElementById("toastWrap");
 
-const el = document.createElement('div');
+  const el = document.createElement("div");
 
-el.className = 'toast';
+  el.className = "toast";
 
-el.innerText = text;
+  el.innerText = text;
 
-wrap.appendChild(el);
+  wrap.appendChild(el);
 
-setTimeout(() => {
-el.remove();
-}, 2000);
+  setTimeout(() => {
+
+    el.remove();
+
+  }, 2200);
+
 }
+
+/* =========================
+   STORAGE
+========================= */
 
 function saveDB(){
 
-localStorage.setItem(
-'emlakcrm',
-JSON.stringify(state)
-);
+  localStorage.setItem(
+    "emlakcrm",
+    JSON.stringify(state)
+  );
+
 }
 
 function loadDB(){
 
-const raw = localStorage.getItem('emlakcrm');
+  const raw = localStorage.getItem("emlakcrm");
 
-if(raw){
+  if(raw){
 
-```
-Object.assign(
-  state,
-  JSON.parse(raw)
-);
-```
+    const parsed = JSON.parse(raw);
+
+    state.portfolio = parsed.portfolio || [];
+
+  }
 
 }
+
+/* =========================
+   MODAL
+========================= */
+
+function openModal(){
+
+  modal.classList.add("open");
+
+  document.body.style.overflow = "hidden";
+
 }
+
+function closeModal(){
+
+  modal.classList.remove("open");
+
+  document.body.style.overflow = "auto";
+
+}
+
+/* =========================
+   RENDER
+========================= */
 
 function render(){
 
-portfolioList.innerHTML = '';
+  portfolioList.innerHTML = "";
 
-const q = document
-.getElementById('searchInput')
-.value
-.toLowerCase();
+  const q = searchInput.value.toLowerCase();
 
-const filtered = state.portfolio.filter(item => {
+  const filtered = state.portfolio.filter(item => {
 
-```
-return (
-  item.title.toLowerCase().includes(q)
-  ||
-  item.city.toLowerCase().includes(q)
-);
-```
-
-});
-
-document.getElementById(
-'portfolioCount'
-).innerText = state.portfolio.length;
-
-filtered.forEach(item => {
-
-```
-const card = document.createElement('div');
-
-card.className = 'card';
-
-card.innerHTML = `
-
-  <div class="thumb">
-
-    <img
-      src="${item.photo || 'https://placehold.co/600x400'}"
-    >
-
-  </div>
-
-  <div class="info">
-
-    <div class="title">
-      ${item.title}
-    </div>
-
-    <div class="meta">
-      ${item.city || '-'}
-    </div>
-
-    <div class="price">
-      ${Number(item.price).toLocaleString('tr-TR')} ₺
-    </div>
-
-    <div class="row">
-
-      <button
-        class="btn btn-secondary delete-btn"
-        data-id="${item.id}"
-      >
-        Sil
-      </button>
-
-    </div>
-
-  </div>
-
-`;
-
-portfolioList.appendChild(card);
-```
-
-});
-
-bindDeleteButtons();
-}
-
-function bindDeleteButtons(){
-
-document.querySelectorAll('.delete-btn')
-.forEach(btn => {
-
-```
-  btn.addEventListener('click', () => {
-
-    const id = Number(btn.dataset.id);
-
-    if(confirm('İlan silinsin mi?')){
-
-      state.portfolio =
-        state.portfolio.filter(
-          x => x.id !== id
-        );
-
-      saveDB();
-
-      render();
-
-      toast('İlan silindi');
-    }
+    return (
+      item.title.toLowerCase().includes(q)
+      ||
+      item.city.toLowerCase().includes(q)
+    );
 
   });
 
-});
-```
+  document.getElementById(
+    "portfolioCount"
+  ).innerText = state.portfolio.length;
+
+  if(filtered.length === 0){
+
+    portfolioList.innerHTML = `
+    
+      <div class="card">
+      
+        <div class="info">
+        
+          <div class="title">
+            Henüz ilan yok
+          </div>
+          
+          <div class="meta">
+            + butonuna basarak ekleyin
+          </div>
+        
+        </div>
+      
+      </div>
+    
+    `;
+
+    return;
+  }
+
+  filtered.forEach(item => {
+
+    const card = document.createElement("div");
+
+    card.className = "card";
+
+    card.innerHTML = `
+
+      <div class="thumb">
+
+        <img
+          src="${item.photo || "https://placehold.co/600x400"}"
+        >
+
+      </div>
+
+      <div class="info">
+
+        <div class="title">
+          ${item.title}
+        </div>
+
+        <div class="meta">
+          ${item.city || "-"}
+        </div>
+
+        <div class="price">
+          ${Number(item.price).toLocaleString("tr-TR")} ₺
+        </div>
+
+        <div class="row">
+
+          <button
+            class="btn btn-secondary delete-btn"
+            data-id="${item.id}"
+          >
+            Sil
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+    portfolioList.appendChild(card);
+
+  });
+
+  bindDeleteButtons();
 
 }
 
-document
-.getElementById('fabBtn')
-.addEventListener('click', () => {
+/* =========================
+   DELETE
+========================= */
 
-```
-modal.classList.add('open');
-```
+function bindDeleteButtons(){
 
-});
+  const buttons = document.querySelectorAll(".delete-btn");
 
-document
-.getElementById('closeModal')
-.addEventListener('click', () => {
+  buttons.forEach(btn => {
 
-```
-modal.classList.remove('open');
-```
+    btn.addEventListener(
+      "click",
+      function(e){
 
-});
+        e.preventDefault();
 
-modal.addEventListener('click', e => {
+        const id = Number(
+          btn.dataset.id
+        );
 
-if(e.target === modal){
+        const ok = confirm(
+          "İlan silinsin mi?"
+        );
 
-```
-modal.classList.remove('open');
-```
+        if(!ok) return;
+
+        state.portfolio =
+          state.portfolio.filter(
+            x => x.id !== id
+          );
+
+        saveDB();
+
+        render();
+
+        toast("İlan silindi");
+
+      }
+    );
+
+  });
 
 }
 
+/* =========================
+   PHOTO
+========================= */
+
+photoInput.addEventListener(
+  "change",
+  function(e){
+
+    const file = e.target.files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(ev){
+
+      currentPhoto = ev.target.result;
+
+      document.getElementById(
+        "preview"
+      ).innerHTML = `
+      
+        <img src="${currentPhoto}">
+      
+      `;
+
+    };
+
+    reader.readAsDataURL(file);
+
+  }
+);
+
+/* =========================
+   SAVE
+========================= */
+
+saveBtn.addEventListener(
+  "click",
+  function(){
+
+    const title =
+      document.getElementById(
+        "titleInput"
+      ).value.trim();
+
+    const price =
+      document.getElementById(
+        "priceInput"
+      ).value.trim();
+
+    const city =
+      document.getElementById(
+        "cityInput"
+      ).value.trim();
+
+    if(!title || !price){
+
+      toast("Başlık ve fiyat gerekli");
+
+      return;
+    }
+
+    state.portfolio.unshift({
+
+      id:Date.now(),
+
+      title,
+
+      price,
+
+      city,
+
+      photo:currentPhoto
+
+    });
+
+    saveDB();
+
+    render();
+
+    closeModal();
+
+    document.getElementById(
+      "titleInput"
+    ).value = "";
+
+    document.getElementById(
+      "priceInput"
+    ).value = "";
+
+    document.getElementById(
+      "cityInput"
+    ).value = "";
+
+    document.getElementById(
+      "preview"
+    ).innerHTML = "";
+
+    currentPhoto = "";
+
+    toast("İlan kaydedildi");
+
+  }
+);
+
+/* =========================
+   SEARCH
+========================= */
+
+searchInput.addEventListener(
+  "input",
+  render
+);
+
+/* =========================
+   FAB
+========================= */
+
+fabBtn.addEventListener(
+  "click",
+  function(e){
+
+    e.preventDefault();
+
+    openModal();
+
+  }
+);
+
+fabBtn.addEventListener(
+  "touchend",
+  function(e){
+
+    e.preventDefault();
+
+    openModal();
+
+  }
+);
+
+/* =========================
+   CLOSE
+========================= */
+
+closeModalBtn.addEventListener(
+  "click",
+  function(){
+
+    closeModal();
+
+  }
+);
+
+/* =========================
+   MODAL BACKGROUND
+========================= */
+
+modal.addEventListener(
+  "click",
+  function(e){
+
+    if(e.target === modal){
+
+      closeModal();
+
+    }
+
+  }
+);
+
+/* =========================
+   NAV BUTTONS IOS FIX
+========================= */
+
+const navButtons =
+  document.querySelectorAll(".nav-btn");
+
+navButtons.forEach(btn => {
+
+  btn.addEventListener(
+    "click",
+    function(){
+
+      navButtons.forEach(x => {
+
+        x.classList.remove("active");
+
+      });
+
+      btn.classList.add("active");
+
+      toast(
+        btn.innerText.trim()
+      );
+
+    }
+  );
+
 });
 
-document
-.getElementById('photoInput')
-.addEventListener('change', e => {
+/* =========================
+   START
+========================= */
 
-```
-const file = e.target.files[0];
+window.addEventListener(
+  "load",
+  function(){
 
-if(!file) return;
+    loadDB();
 
-const reader = new FileReader();
+    render();
 
-reader.onload = ev => {
+    toast("Emlak CRM hazır");
 
-  currentPhoto = ev.target.result;
-
-  document.getElementById(
-    'preview'
-  ).innerHTML = `
-    <img src="${currentPhoto}">
-  `;
-
-};
-
-reader.readAsDataURL(file);
-```
-
-});
-
-document
-.getElementById('saveBtn')
-.addEventListener('click', () => {
-
-```
-const title =
-  document.getElementById(
-    'titleInput'
-  ).value;
-
-const price =
-  document.getElementById(
-    'priceInput'
-  ).value;
-
-const city =
-  document.getElementById(
-    'cityInput'
-  ).value;
-
-if(!title || !price){
-
-  toast('Eksik alan var');
-
-  return;
-}
-
-state.portfolio.unshift({
-
-  id:Date.now(),
-
-  title,
-
-  price,
-
-  city,
-
-  photo:currentPhoto
-
-});
-
-saveDB();
-
-render();
-
-modal.classList.remove('open');
-
-document.getElementById(
-  'titleInput'
-).value = '';
-
-document.getElementById(
-  'priceInput'
-).value = '';
-
-document.getElementById(
-  'cityInput'
-).value = '';
-
-currentPhoto = '';
-
-document.getElementById(
-  'preview'
-).innerHTML = '';
-
-toast('İlan kaydedildi');
-```
-
-});
-
-document
-.getElementById('searchInput')
-.addEventListener('input', render);
-
-window.addEventListener('load', () => {
-
-loadDB();
-
-render();
-
-toast('Emlak CRM hazır');
-
-});
+  }
+);
