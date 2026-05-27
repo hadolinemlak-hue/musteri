@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emlak CRM - Portföy Yönetim Sistemi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary: #FF7A00;
+    --primary-light: #FF9A3C;
+    --primary-dark: #E66A00;
+    --primary-faint: rgba(255,122,0,0.10);
+    --bg-dark: #1A1A2E;
+    --bg-sidebar: #1E1E2E;
+    --bg-card: #2A2A3E;
+    --bg-card2: #242436;
+    --bg-input: #1A1A2E;
+    --text-primary: #F0F0F8;
+    --text-secondary: #A0A0BC;
+    --text-muted: #6B6B8A;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #3B82F6;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.13);
+    --sidebar-width: 240px;
+    --header-h: 64px;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-dark);color:var(--text-primary);display:flex;min-height:100vh;font-size:14px;}
+
+  /* ===== SIDEBAR ===== */
+  #sidebar{width:var(--sidebar-width);background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s;}
+  .sb-brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+  .sb-brand .logo{display:flex;align-items:center;gap:10px;}
+  .sb-brand .logo-icon{width:34px;height:34px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0;}
+  .sb-brand .logo-text{font-size:15px;font-weight:700;color:var(--text-primary);}
+  .sb-brand .logo-sub{font-size:11px;color:var(--text-muted);}
+  .sb-nav{flex:1;padding:12px 0;overflow-y:auto;}
+  .sb-section{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;padding:16px 20px 6px;}
+  .sb-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;color:var(--text-secondary);transition:all .2s;border-left:3px solid transparent;font-size:13.5px;}
+  .sb-item:hover{background:rgba(255,255,255,0.04);color:var(--text-primary);}
+  .sb-item.active{background:var(--primary-faint);color:var(--primary);border-left-color:var(--primary);font-weight:600;}
+  .sb-item i{width:18px;text-align:center;font-size:15px;}
+  .sb-footer{padding:14px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);}
+
+  /* ===== MAIN ===== */
+  #main{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+  #header{height:var(--header-h);background:var(--bg-sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50;}
+  #header .header-title{font-size:17px;font-weight:700;flex:1;}
+  #header .header-sub{font-size:12px;color:var(--text-muted);}
+  #content{flex:1;padding:24px;overflow-y:auto;}
+
+  /* ===== PAGES ===== */
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* ===== STATS GRID ===== */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+  .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--primary));}
+  .stat-card .sv{font-size:26px;font-weight:700;line-height:1;color:var(--accent,var(--primary));}
+  .stat-card .sl{font-size:12px;color:var(--text-muted);margin-top:4px;}
+  .stat-card .si{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--accent,var(--primary));opacity:.25;}
+
+  /* ===== TOOLBAR ===== */
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .toolbar .search-wrap{position:relative;flex:1;min-width:180px;}
+  .toolbar .search-wrap input{width:100%;padding:9px 12px 9px 34px;background:var(--bg-card);border:1px solid var(--border-strong);border-radius:var(--radius);color:var(--text-primary);font-size:13px;}
+  .toolbar .search-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);}
+  .toolbar select{padding:9px 12px;background:var(--bg-card);border:1px solid var(--border-strong);border-radius:var(--radius);color:var(--text-primary);font-size:13px;cursor:pointer;}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-secondary{background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border-strong);}
+  .btn-secondary:hover{color:var(--text-primary);border-color:var(--primary);}
+  .btn-danger{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+  .btn-danger:hover{background:rgba(239,68,68,.25);}
+  .btn-success{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3);}
+  .btn-success:hover{background:rgba(16,185,129,.25);}
+  .btn-sm{padding:5px 11px;font-size:12px;}
+  .btn-icon{padding:8px;border-radius:var(--radius);}
+
+  /* ===== TABLE ===== */
+  .table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+  table{width:100%;border-collapse:collapse;}
+  thead th{background:var(--bg-card2);padding:12px 14px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:1px solid var(--border);}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:rgba(255,255,255,0.025);}
+  tbody td{padding:12px 14px;color:var(--text-primary);font-size:13px;vertical-align:middle;}
+  .td-actions{display:flex;gap:6px;align-items:center;}
+
+  /* ===== BADGES ===== */
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+  .badge-green{background:rgba(16,185,129,.15);color:var(--success);}
+  .badge-red{background:rgba(239,68,68,.15);color:var(--danger);}
+  .badge-yellow{background:rgba(245,158,11,.15);color:var(--warning);}
+  .badge-blue{background:rgba(59,130,246,.15);color:var(--info);}
+  .badge-orange{background:rgba(255,122,0,.15);color:var(--primary);}
+  .badge-gray{background:rgba(160,160,188,.1);color:var(--text-muted);}
+
+  /* ===== MODAL ===== */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:999;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg-sidebar);border:1px solid var(--border-strong);border-radius:var(--radius-lg);width:100%;max-width:620px;max-height:90vh;display:flex;flex-direction:column;animation:modalIn .25s ease;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(-10px);}to{opacity:1;transform:none;}}
+  .modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .modal-header h3{font-size:16px;font-weight:700;}
+  .modal-body{padding:22px;overflow-y:auto;flex:1;}
+  .modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-full{grid-column:1/-1;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group label{font-size:12px;font-weight:600;color:var(--text-secondary);}
+  .form-group input,.form-group select,.form-group textarea{padding:9px 12px;background:var(--bg-input);border:1px solid var(--border-strong);border-radius:var(--radius);color:var(--text-primary);font-size:13px;width:100%;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);}
+  .form-group textarea{resize:vertical;min-height:70px;}
+  .form-group select option{background:var(--bg-dark);}
+
+  /* ===== MATCH CARD ===== */
+  .match-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px;}
+  .match-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .match-score-bar{height:8px;border-radius:4px;background:var(--bg-input);overflow:hidden;margin:6px 0;}
+  .match-score-fill{height:100%;border-radius:4px;transition:width .4s;}
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .match-info-box{background:var(--bg-card2);border-radius:var(--radius);padding:12px;}
+  .match-info-box .mib-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px;}
+  .match-info-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);}
+  .match-info-row:last-child{border:none;}
+  .match-info-row span:first-child{color:var(--text-muted);}
+  .criteria-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .criteria-item{display:flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:20px;}
+  .criteria-ok{background:rgba(16,185,129,.12);color:var(--success);}
+  .criteria-no{background:rgba(239,68,68,.12);color:var(--danger);}
+
+  /* ===== BACKUP PAGE ===== */
+  .backup-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;}
+  .backup-card h3{font-size:15px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+  .backup-card p{color:var(--text-muted);font-size:13px;margin-bottom:16px;}
+
+  /* ===== TOAST ===== */
+  #toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+  .toast{padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;min-width:240px;max-width:340px;animation:toastIn .3s ease,toastOut .3s ease forwards;animation-delay:0s,2.7s;pointer-events:none;}
+  @keyframes toastIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:none;}}
+  @keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(30px);}}
+  .toast-success{background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.3);}
+  .toast-error{background:rgba(239,68,68,.2);color:#f87171;border:1px solid rgba(239,68,68,.3);}
+  .toast-warning{background:rgba(245,158,11,.2);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state{text-align:center;padding:48px 24px;color:var(--text-muted);}
+  .empty-state i{font-size:40px;margin-bottom:12px;display:block;}
+  .empty-state p{font-size:13px;}
+
+  /* ===== RESPONSIVE ===== */
+  .mobile-menu-btn{display:none;background:none;border:none;color:var(--text-primary);font-size:20px;cursor:pointer;}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+  @media(max-width:768px){
+    #sidebar{transform:translateX(-100%);}
+    #sidebar.open{transform:none;}
+    #main{margin-left:0;}
+    .mobile-menu-btn{display:block;}
+    .sidebar-overlay.open{display:block;}
+    .form-grid{grid-template-columns:1fr;}
+    .match-grid{grid-template-columns:1fr;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+  }
+
+  /* number input no spinner */
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+
+  /* ===== PHOTO UPLOAD ===== */
+  .photo-upload-zone{border:2px dashed var(--border-strong);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+  .photo-upload-zone:hover,.photo-upload-zone.drag-over{border-color:var(--primary);background:var(--primary-faint);}
+  .photo-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .photo-upload-zone i{font-size:28px;color:var(--text-muted);margin-bottom:8px;display:block;}
+  .photo-upload-zone p{font-size:12px;color:var(--text-muted);}
+  .photo-upload-zone .pu-hint{font-size:11px;color:var(--text-muted);margin-top:4px;}
+  .photo-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px;}
+  .photo-thumb{position:relative;aspect-ratio:1;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border-strong);}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;}
+  .photo-thumb .ph-del{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,.65);border:none;border-radius:4px;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .photo-thumb .ph-del:hover{background:var(--danger);}
+  .photo-thumb .ph-main{position:absolute;bottom:4px;left:4px;font-size:9px;background:var(--primary);color:#fff;padding:1px 5px;border-radius:3px;font-weight:700;}
+  .photo-count{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);cursor:pointer;}
+  .photo-count:hover{color:var(--primary);}
+  /* gallery modal */
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+  .gallery-item{aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;cursor:pointer;border:2px solid transparent;transition:border-color .2s;}
+  .gallery-item:hover{border-color:var(--primary);}
+  .gallery-item img{width:100%;height:100%;object-fit:cover;}
+  .gallery-main{width:100%;max-height:320px;border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;}
+  .gallery-main img{max-width:100%;max-height:320px;object-fit:contain;}
+
+  /* section divider */
+  .section-divider{height:1px;background:var(--border);margin:18px 0;}
+
+  /* scrollbar */
+  ::-webkit-scrollbar{width:5px;height:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sb-brand">
+    <div class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-house"></i></div>
+      <div><div class="logo-text">Emlak CRM</div><div class="logo-sub">Portföy Yönetim</div></div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Ana Menü</div>
+    <div class="sb-item active" data-page="portfolio" onclick="navigate(this,'portfolio')"><i class="fa-solid fa-building"></i>Portföy</div>
+    <div class="sb-item" data-page="customers" onclick="navigate(this,'customers')"><i class="fa-solid fa-users"></i>Müşteriler</div>
+    <div class="sb-item" data-page="matching" onclick="navigate(this,'matching')"><i class="fa-solid fa-link"></i>Eşleştirme</div>
+    <div class="sb-section">Sistem</div>
+    <div class="sb-item" data-page="backup" onclick="navigate(this,'backup')"><i class="fa-solid fa-cloud-arrow-down"></i>Yedekleme</div>
+  </nav>
+  <div class="sb-footer"><i class="fa-solid fa-circle" style="color:var(--success);font-size:8px;"></i> Sistem Aktif · v1.0</div>
+</aside>
+
+<!-- MAIN -->
+<main id="main">
+  <header id="header">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div>
+      <div class="header-title" id="headerTitle">Portföy Yönetimi</div>
+      <div class="header-sub" id="headerSub">İlanlarınızı yönetin</div>
+    </div>
+    <div style="margin-left:auto;" id="headerActions"></div>
+  </header>
+
+  <div id="content">
+
+    <!-- ===== PORTFOLIO PAGE ===== -->
+    <div class="page active" id="page-portfolio">
+      <div class="stats-grid" id="portfolioStats"></div>
+      <div class="toolbar">
+        <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="pfSearch" placeholder="Başlık, il, ilçe ara..." oninput="renderPortfolio()"></div>
+        <select id="pfFilterType" onchange="renderPortfolio()"><option value="">Tüm Türler</option><option>Daire</option><option>Villa</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option></select>
+        <select id="pfFilterStatus" onchange="renderPortfolio()"><option value="">Satılık/Kiralık</option><option>Satılık</option><option>Kiralık</option></select>
+        <select id="pfFilterLabel" onchange="renderPortfolio()"><option value="">Tüm Etiketler</option><option>Aktif</option><option>Satıldı</option><option>Kiralandı</option></select>
+        <button class="btn btn-primary" onclick="openPortfolioModal()"><i class="fa-solid fa-plus"></i>Yeni İlan</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>No</th><th>Başlık</th><th>Tür</th><th>Durum</th><th>Fiyat</th><th>m²</th><th>Konum</th><th>Etiket</th><th>İşlemler</th></tr></thead>
+          <tbody id="portfolioTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== CUSTOMERS PAGE ===== -->
+    <div class="page" id="page-customers">
+      <div class="stats-grid" id="customerStats"></div>
+      <div class="toolbar">
+        <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="cuSearch" placeholder="Ad, telefon, e-posta ara..." oninput="renderCustomers()"></div>
+        <select id="cuFilterType" onchange="renderCustomers()"><option value="">Alıcı/Kiracı</option><option>Alıcı</option><option>Kiracı</option></select>
+        <select id="cuFilterStatus" onchange="renderCustomers()"><option value="">Tüm Durumlar</option><option>Aktif</option><option>Pasif</option><option>Tamamlandı</option></select>
+        <button class="btn btn-primary" onclick="openCustomerModal()"><i class="fa-solid fa-plus"></i>Yeni Müşteri</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>No</th><th>Ad Soyad</th><th>Telefon</th><th>Tür</th><th>Emlak Türü</th><th>Bütçe</th><th>Konum</th><th>Durum</th><th>İşlemler</th></tr></thead>
+          <tbody id="customerTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== MATCHING PAGE ===== -->
+    <div class="page" id="page-matching">
+      <div class="stats-grid" id="matchingStats"></div>
+      <div class="toolbar">
+        <select id="mFilterCustomer" onchange="renderMatching()"><option value="">Tüm Müşteriler</option></select>
+        <select id="mFilterScore" onchange="renderMatching()"><option value="">Tüm Skorlar</option><option value="high">Yüksek (>80)</option><option value="mid">Orta (50-80)</option><option value="low">Düşük (<50)</option></select>
+        <select id="mFilterConfirmed" onchange="renderMatching()"><option value="">Tümü</option><option value="confirmed">Onaylananlar</option><option value="pending">Onay Bekleyenler</option></select>
+      </div>
+      <div id="matchingList"></div>
+    </div>
+
+    <!-- ===== BACKUP PAGE ===== -->
+    <div class="page" id="page-backup">
+      <div class="stats-grid" id="backupStats"></div>
+      <div class="backup-card">
+        <h3><i class="fa-solid fa-download" style="color:var(--primary)"></i>Veri Yedekle</h3>
+        <p>Tüm portföy, müşteri ve eşleşme verilerini JSON dosyası olarak bilgisayarınıza indirin.</p>
+        <button class="btn btn-primary" onclick="downloadBackup()"><i class="fa-solid fa-download"></i>Yedeği İndir (JSON)</button>
+      </div>
+      <div class="backup-card">
+        <h3><i class="fa-solid fa-upload" style="color:var(--success)"></i>Veri Geri Yükle</h3>
+        <p>Daha önce aldığınız JSON yedek dosyasını yükleyerek verilerinizi geri getirin.</p>
+        <label class="btn btn-success" style="cursor:pointer;"><i class="fa-solid fa-upload"></i>Yedek Yükle <input type="file" accept=".json" onchange="uploadBackup(event)" style="display:none"></label>
+      </div>
+      <div class="backup-card" id="backupHistory">
+        <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--info)"></i>Son Yedekleme</h3>
+        <p id="lastBackupText">Henüz yedek alınmamış.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ===== PORTFOLIO MODAL ===== -->
+<div class="modal-overlay" id="modalPortfolio">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalPfTitle">Yeni İlan Ekle</h3>
+      <button class="btn btn-icon btn-secondary" onclick="closeModal('modalPortfolio')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full"><label>Başlık *</label><input type="text" id="pf_title" placeholder="İlan başlığı"></div>
+        <div class="form-group"><label>Tür *</label><select id="pf_type"><option>Daire</option><option>Villa</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option></select></div>
+        <div class="form-group"><label>Durum *</label><select id="pf_status"><option>Satılık</option><option>Kiralık</option></select></div>
+        <div class="form-group"><label>Fiyat (TL) *</label><input type="number" id="pf_price" placeholder="0"></div>
+        <div class="form-group"><label>Metrekare (m²)</label><input type="number" id="pf_area" placeholder="0"></div>
+        <div class="form-group"><label>Oda Sayısı</label><input type="text" id="pf_rooms" placeholder="3+1"></div>
+        <div class="form-group"><label>İl *</label><input type="text" id="pf_city" placeholder="İstanbul"></div>
+        <div class="form-group"><label>İlçe</label><input type="text" id="pf_district" placeholder="Kadıköy"></div>
+        <div class="form-group"><label>Mahalle</label><input type="text" id="pf_neighborhood" placeholder="Moda"></div>
+        <div class="form-group"><label>Kat</label><input type="text" id="pf_floor" placeholder="3. Kat"></div>
+        <div class="form-group"><label>Bina Yaşı</label><input type="number" id="pf_buildingAge" placeholder="5"></div>
+        <div class="form-group"><label>Isıtma Sistemi</label><input type="text" id="pf_heating" placeholder="Merkezi"></div>
+        <div class="form-group"><label>Etiket</label><select id="pf_label"><option>Aktif</option><option>Satıldı</option><option>Kiralandı</option></select></div>
+        <div class="form-group form-full"><label>Açıklama</label><textarea id="pf_description" placeholder="İlan detayları..."></textarea></div>
+        <div class="form-group form-full">
+          <label>Fotoğraflar <span style="font-weight:400;color:var(--text-muted)">(max 10 adet)</span></label>
+          <div class="photo-upload-zone" id="pfPhotoZone">
+            <input type="file" id="pf_photos" accept="image/*" multiple onchange="handlePhotoUpload(event)">
+            <i class="fa-solid fa-camera-retro"></i>
+            <p>Tıklayın veya fotoğraf sürükleyin</p>
+            <div class="pu-hint">JPG, PNG, WEBP</div>
+          </div>
+          <div class="photo-preview-grid" id="pfPhotoPreview"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalPortfolio')">İptal</button>
+      <button class="btn btn-primary" onclick="savePortfolio()"><i class="fa-solid fa-floppy-disk"></i>Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GALLERY MODAL ===== -->
+<div class="modal-overlay" id="modalGallery">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-header">
+      <h3 id="galleryTitle">Fotoğraflar</h3>
+      <button class="btn btn-icon btn-secondary" onclick="closeModal('modalGallery')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="gallery-main"><img id="galleryMainImg" src="" alt=""></div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CUSTOMER MODAL ===== -->
+<div class="modal-overlay" id="modalCustomer">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalCuTitle">Yeni Müşteri Ekle</h3>
+      <button class="btn btn-icon btn-secondary" onclick="closeModal('modalCustomer')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full"><label>Ad Soyad *</label><input type="text" id="cu_name" placeholder="Ahmet Yılmaz"></div>
+        <div class="form-group"><label>Telefon</label><input type="text" id="cu_phone" placeholder="0532 XXX XX XX"></div>
+        <div class="form-group"><label>E-posta</label><input type="email" id="cu_email" placeholder="ahmet@email.com"></div>
+        <div class="form-group"><label>Arama Türü *</label><select id="cu_searchType"><option>Alıcı</option><option>Kiracı</option></select></div>
+        <div class="form-group"><label>İlgilenilen Emlak Türü</label><select id="cu_propertyType"><option value="">Fark Etmez</option><option>Daire</option><option>Villa</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option></select></div>
+        <div class="form-group"><label>Min Bütçe (TL) *</label><input type="number" id="cu_minBudget" placeholder="0"></div>
+        <div class="form-group"><label>Max Bütçe (TL) *</label><input type="number" id="cu_maxBudget" placeholder="0"></div>
+        <div class="form-group"><label>Tercih İl</label><input type="text" id="cu_city" placeholder="İstanbul"></div>
+        <div class="form-group"><label>Tercih İlçe</label><input type="text" id="cu_district" placeholder="Kadıköy"></div>
+        <div class="form-group"><label>Min m²</label><input type="number" id="cu_minArea" placeholder="0"></div>
+        <div class="form-group"><label>Oda Tercihi</label><input type="text" id="cu_roomPreference" placeholder="3+1"></div>
+        <div class="form-group"><label>Durum</label><select id="cu_status"><option>Aktif</option><option>Pasif</option><option>Tamamlandı</option></select></div>
+        <div class="form-group form-full"><label>Notlar</label><textarea id="cu_notes" placeholder="Müşteri notları..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalCustomer')">İptal</button>
+      <button class="btn btn-primary" onclick="saveCustomer()"><i class="fa-solid fa-floppy-disk"></i>Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+// ===== DATA =====
+let data = {
+  portfolio: [],
+  customers: [],
+  matches: [], // {customerId, propertyId, confirmedAt}
+  lastBackup: null
+};
+let editingPfId = null;
+let editingCuId = null;
+
+function saveData(){localStorage.setItem('emlakCRM',JSON.stringify(data));}
+function loadData(){const d=localStorage.getItem('emlakCRM');if(d)data=JSON.parse(d);}
+
+// ===== NAV =====
+const pageTitles={portfolio:['Portföy Yönetimi','İlanlarınızı yönetin'],customers:['Müşteri Yönetimi','Müşterilerinizi yönetin'],matching:['Akıllı Eşleştirme','Müşteri-Portföy eşleştirme'],backup:['Yedekleme Sistemi','Veri yedekleme ve geri yükleme']};
+function navigate(el,page){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const t=pageTitles[page];
+  document.getElementById('headerTitle').textContent=t[0];
+  document.getElementById('headerSub').textContent=t[1];
+  if(page==='portfolio')renderPortfolio();
+  if(page==='customers')renderCustomers();
+  if(page==='matching')renderMatching();
+  if(page==='backup')renderBackup();
+  if(window.innerWidth<=768)closeSidebar();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+
+// ===== HELPERS =====
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function fmtPrice(n){if(!n)return'-';return Number(n).toLocaleString('tr-TR')+'₺';}
+function toast(msg,type='success'){
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  const icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle'};
+  t.className='toast toast-'+type;
+  t.innerHTML=`<i class="fa-solid ${icons[type]}"></i>${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(),3100);
+}
+function labelBadge(l){if(l==='Satıldı')return'<span class="badge badge-red">'+l+'</span>';if(l==='Kiralandı')return'<span class="badge badge-blue">'+l+'</span>';return'<span class="badge badge-green">'+l+'</span>';}
+function statusBadge(s){if(s==='Aktif')return'<span class="badge badge-green">'+s+'</span>';if(s==='Pasif')return'<span class="badge badge-gray">'+s+'</span>';if(s==='Tamamlandı')return'<span class="badge badge-blue">'+s+'</span>';return'<span class="badge">'+s+'</span>';}
+function typeBadge(t){return'<span class="badge badge-orange">'+t+'</span>';}
+
+// ===== PORTFOLIO =====
+function renderPortfolio(){
+  const search=document.getElementById('pfSearch').value.toLowerCase();
+  const fType=document.getElementById('pfFilterType').value;
+  const fStatus=document.getElementById('pfFilterStatus').value;
+  const fLabel=document.getElementById('pfFilterLabel').value;
+  const list=data.portfolio.filter(p=>{
+    if(search&&!`${p.title} ${p.city} ${p.district}`.toLowerCase().includes(search))return false;
+    if(fType&&p.type!==fType)return false;
+    if(fStatus&&p.status!==fStatus)return false;
+    if(fLabel&&p.label!==fLabel)return false;
+    return true;
+  });
+  const total=data.portfolio.length;
+  const active=data.portfolio.filter(p=>p.label==='Aktif').length;
+  const sold=data.portfolio.filter(p=>p.label==='Satıldı'||p.label==='Kiralandı').length;
+  document.getElementById('portfolioStats').innerHTML=`
+    <div class="stat-card" style="--accent:var(--primary)"><div class="sv">${total}</div><div class="sl">Toplam İlan</div><i class="fa-solid fa-building si"></i></div>
+    <div class="stat-card" style="--accent:var(--success)"><div class="sv">${active}</div><div class="sl">Aktif İlan</div><i class="fa-solid fa-check-circle si"></i></div>
+    <div class="stat-card" style="--accent:var(--info)"><div class="sv">${sold}</div><div class="sl">Satıldı/Kiralandı</div><i class="fa-solid fa-handshake si"></i></div>
+    <div class="stat-card" style="--accent:var(--warning)"><div class="sv">${list.length}</div><div class="sl">Filtrelenmiş</div><i class="fa-solid fa-filter si"></i></div>`;
+  const tbody=document.getElementById('portfolioTbody');
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><i class="fa-solid fa-building"></i><p>İlan bulunamadı.</p></div></td></tr>`;return;}
+  tbody.innerHTML=list.map(p=>{
+    const photos=p.photos||[];
+    const thumb=photos.length?`<img src="${photos[0]}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid var(--border-strong);cursor:pointer" onclick="openGallery('${p.id}')" title="Fotoğrafları Gör">`:'<div style="width:40px;height:40px;border-radius:6px;background:var(--bg-input);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px"><i class=\"fa-solid fa-image\"></i></div>';
+    const photoBtn=photos.length?`<span class="photo-count" onclick="openGallery('${p.id}')"><i class="fa-solid fa-images"></i>${photos.length}</span>`:'';
+    return`<tr>
+      <td style="width:52px">${thumb}</td>
+      <td><span style="color:var(--text-muted);font-size:12px">${p.number}</span></td>
+      <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title} ${photoBtn}</td>
+      <td>${typeBadge(p.type)}</td>
+      <td><span class="badge ${p.status==='Satılık'?'badge-orange':'badge-blue'}">${p.status}</span></td>
+      <td style="font-weight:600;color:var(--primary)">${fmtPrice(p.price)}</td>
+      <td>${p.area?p.area+' m²':'-'}</td>
+      <td style="color:var(--text-secondary)">${[p.city,p.district].filter(Boolean).join(', ')||'-'}</td>
+      <td>${labelBadge(p.label)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-sm btn-secondary btn-icon" onclick="editPortfolio('${p.id}')" title="Düzenle"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="deletePortfolio('${p.id}')" title="Sil"><i class="fa-solid fa-trash"></i></button>
+      </div></td>
+    </tr>`;}).join('');
+}
+
+let currentPhotos=[];
+function openPortfolioModal(id=null){
+  editingPfId=id;
+  document.getElementById('modalPfTitle').textContent=id?'İlanı Düzenle':'Yeni İlan Ekle';
+  const fields=['title','type','status','price','area','rooms','city','district','neighborhood','floor','buildingAge','heating','label','description'];
+  if(id){
+    const p=data.portfolio.find(x=>x.id===id);
+    fields.forEach(f=>document.getElementById('pf_'+f).value=p[f]||'');
+    currentPhotos=[...(p.photos||[])];
+  } else {
+    fields.forEach(f=>document.getElementById('pf_'+f).value='');
+    document.getElementById('pf_type').value='Daire';
+    document.getElementById('pf_status').value='Satılık';
+    document.getElementById('pf_label').value='Aktif';
+    currentPhotos=[];
+  }
+  renderPhotoPreview();
+  document.getElementById('modalPortfolio').classList.add('open');
+}
+function editPortfolio(id){openPortfolioModal(id);}
+function savePortfolio(){
+  const title=document.getElementById('pf_title').value.trim();
+  const price=document.getElementById('pf_price').value;
+  const city=document.getElementById('pf_city').value.trim();
+  if(!title){toast('Başlık zorunludur.','error');return;}
+  if(!price){toast('Fiyat zorunludur.','error');return;}
+  if(!city){toast('İl zorunludur.','error');return;}
+  const obj={
+    id:editingPfId||uid(),
+    number:editingPfId?(data.portfolio.find(p=>p.id===editingPfId)||{number:'?'}).number:'P'+(data.portfolio.length+1).toString().padStart(4,'0'),
+    title,type:document.getElementById('pf_type').value,status:document.getElementById('pf_status').value,
+    price:Number(price),area:Number(document.getElementById('pf_area').value)||0,
+    rooms:document.getElementById('pf_rooms').value,city,district:document.getElementById('pf_district').value,
+    neighborhood:document.getElementById('pf_neighborhood').value,floor:document.getElementById('pf_floor').value,
+    buildingAge:Number(document.getElementById('pf_buildingAge').value)||0,heating:document.getElementById('pf_heating').value,
+    label:document.getElementById('pf_label').value,description:document.getElementById('pf_description').value,
+    photos:[...currentPhotos],
+    createdAt:editingPfId?(data.portfolio.find(p=>p.id===editingPfId)||{createdAt:new Date().toISOString()}).createdAt:new Date().toISOString()
+  };
+  if(editingPfId){const i=data.portfolio.findIndex(p=>p.id===editingPfId);data.portfolio[i]=obj;}
+  else data.portfolio.push(obj);
+  saveData();closeModal('modalPortfolio');renderPortfolio();
+  toast(editingPfId?'İlan güncellendi.':'İlan eklendi.');
+}
+function deletePortfolio(id){
+  if(!confirm('Bu ilanı silmek istediğinize emin misiniz?'))return;
+  data.portfolio=data.portfolio.filter(p=>p.id!==id);
+  data.matches=data.matches.filter(m=>m.propertyId!==id);
+  saveData();renderPortfolio();toast('İlan silindi.','warning');
+}
+
+// ===== PHOTOS =====
+function handlePhotoUpload(e){
+  const files=Array.from(e.target.files);
+  const remaining=10-currentPhotos.length;
+  if(remaining<=0){toast('Maksimum 10 fotoğraf eklenebilir.','warning');return;}
+  const toAdd=files.slice(0,remaining);
+  let loaded=0;
+  toAdd.forEach(file=>{
+    if(file.size>3*1024*1024){toast(file.name+' 3MB\'den büyük, atlandı.','warning');loaded++;if(loaded===toAdd.length)renderPhotoPreview();return;}
+    const reader=new FileReader();
+    reader.onload=ev=>{currentPhotos.push(ev.target.result);loaded++;if(loaded===toAdd.length)renderPhotoPreview();};
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+function renderPhotoPreview(){
+  const grid=document.getElementById('pfPhotoPreview');
+  if(!currentPhotos.length){grid.innerHTML='';return;}
+  grid.innerHTML=currentPhotos.map((src,i)=>`
+    <div class="photo-thumb">
+      <img src="${src}" alt="">
+      ${i===0?'<span class="ph-main">Kapak</span>':''}
+      <button class="ph-del" onclick="removePhoto(${i})" title="Kaldır"><i class="fa-solid fa-xmark"></i></button>
+    </div>`).join('');
+}
+function removePhoto(idx){currentPhotos.splice(idx,1);renderPhotoPreview();}
+
+function openGallery(id){
+  const p=data.portfolio.find(x=>x.id===id);
+  if(!p||!p.photos||!p.photos.length)return;
+  document.getElementById('galleryTitle').textContent=p.title+' — Fotoğraflar ('+p.photos.length+')';
+  document.getElementById('galleryMainImg').src=p.photos[0];
+  document.getElementById('galleryGrid').innerHTML=p.photos.map((src,i)=>`
+    <div class="gallery-item" onclick="document.getElementById('galleryMainImg').src='${src}'">
+      <img src="${src}" alt="Fotoğraf ${i+1}">
+    </div>`).join('');
+  document.getElementById('modalGallery').classList.add('open');
+}
+
+// ===== CUSTOMERS =====
+function renderCustomers(){
+  const search=document.getElementById('cuSearch').value.toLowerCase();
+  const fType=document.getElementById('cuFilterType').value;
+  const fStatus=document.getElementById('cuFilterStatus').value;
+  const list=data.customers.filter(c=>{
+    if(search&&!`${c.name} ${c.phone} ${c.email}`.toLowerCase().includes(search))return false;
+    if(fType&&c.searchType!==fType)return false;
+    if(fStatus&&c.status!==fStatus)return false;
+    return true;
+  });
+  const total=data.customers.length;
+  const active=data.customers.filter(c=>c.status==='Aktif').length;
+  const buyers=data.customers.filter(c=>c.searchType==='Alıcı').length;
+  document.getElementById('customerStats').innerHTML=`
+    <div class="stat-card" style="--accent:var(--primary)"><div class="sv">${total}</div><div class="sl">Toplam Müşteri</div><i class="fa-solid fa-users si"></i></div>
+    <div class="stat-card" style="--accent:var(--success)"><div class="sv">${active}</div><div class="sl">Aktif Müşteri</div><i class="fa-solid fa-user-check si"></i></div>
+    <div class="stat-card" style="--accent:var(--info)"><div class="sv">${buyers}</div><div class="sl">Alıcı</div><i class="fa-solid fa-user-tag si"></i></div>
+    <div class="stat-card" style="--accent:var(--warning)"><div class="sv">${list.length}</div><div class="sl">Filtrelenmiş</div><i class="fa-solid fa-filter si"></i></div>`;
+  const tbody=document.getElementById('customerTbody');
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><i class="fa-solid fa-users"></i><p>Müşteri bulunamadı.</p></div></td></tr>`;return;}
+  tbody.innerHTML=list.map(c=>`
+    <tr>
+      <td><span style="color:var(--text-muted);font-size:12px">${c.number}</span></td>
+      <td style="font-weight:600">${c.name}</td>
+      <td style="color:var(--text-secondary)">${c.phone||'-'}</td>
+      <td><span class="badge ${c.searchType==='Alıcı'?'badge-orange':'badge-blue'}">${c.searchType}</span></td>
+      <td>${c.propertyType?typeBadge(c.propertyType):'<span class="badge badge-gray">Fark Etmez</span>'}</td>
+      <td style="font-size:12px;color:var(--text-secondary)">${fmtPrice(c.minBudget)} - ${fmtPrice(c.maxBudget)}</td>
+      <td style="color:var(--text-secondary)">${[c.city,c.district].filter(Boolean).join(', ')||'-'}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-sm btn-secondary btn-icon" onclick="editCustomer('${c.id}')" title="Düzenle"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="deleteCustomer('${c.id}')" title="Sil"><i class="fa-solid fa-trash"></i></button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function openCustomerModal(id=null){
+  editingCuId=id;
+  document.getElementById('modalCuTitle').textContent=id?'Müşteriyi Düzenle':'Yeni Müşteri Ekle';
+  const fields=['name','phone','email','searchType','propertyType','minBudget','maxBudget','city','district','minArea','roomPreference','status','notes'];
+  if(id){
+    const c=data.customers.find(x=>x.id===id);
+    fields.forEach(f=>document.getElementById('cu_'+f).value=c[f]||'');
+  } else {
+    fields.forEach(f=>document.getElementById('cu_'+f).value='');
+    document.getElementById('cu_searchType').value='Alıcı';
+    document.getElementById('cu_status').value='Aktif';
+  }
+  document.getElementById('modalCustomer').classList.add('open');
+}
+function editCustomer(id){openCustomerModal(id);}
+function saveCustomer(){
+  const name=document.getElementById('cu_name').value.trim();
+  const minB=document.getElementById('cu_minBudget').value;
+  const maxB=document.getElementById('cu_maxBudget').value;
+  if(!name){toast('Ad Soyad zorunludur.','error');return;}
+  if(!minB||!maxB){toast('Min ve Max bütçe zorunludur.','error');return;}
+  const obj={
+    id:editingCuId||uid(),
+    number:editingCuId?(data.customers.find(c=>c.id===editingCuId)||{number:'?'}).number:'C'+(data.customers.length+1).toString().padStart(4,'0'),
+    name,phone:document.getElementById('cu_phone').value,email:document.getElementById('cu_email').value,
+    searchType:document.getElementById('cu_searchType').value,propertyType:document.getElementById('cu_propertyType').value,
+    minBudget:Number(minB),maxBudget:Number(maxB),
+    city:document.getElementById('cu_city').value,district:document.getElementById('cu_district').value,
+    minArea:Number(document.getElementById('cu_minArea').value)||0,roomPreference:document.getElementById('cu_roomPreference').value,
+    status:document.getElementById('cu_status').value,notes:document.getElementById('cu_notes').value,
+    createdAt:editingCuId?(data.customers.find(c=>c.id===editingCuId)||{createdAt:new Date().toISOString()}).createdAt:new Date().toISOString()
+  };
+  if(editingCuId){const i=data.customers.findIndex(c=>c.id===editingCuId);data.customers[i]=obj;}
+  else data.customers.push(obj);
+  saveData();closeModal('modalCustomer');renderCustomers();
+  toast(editingCuId?'Müşteri güncellendi.':'Müşteri eklendi.');
+}
+function deleteCustomer(id){
+  if(!confirm('Bu müşteriyi silmek istediğinize emin misiniz?'))return;
+  data.customers=data.customers.filter(c=>c.id!==id);
+  data.matches=data.matches.filter(m=>m.customerId!==id);
+  saveData();renderCustomers();toast('Müşteri silindi.','warning');
+}
+
+// ===== MATCHING =====
+function calcScore(customer,property){
+  let score=0;const criteria=[];
+  // Budget 40pts
+  if(customer.minBudget>0&&customer.maxBudget>0&&property.price>=customer.minBudget&&property.price<=customer.maxBudget){score+=40;criteria.push({label:'Bütçe Uyumu',ok:true});}
+  else criteria.push({label:'Bütçe Uyumu',ok:false});
+  // Type 20pts
+  const typeOk=!customer.propertyType||customer.propertyType===property.type;
+  if(typeOk){score+=20;criteria.push({label:'Tür Uyumu',ok:true});}
+  else criteria.push({label:'Tür Uyumu',ok:false});
+  // Status 20pts
+  const stOk=(customer.searchType==='Alıcı'&&property.status==='Satılık')||(customer.searchType==='Kiracı'&&property.status==='Kiralık');
+  if(stOk){score+=20;criteria.push({label:'Durum Uyumu',ok:true});}
+  else criteria.push({label:'Durum Uyumu',ok:false});
+  // Location 10pts
+  const locOk=customer.city&&property.city&&customer.city.toLowerCase()===property.city.toLowerCase();
+  if(locOk){score+=10;criteria.push({label:'Konum Uyumu',ok:true});}
+  else criteria.push({label:'Konum Uyumu',ok:false});
+  // Area 5pts
+  const areaOk=!customer.minArea||property.area>=customer.minArea;
+  if(areaOk){score+=5;criteria.push({label:'Metrekare Uyumu',ok:true});}
+  else criteria.push({label:'Metrekare Uyumu',ok:false});
+  // Rooms 5pts
+  const roomOk=!customer.roomPreference||customer.roomPreference===property.rooms;
+  if(roomOk){score+=5;criteria.push({label:'Oda Uyumu',ok:true});}
+  else criteria.push({label:'Oda Uyumu',ok:false});
+  return{score,criteria};
+}
+
+function renderMatching(){
+  const fCust=document.getElementById('mFilterCustomer').value;
+  const fScore=document.getElementById('mFilterScore').value;
+  const fConf=document.getElementById('mFilterConfirmed').value;
+  const activeCustomers=data.customers.filter(c=>c.status==='Aktif');
+  const activePortfolios=data.portfolio.filter(p=>p.label==='Aktif');
+
+  // populate customer filter
+  const sel=document.getElementById('mFilterCustomer');
+  const curVal=sel.value;
+  sel.innerHTML='<option value="">Tüm Müşteriler</option>';
+  activeCustomers.forEach(c=>sel.innerHTML+=`<option value="${c.id}">${c.name}</option>`);
+  sel.value=curVal;
+
+  const pairs=[];
+  activeCustomers.forEach(c=>{
+    if(fCust&&c.id!==fCust)return;
+    activePortfolios.forEach(p=>{
+      const {score,criteria}=calcScore(c,p);
+      const confirmed=data.matches.find(m=>m.customerId===c.id&&m.propertyId===p.id);
+      pairs.push({customer:c,property:p,score,criteria,confirmed:!!confirmed});
+    });
+  });
+  pairs.sort((a,b)=>b.score-a.score);
+
+  const filtered=pairs.filter(x=>{
+    if(fScore==='high'&&x.score<=80)return false;
+    if(fScore==='mid'&&(x.score<50||x.score>80))return false;
+    if(fScore==='low'&&x.score>=50)return false;
+    if(fConf==='confirmed'&&!x.confirmed)return false;
+    if(fConf==='pending'&&x.confirmed)return false;
+    return true;
+  });
+
+  const total=pairs.length;
+  const high=pairs.filter(p=>p.score>80).length;
+  const confirmed=pairs.filter(p=>p.confirmed).length;
+  document.getElementById('matchingStats').innerHTML=`
+    <div class="stat-card" style="--accent:var(--primary)"><div class="sv">${total}</div><div class="sl">Toplam Eşleşme</div><i class="fa-solid fa-link si"></i></div>
+    <div class="stat-card" style="--accent:var(--success)"><div class="sv">${high}</div><div class="sl">Yüksek Skor (>80)</div><i class="fa-solid fa-star si"></i></div>
+    <div class="stat-card" style="--accent:var(--info)"><div class="sv">${confirmed}</div><div class="sl">Onaylandı</div><i class="fa-solid fa-check-double si"></i></div>
+    <div class="stat-card" style="--accent:var(--warning)"><div class="sv">${filtered.length}</div><div class="sl">Filtrelenmiş</div><i class="fa-solid fa-filter si"></i></div>`;
+
+  const list=document.getElementById('matchingList');
+  if(!filtered.length){list.innerHTML=`<div class="empty-state"><i class="fa-solid fa-link"></i><p>Eşleşme bulunamadı. Aktif müşteri ve portföy ekleyin.</p></div>`;return;}
+
+  list.innerHTML=filtered.map((x,i)=>{
+    const sc=x.score;
+    const color=sc>80?'var(--success)':sc>=50?'var(--warning)':'var(--danger)';
+    const label=sc>80?'Yüksek':'Orta ≥50 puan'?sc>=50?'Orta':'Düşük':'Düşük';
+    return`<div class="match-card">
+      <div class="match-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:42px;height:42px;border-radius:50%;background:var(--primary-faint);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:16px"><i class="fa-solid fa-user"></i></div>
+          <div><div style="font-weight:700">${x.customer.name}</div><div style="font-size:12px;color:var(--text-muted)">${x.customer.number} · ${x.customer.searchType}</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="text-align:right"><div style="font-size:22px;font-weight:700;color:${color}">${sc}</div><div style="font-size:11px;color:var(--text-muted)">/ 100 Puan</div></div>
+          ${x.confirmed?
+            `<span class="badge badge-green"><i class="fa-solid fa-check"></i>Onaylı</span>`:
+            `<button class="btn btn-sm btn-success" onclick="confirmMatch('${x.customer.id}','${x.property.id}')"><i class="fa-solid fa-check"></i>Onayla</button>`}
+        </div>
+      </div>
+      <div class="match-score-bar"><div class="match-score-fill" style="width:${sc}%;background:${color}"></div></div>
+      <div class="match-grid">
+        <div class="match-info-box">
+          <div class="mib-title"><i class="fa-solid fa-user"></i> Müşteri</div>
+          <div class="match-info-row"><span>Bütçe:</span><span>${fmtPrice(x.customer.minBudget)} - ${fmtPrice(x.customer.maxBudget)}</span></div>
+          <div class="match-info-row"><span>Tür:</span><span>${x.customer.propertyType||'Fark Etmez'}</span></div>
+          <div class="match-info-row"><span>Konum:</span><span>${[x.customer.city,x.customer.district].filter(Boolean).join(', ')||'-'}</span></div>
+          <div class="match-info-row"><span>Min m²:</span><span>${x.customer.minArea||'-'}</span></div>
+          <div class="match-info-row"><span>Oda:</span><span>${x.customer.roomPreference||'-'}</span></div>
+        </div>
+        <div class="match-info-box">
+          <div class="mib-title"><i class="fa-solid fa-building"></i> ${x.property.number}</div>
+          <div class="match-info-row"><span>Fiyat:</span><span style="color:var(--primary);font-weight:600">${fmtPrice(x.property.price)}</span></div>
+          <div class="match-info-row"><span>Tür:</span><span>${x.property.type}</span></div>
+          <div class="match-info-row"><span>Konum:</span><span>${[x.property.city,x.property.district].filter(Boolean).join(', ')||'-'}</span></div>
+          <div class="match-info-row"><span>Alan:</span><span>${x.property.area?x.property.area+' m²':'-'}</span></div>
+          <div class="match-info-row"><span>Oda:</span><span>${x.property.rooms||'-'}</span></div>
+        </div>
+      </div>
+      <div class="criteria-list">
+        ${x.criteria.map(c=>`<div class="criteria-item ${c.ok?'criteria-ok':'criteria-no'}"><i class="fa-solid ${c.ok?'fa-check':'fa-xmark'}"></i>${c.label}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function confirmMatch(customerId,propertyId){
+  if(!data.matches.find(m=>m.customerId===customerId&&m.propertyId===propertyId)){
+    data.matches.push({customerId,propertyId,confirmedAt:new Date().toISOString()});
+    saveData();renderMatching();toast('Eşleşme onaylandı!');
+  }
+}
+
+// ===== BACKUP =====
+function renderBackup(){
+  document.getElementById('backupStats').innerHTML=`
+    <div class="stat-card" style="--accent:var(--primary)"><div class="sv">${data.portfolio.length}</div><div class="sl">Portföy</div><i class="fa-solid fa-building si"></i></div>
+    <div class="stat-card" style="--accent:var(--info)"><div class="sv">${data.customers.length}</div><div class="sl">Müşteri</div><i class="fa-solid fa-users si"></i></div>
+    <div class="stat-card" style="--accent:var(--success)"><div class="sv">${data.matches.length}</div><div class="sl">Eşleşme</div><i class="fa-solid fa-link si"></i></div>`;
+  const lb=document.getElementById('lastBackupText');
+  if(data.lastBackup){const d=new Date(data.lastBackup);lb.textContent=`Son yedek: ${d.toLocaleDateString('tr-TR')} ${d.toLocaleTimeString('tr-TR')}`;}
+  else lb.textContent='Henüz yedek alınmamış.';
+}
+
+function downloadBackup(){
+  const date=new Date().toISOString().slice(0,10);
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`emlak_crm_yedek_${date}.json`;a.click();
+  data.lastBackup=new Date().toISOString();saveData();renderBackup();
+  toast('Yedek indiriliyor...');
+}
+
+function uploadBackup(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!d.portfolio||!d.customers){toast('Geçersiz yedek dosyası.','error');return;}
+      if(!confirm(`Bu işlem mevcut ${data.portfolio.length} ilan ve ${data.customers.length} müşteriyi silecek. Devam edilsin mi?`))return;
+      data=d;saveData();renderBackup();
+      toast('Veriler başarıyla geri yüklendi!');
+    }catch{toast('Dosya okuma hatası.','error');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ===== MODAL UTILS =====
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+// ===== INIT =====
+loadData();
+renderPortfolio();
+</script>
+</body>
+</html>
