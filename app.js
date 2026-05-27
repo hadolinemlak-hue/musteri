@@ -179,21 +179,24 @@ function render(){
         <div class="price">
           ${Number(item.price).toLocaleString("tr-TR")} ₺
         </div>
-
         <div class="row">
 
-          <button
-            class="btn btn-secondary delete-btn"
-            data-id="${item.id}"
-          >
-            Sil
-          </button>
+  <button
+    class="btn btn-primary edit-btn"
+    data-id="${item.id}"
+  >
+    Düzenle
+  </button>
 
-        </div>
+  <button
+    class="btn btn-secondary delete-btn"
+    data-id="${item.id}"
+  >
+    Sil
+  </button>
 
-      </div>
+</div>
 
-    `;
 
     portfolioList.appendChild(card);
 
