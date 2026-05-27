@@ -305,3 +305,23 @@ color:#fff;
 padding:12px 18px;
 border-radius:999px;
 }
+button,
+.nav-btn,
+.fab,
+.btn{
+  cursor:pointer;
+  pointer-events:auto;
+  touch-action:manipulation;
+}
+
+.bottom{
+  z-index:999;
+}
+
+.fab{
+  z-index:1000;
+}
+
+.modal-overlay{
+  z-index:5000;
+}
