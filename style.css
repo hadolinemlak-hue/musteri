@@ -74,10 +74,10 @@ padding-bottom:120px;
 }
 
 .stats{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-margin-bottom:16px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-bottom:18px;
 }
 
 .stat{
