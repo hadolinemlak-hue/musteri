@@ -189,14 +189,16 @@ z-index:200;
 }
 
 .bottom{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#1E1E30;
-display:flex;
-border-top:1px solid var(--border);
-padding-bottom:max(env(safe-area-inset-bottom),8px);
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#1E1E30;
+  display:flex;
+  border-top:1px solid var(--border);
+  padding-bottom:max(env(safe-area-inset-bottom),8px);
+  z-index:9999;
+  pointer-events:auto;
 }
 
 .nav-btn{
