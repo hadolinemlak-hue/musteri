@@ -314,19 +314,38 @@ saveBtn.addEventListener(
       return;
     }
 
-    state.portfolio.unshift({
+    const itemData = {
 
-      id:Date.now(),
+  id: editingId || Date.now(),
 
-      title,
+  title,
 
-      price,
+  price,
 
-      city,
+  city,
 
-      photo:currentPhoto
+  photo: currentPhoto
 
-    });
+};
+
+if(editingId){
+
+  const index =
+    state.portfolio.findIndex(
+      x => x.id === editingId
+    );
+
+  state.portfolio[index] = itemData;
+
+  toast("Portföy güncellendi");
+
+}else{
+
+  state.portfolio.unshift(itemData);
+
+  toast("Portföy kaydedildi");
+
+}
 
     saveDB();
 
