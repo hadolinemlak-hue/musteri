@@ -2,26 +2,13 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1, viewport-fit=cover"
-/>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Emlak CRM</title>
-
-<link
-rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-/>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
 <div id="app">
-
 <header>
 <div>
 <h1>Emlak CRM</h1>
@@ -31,50 +18,52 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 
 <!-- PORTFOLIO PAGE -->
 <div class="page active" id="portfolioPage">
-
 <div class="stats">
 <div class="stat">
 <div class="v" id="portfolioCount">0</div>
 <div class="l">Portföy</div>
 </div>
+<div class="stat">
+<div class="v" id="customerCount">0</div>
+<div class="l">Müşteri</div>
 </div>
-
+</div>
 <div class="search">
-<input
-type="text"
-id="searchInput"
-placeholder="İlan ara..."
->
+<input type="text" id="searchInput" placeholder="İlan ara...">
 </div>
-
 <div id="portfolioList"></div>
-
 </div>
 
 <!-- CUSTOMER PAGE -->
 <div class="page" id="customerPage">
-
 <div class="customer-header">
 <h2>Müşteriler</h2>
 </div>
-
-<div class="empty">
-Henüz müşteri eklenmedi
-</div>
-
+<div id="customerList"></div>
 </div>
 
 <!-- MATCH PAGE -->
 <div class="page" id="matchPage">
-
 <div class="customer-header">
 <h2>Eşleşmeler</h2>
 </div>
-
-<div class="empty">
-Henüz eşleşme yok
+<div style="background: #1f2937; border: 1px solid #374151; padding: 16px; border-radius: 14px; margin-bottom: 20px;">
+<div style="font-weight: 700; margin-bottom: 14px; font-size: 15px;">Yeni Eşleştirme</div>
+<div class="form-group" style="margin-bottom: 12px;">
+<label style="font-size: 13px;">Müşteri Seç</label>
+<select id="matchCustomerSelect" style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 12px; font-size: 16px; background: #111827; color: white;">
+<option value="">-- Müşteri Seçin --</option>
+</select>
 </div>
-
+<div class="form-group" style="margin-bottom: 12px;">
+<label style="font-size: 13px;">İlan Seç</label>
+<select id="matchPropertySelect" style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 12px; font-size: 16px; background: #111827; color: white;">
+<option value="">-- İlan Seçin --</option>
+</select>
+</div>
+<button class="btn btn-primary" id="createMatchBtn" style="font-size: 14px;">Eşleştir</button>
+</div>
+<div id="matchList"></div>
 </div>
 
 <button class="fab" id="fabBtn">
@@ -82,146 +71,94 @@ Henüz eşleşme yok
 </button>
 
 <nav class="bottom">
-
 <button class="nav-btn active" data-page="portfolio">
 <i class="fa-solid fa-building"></i>
 <span>Portföy</span>
 </button>
-
 <button class="nav-btn" data-page="customer">
 <i class="fa-solid fa-users"></i>
 <span>Müşteri</span>
 </button>
-
 <button class="nav-btn" data-page="match">
 <i class="fa-solid fa-link"></i>
 <span>Eşleşme</span>
 </button>
-
 </nav>
-
 </div>
 
-<!-- MODAL -->
+<!-- PORTFOLIO MODAL -->
 <div class="modal-overlay" id="modal">
-
 <div class="modal">
-
 <div class="modal-header">
-
 <h2 id="modalTitle">Yeni İlan</h2>
-
-<button class="btn btn-secondary" id="closeModal">
-Kapat
-</button>
-
+<button class="btn btn-secondary" id="closeModal">Kapat</button>
 </div>
-
 <div class="modal-body">
-
 <div class="form-group">
 <label>Başlık</label>
 <input type="text" id="titleInput">
 </div>
-
 <div class="form-group">
-<label>Fiyat</label>
+<label>Fiyat (₺)</label>
 <input type="number" id="priceInput">
 </div>
-
 <div class="form-group">
 <label>Şehir</label>
 <input type="text" id="cityInput">
 </div>
-
 <div class="form-group">
-
+<label>Açıklama</label>
+<textarea id="descInput" rows="3"></textarea>
+</div>
+<div class="form-group">
 <label>Fotoğraf</label>
-
 <div class="photo-zone">
-
-<input
-type="file"
-id="photoInput"
-accept="image/*"
->
-
+<input type="file" id="photoInput" accept="image/*">
 <i class="fa-solid fa-camera"></i>
-
 <div>Galeriden Fotoğraf Seç</div>
-
 </div>
-
 <div class="preview" id="preview"></div>
-
+</div>
+<button class="btn btn-primary" id="saveBtn">Kaydet</button>
+</div>
+</div>
 </div>
 
-<button class="btn btn-primary" id="saveBtn">
-Kaydet
-</button>
-
+<!-- CUSTOMER MODAL -->
+<div class="modal-overlay" id="customerModal">
+<div class="modal">
+<div class="modal-header">
+<h2 id="customerModalTitle">Yeni Müşteri</h2>
+<button class="btn btn-secondary" id="closeCustomerModal">Kapat</button>
 </div>
-
+<div class="modal-body">
+<div class="form-group">
+<label>Ad Soyad</label>
+<input type="text" id="customerName">
 </div>
-
+<div class="form-group">
+<label>Telefon</label>
+<input type="text" id="customerPhone">
+</div>
+<div class="form-group">
+<label>Email</label>
+<input type="email" id="customerEmail">
+</div>
+<div class="form-group">
+<label>Bütçe (₺)</label>
+<input type="number" id="customerBudget">
+</div>
+<div class="form-group">
+<label>Tercihler (konum, tip, vb.)</label>
+<textarea id="customerPreferences" rows="2"></textarea>
+</div>
+<button class="btn btn-primary" id="saveCustomerBtn">Kaydet</button>
+</div>
+</div>
 </div>
 
 <div class="toast-wrap" id="toastWrap"></div>
-  <div class="modal-overlay" id="customerModal">
-
-  <div class="modal">
-
-    <div class="modal-header">
-
-      <h2>Yeni Müşteri</h2>
-
-      <button
-        class="btn btn-secondary"
-        id="closeCustomerModal"
-      >
-        Kapat
-      </button>
-
-    </div>
-
-    <div class="modal-body">
-
-      <div class="form-group">
-
-        <label>Ad Soyad</label>
-
-        <input
-          type="text"
-          id="customerName"
-        />
-
-      </div>
-
-      <div class="form-group">
-
-        <label>Telefon</label>
-
-        <input
-          type="text"
-          id="customerPhone"
-        />
-
-      </div>
-
-      <button
-        class="btn btn-primary"
-        id="saveCustomerBtn"
-      >
-        Kaydet
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
