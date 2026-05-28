@@ -461,6 +461,8 @@ const pages = {
 };
 
 function switchPage(page){
+   
+   currentPage = page;
 
   const container =
     document.querySelector(".container");
