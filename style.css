@@ -255,6 +255,21 @@ opacity:.7;
 padding:40px 10px;
 text-align:center;
 }
+.empty-page{
+  padding:40px 20px;
+  text-align:center;
+  color:#999;
+}
+
+.empty-page i{
+  font-size:52px;
+  margin-bottom:14px;
+  color:#FF7A00;
+}
+
+.empty-page h2{
+  margin-bottom:10px;
+}
 
 .customer-header{
 margin-bottom:20px;
