@@ -426,3 +426,119 @@ toast("Emlak CRM hazır");
 
 }
 );
+/* =========================
+   PAGE SYSTEM
+========================= */
+
+const pages = {
+  portfolio: `
+    <div class="search">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="İlan ara..."
+      />
+    </div>
+
+    <div id="portfolioList"></div>
+  `,
+
+  customers: `
+    <div class="empty-page">
+      <i class="fa-solid fa-users"></i>
+      <h2>Müşteri Sayfası</h2>
+      <p>Henüz müşteri eklenmedi.</p>
+    </div>
+  `,
+
+  matching: `
+    <div class="empty-page">
+      <i class="fa-solid fa-link"></i>
+      <h2>Eşleşme Sistemi</h2>
+      <p>Henüz eşleşme bulunmuyor.</p>
+    </div>
+  `
+};
+
+function switchPage(page){
+
+  const container =
+    document.querySelector(".container");
+
+  if(page === "portfolio"){
+
+    container.innerHTML = `
+
+      <div class="stats">
+
+        <div class="stat">
+          <div class="v" id="portfolioCount">0</div>
+          <div class="l">Portföy</div>
+        </div>
+
+        <div class="stat">
+          <div class="v" id="customerCount">0</div>
+          <div class="l">Müşteri</div>
+        </div>
+
+      </div>
+
+      ${pages.portfolio}
+
+    `;
+
+    const newSearch =
+      document.getElementById("searchInput");
+
+    newSearch.addEventListener(
+      "input",
+      render
+    );
+
+    window.searchInput = newSearch;
+
+    render();
+
+  } else {
+
+    container.innerHTML = pages[page];
+
+  }
+
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+const navButtons =
+  document.querySelectorAll(".nav-btn");
+
+navButtons.forEach((btn,index) => {
+
+  btn.addEventListener(
+    "click",
+    function(){
+
+      navButtons.forEach(x => {
+        x.classList.remove("active");
+      });
+
+      btn.classList.add("active");
+
+      if(index === 0){
+        switchPage("portfolio");
+      }
+
+      if(index === 1){
+        switchPage("customers");
+      }
+
+      if(index === 2){
+        switchPage("matching");
+      }
+
+    }
+  );
+
+});
