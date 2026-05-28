@@ -545,3 +545,89 @@ navButtons.forEach((btn,index) => {
 
 });
 let currentPage = "portfolio";
+/* =========================
+   CUSTOMER MODAL
+========================= */
+
+const customerModal =
+  document.getElementById(
+    "customerModal"
+  );
+
+function openCustomerModal(){
+
+  customerModal.classList.add(
+    "open"
+  );
+
+}
+
+function closeCustomerModal(){
+
+  customerModal.classList.remove(
+    "open"
+  );
+
+}
+
+document.getElementById(
+  "closeCustomerModal"
+).addEventListener(
+  "click",
+  closeCustomerModal
+);
+
+/* =========================
+   SAVE CUSTOMER
+========================= */
+
+document.getElementById(
+  "saveCustomerBtn"
+).addEventListener(
+  "click",
+  function(){
+
+    const name =
+      document.getElementById(
+        "customerName"
+      ).value.trim();
+
+    const phone =
+      document.getElementById(
+        "customerPhone"
+      ).value.trim();
+
+    if(!name){
+
+      toast("Müşteri adı gerekli");
+
+      return;
+
+    }
+
+    state.customers.push({
+
+      id: Date.now(),
+
+      name,
+
+      phone
+
+    });
+
+    saveDB();
+
+    document.getElementById(
+      "customerName"
+    ).value = "";
+
+    document.getElementById(
+      "customerPhone"
+    ).value = "";
+
+    closeCustomerModal();
+
+    toast("Müşteri kaydedildi");
+
+  }
+);
