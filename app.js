@@ -542,3 +542,4 @@ navButtons.forEach((btn,index) => {
   );
 
 });
+let currentPage = "portfolio";
