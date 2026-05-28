@@ -1,32 +1,21 @@
 <!DOCTYPE html>
-
 <html lang="tr">
 <head>
-
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 
 <meta
 name="viewport"
-content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+content="width=device-width, initial-scale=1, viewport-fit=cover"
 />
-
-<meta name="theme-color" content="#FF7A00" />
-
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Emlak CRM" />
-
-<link rel="manifest" href="manifest.json" />
 
 <title>Emlak CRM</title>
 
 <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 />
 
-<link rel="stylesheet" href="style.css" />
-
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -34,150 +23,146 @@ content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=
 <div id="app">
 
 <header>
-
-  <div class="header-row">
 <div>
-  <h1>Emlak CRM</h1>
-  <div class="sub">Mobil Portföy Yönetimi</div>
+<h1>Emlak CRM</h1>
+<div class="sub">Mobil Portföy Yönetimi</div>
 </div>
-
-  </div>
-
 </header>
 
-<div class="container">
+<!-- PORTFOLIO PAGE -->
+<div class="page active" id="portfolioPage">
 
-  <div class="stats">
-
+<div class="stats">
 <div class="stat">
-  <div class="v" id="portfolioCount">0</div>
-  <div class="l">Portföy</div>
+<div class="v" id="portfolioCount">0</div>
+<div class="l">Portföy</div>
+</div>
 </div>
 
-<div class="stat">
-  <div class="v">iOS</div>
-  <div class="l">Uyumlu</div>
+<div class="search">
+<input
+type="text"
+id="searchInput"
+placeholder="İlan ara..."
+>
 </div>
 
-  </div>
+<div id="portfolioList"></div>
 
-  <div class="search">
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="İlan ara..."
-    />
-  </div>
+</div>
 
-  <div id="portfolioList"></div>
+<!-- CUSTOMER PAGE -->
+<div class="page" id="customerPage">
+
+<div class="customer-header">
+<h2>Müşteriler</h2>
+</div>
+
+<div class="empty">
+Henüz müşteri eklenmedi
+</div>
+
+</div>
+
+<!-- MATCH PAGE -->
+<div class="page" id="matchPage">
+
+<div class="customer-header">
+<h2>Eşleşmeler</h2>
+</div>
+
+<div class="empty">
+Henüz eşleşme yok
+</div>
 
 </div>
 
 <button class="fab" id="fabBtn">
-  <i class="fa-solid fa-plus"></i>
+<i class="fa-solid fa-plus"></i>
 </button>
 
 <nav class="bottom">
 
-  <button class="nav-btn active">
-    <i class="fa-solid fa-building"></i>
-    <span>Portföy</span>
-  </button>
+<button class="nav-btn active" data-page="portfolio">
+<i class="fa-solid fa-building"></i>
+<span>Portföy</span>
+</button>
 
-  <button class="nav-btn">
-    <i class="fa-solid fa-users"></i>
-    <span>Müşteri</span>
-  </button>
+<button class="nav-btn" data-page="customer">
+<i class="fa-solid fa-users"></i>
+<span>Müşteri</span>
+</button>
 
-  <button class="nav-btn">
-    <i class="fa-solid fa-link"></i>
-    <span>Eşleşme</span>
-  </button>
+<button class="nav-btn" data-page="match">
+<i class="fa-solid fa-link"></i>
+<span>Eşleşme</span>
+</button>
 
 </nav>
 
 </div>
 
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
 
-  <div class="modal">
+<div class="modal">
+
 <div class="modal-header">
 
-  <h2>Yeni İlan</h2>
+<h2 id="modalTitle">Yeni İlan</h2>
 
-  <button class="btn btn-secondary" id="closeModal">
-    Kapat
-  </button>
+<button class="btn btn-secondary" id="closeModal">
+Kapat
+</button>
 
 </div>
 
 <div class="modal-body">
 
-  <div class="form-group">
+<div class="form-group">
+<label>Başlık</label>
+<input type="text" id="titleInput">
+</div>
 
-    <label>Başlık</label>
+<div class="form-group">
+<label>Fiyat</label>
+<input type="number" id="priceInput">
+</div>
 
-    <input
-      type="text"
-      id="titleInput"
-    />
+<div class="form-group">
+<label>Şehir</label>
+<input type="text" id="cityInput">
+</div>
 
-  </div>
+<div class="form-group">
 
-  <div class="form-group">
+<label>Fotoğraf</label>
 
-    <label>Fiyat</label>
+<div class="photo-zone">
 
-    <input
-      type="number"
-      id="priceInput"
-    />
+<input
+type="file"
+id="photoInput"
+accept="image/*"
+>
 
-  </div>
+<i class="fa-solid fa-camera"></i>
 
-  <div class="form-group">
-
-    <label>Şehir</label>
-
-    <input
-      type="text"
-      id="cityInput"
-    />
-
-  </div>
-
-  <div class="form-group">
-
-    <label>Fotoğraf</label>
-
-    <div class="photo-zone">
-
-      <i
-        class="fa-solid fa-camera"
-        style="font-size:32px;margin-bottom:10px;"
-      ></i>
-
-      <div>Fotoğraf Seç</div>
-
-      <input
-    type="file"
-    id="photoInput"
-    accept="image/*"
-  />
-
-    </div>
-
-    <div class="preview" id="preview"></div>
-
-  </div>
-
-  <button class="btn btn-primary" id="saveBtn">
-    Kaydet
-  </button>
+<div>Galeriden Fotoğraf Seç</div>
 
 </div>
 
-  </div>
+<div class="preview" id="preview"></div>
+
+</div>
+
+<button class="btn btn-primary" id="saveBtn">
+Kaydet
+</button>
+
+</div>
+
+</div>
 
 </div>
 
