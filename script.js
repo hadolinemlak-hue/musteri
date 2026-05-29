@@ -2,7 +2,6 @@ let portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
 let customers = JSON.parse(localStorage.getItem("customers")) || [];
 let matches = JSON.parse(localStorage.getItem("matches")) || [];
 
-// Bölüm geçişlerini hatasız yöneten ana fonksiyon
 function showSection(id){
   document.querySelectorAll("main section").forEach(section => {
     section.classList.remove("active");
@@ -37,6 +36,49 @@ function updateDashboard(){
    PORTFOLIO (PORTFÖY / İLAN) İŞLEMLERİ
    ========================================================================== */
 
+// Fotoğraf Optimize Edici (Boyut Küçültüp JPEG/PNG Yükleme Hatasını Çözer)
+function resizeAndCompressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(dataUrl);
+      };
+      img.onerror = error => reject(error);
+    };
+    reader.onerror = error => reject(error);
+  });
+}
+
 async function addPortfolio(){
   const titleInput = document.getElementById("title");
   const priceInput = document.getElementById("price");
@@ -61,10 +103,10 @@ async function addPortfolio(){
   let images = [];
   for(let i = 0; i < files.length; i++){
     try {
-      const base64 = await convertToBase64(files[i]);
-      images.push(base64);
+      const compressedBase64 = await resizeAndCompressImage(files[i]);
+      images.push(compressedBase64);
     } catch(e) {
-      console.error("Dosya yüklenirken hata:", e);
+      console.error("Dosya işlenirken hata oluştu:", e);
     }
   }
 
@@ -88,15 +130,6 @@ async function addPortfolio(){
   alert("İlan başarıyla eklendi.");
 }
 
-function convertToBase64(file){
-  return new Promise((resolve,reject)=>{
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-}
-
 function renderPortfolios(){
   const list = document.getElementById("portfolioList");
   if(!list) return;
@@ -114,7 +147,7 @@ function renderPortfolios(){
   });
 
   filtered.forEach(item=>{
-    let imagesHTML = item.images.map(img => `<img src="${img}" alt="">`).join('');
+    let imagesHTML = item.images.map(img => `<img src="${img}" alt="" onclick="openImageModal(this.src)">`).join('');
 
     htmlContent += `
       <div class="portfolio-item">
@@ -412,9 +445,27 @@ function deleteMatch(matchId) {
 }
 
 /* ==========================================================================
+   FOTOĞRAFI BÜYÜTME (LIGHTBOX MODAL) FONKSİYONLARI
+   ========================================================================== */
+function openImageModal(imgSrc) {
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalTargetImg");
+  if(modal && modalImg) {
+    modal.style.display = "block";
+    modalImg.src = imgSrc;
+  }
+}
+
+function closeImageModal() {
+  const modal = document.getElementById("imageModal");
+  if(modal) {
+    modal.style.display = "none";
+  }
+}
+
+/* ==========================================================================
    UYGULAMA BAŞLANGICI VE DİNAMİK FİLTRELEME DİNLEYİCİLERİ
    ========================================================================== */
-
 document.addEventListener("DOMContentLoaded", ()=>{
   renderPortfolios();
   renderCustomers();
@@ -422,7 +473,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   updateMatchOptions();
   updateDashboard();
 
-  // Canlı Filtreleme Tetikleyicileri
   document.getElementById("portfolioSearch")?.addEventListener("input", renderPortfolios);
   document.getElementById("portfolioMinPrice")?.addEventListener("input", renderPortfolios);
   document.getElementById("portfolioMaxPrice")?.addEventListener("input", renderPortfolios);
