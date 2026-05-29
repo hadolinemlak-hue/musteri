@@ -28,7 +28,7 @@ function updateDashboard(){
 }
 
 /* ==========================================================================
-   PORTFOLIO (PORTFÖY / İLAN) İŞLEMLERİ
+   PORTFOLIO (PORTFÖY / İLAN) İŞLEMLERİ [DÜZENLE, SİL VE FİLTRE DAHİL]
    ========================================================================== */
 
 async function addPortfolio(){
@@ -91,16 +91,19 @@ function convertToBase64(file){
   });
 }
 
+// PORTFÖY LİSTELEME VE GELİŞMİŞ FİLTRELEME
 function renderPortfolios(){
   const list = document.getElementById("portfolioList");
   if(!list) return;
 
+  // Filtre input değerlerini alıyoruz
   const searchKey = document.getElementById("portfolioSearch")?.value.toLowerCase() || "";
   const minPrice = parseFloat(document.getElementById("portfolioMinPrice")?.value) || 0;
   const maxPrice = parseFloat(document.getElementById("portfolioMaxPrice")?.value) || Infinity;
 
   let htmlContent = "";
 
+  // Filtreleme süzgeci
   const filtered = portfolios.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchKey) || item.description.toLowerCase().includes(searchKey);
     const matchesPrice = item.price >= minPrice && item.price <= maxPrice;
@@ -125,6 +128,7 @@ function renderPortfolios(){
   list.innerHTML = htmlContent || "<p>Kriterlere uygun ilan bulunamadı.</p>";
 }
 
+// PORTFÖY DÜZENLEME (EDIT)
 function editPortfolio(id) {
   const portfolio = portfolios.find(p => p.id === id);
   if(!portfolio) return;
@@ -137,44 +141,51 @@ function editPortfolio(id) {
 
   const newDesc = prompt("Yeni Açıklama:", portfolio.description);
 
+  // Verileri güncelle
   portfolio.title = newTitle.trim();
   portfolio.price = parseFloat(newPrice);
   if(newDesc !== null) portfolio.description = newDesc.trim();
 
   saveData();
   renderPortfolios();
-  renderMatches();
-  updateMatchOptions();
-  alert("İlan güncellendi.");
+  renderMatches(); // Eşleşmeler sayfasındaki ilan başlıklarının da güncellenmesi için
+  updateMatchOptions(); // Seçim kutularının (select) güncellenmesi için
+  
+  alert("İlan başarıyla güncellendi.");
 }
 
+// PORTFÖY SİLME (DELETE)
 function deletePortfolio(id){
   if(!confirm("Bu ilanı silmek istediğinize emin misiniz?")) return;
 
+  // İlanı diziden kaldır
   portfolios = portfolios.filter(p => p.id !== id);
+  
+  // Kritik İlişki Koruması: İlan silindiğinde ona ait eski eşleşmeleri de temizle
   matches = matches.filter(m => m.portfolioId !== id);
 
   saveData();
   renderPortfolios();
   renderMatches();
   updateMatchOptions();
-  alert("İlan ve ilgili eşleştirmeleri silindi.");
+  
+  alert("İlan ve ilanla ilişkili tüm eşleştirmeler silindi.");
 }
 
 
 /* ==========================================================================
-   CUSTOMER (MÜŞTERİ) İŞLEMLERİ (TALEP ALANI DAHİL EDİLDİ)
+   CUSTOMER (MÜŞTERİ) İŞLEMLERİ
    ========================================================================== */
 
 function addCustomer(){
   const nameInput = document.getElementById("customerName");
   const phoneInput = document.getElementById("customerPhone");
-  const demandInput = document.getElementById("customerDemand"); // Yeni alan
+  const demandInput = document.getElementById("customerDemand");
   const noteInput = document.getElementById("customerNote");
 
   const name = nameInput.value.trim();
   const phone = phoneInput.value.trim();
-  const demand = demandInput.value.trim(); // Yeni alan
+  const demand = demandInput.value.trim();
   const note = noteInput.value.trim();
 
   if(name === "" || phone === "" || demand === ""){
@@ -186,7 +197,7 @@ function addCustomer(){
     id: Date.now(),
     name,
     phone,
-    demand, // Yeni alan kaydediliyor
+    demand,
     note
   });
 
@@ -210,17 +221,13 @@ function getCleanTrPhone(phoneStr) {
   return clean;
 }
 
-// MÜŞTERİ LİSTELEME VE FİLTRELEME
 function renderCustomers(){
   const list = document.getElementById("customerList");
   if(!list) return;
 
-  // Arama kutusuna yazılan kelime
   const searchKey = document.getElementById("customerSearch")?.value.toLowerCase() || "";
-
   let htmlContent = "";
 
-  // Filtreleme: İsim, Talep veya Not alanlarından herhangi birinde geçiyorsa getir
   const filtered = customers.filter(c => 
     c.name.toLowerCase().includes(searchKey) || 
     c.demand.toLowerCase().includes(searchKey) || 
@@ -234,7 +241,8 @@ function renderCustomers(){
     htmlContent += `
       <div class="customer-item">
         <h3>${customer.name}</h3>
-        <p><strong>Talep:</strong> <span style="color: #2c3e50; font-weight: bold;">${customer.demand}</span></p> <a class="phone-link" href="tel:${callPhone}">📞 ${customer.phone}</a>
+        <p><strong>Talep:</strong> <span style="color: #2c3e50; font-weight: bold;">${customer.demand}</span></p>
+        <a class="phone-link" href="tel:${callPhone}">📞 ${customer.phone}</a>
         <p><strong>Not:</strong> ${customer.note || '-'}</p>
         <a class="whatsapp-btn" href="https://wa.me/${whatsappPhone}" target="_blank">WhatsApp Gönder</a>
         <button onclick="editCustomer(${customer.id})">Düzenle</button>
@@ -256,14 +264,14 @@ function editCustomer(id){
   const newPhone = prompt("Telefon:", customer.phone);
   if(newPhone === null || newPhone.trim() === "") return;
 
-  const newDemand = prompt("Müşteri Talebi:", customer.demand); // Yeni alan düzenleme
+  const newDemand = prompt("Müşteri Talebi:", customer.demand);
   if(newDemand === null || newDemand.trim() === "") return;
 
   const newNote = prompt("Not:", customer.note);
 
   customer.name = newName.trim();
   customer.phone = newPhone.trim();
-  customer.demand = newDemand.trim(); // Yeni alan güncelleniyor
+  customer.demand = newDemand.trim();
   if(newNote !== null) customer.note = newNote.trim();
 
   saveData();
@@ -290,7 +298,7 @@ function deleteCustomer(id){
 
 
 /* ==========================================================================
-   MATCH (EŞLEŞTİRME) İŞLEMLERİ (TALEBE GÖRE SEÇİM VE ARAMA)
+   MATCH (EŞLEŞTİRME) İŞLEMLERİ
    ========================================================================== */
 
 function updateMatchOptions(){
@@ -299,13 +307,12 @@ function updateMatchOptions(){
 
   if(!customerSelect || !portfolioSelect) return;
 
-  // Select kutusunda müşterinin sadece adını değil, TALEBİNİ de gösteriyoruz ki eşleştirmek kolay olsun.
   customerSelect.innerHTML = customers.map(c => `
     <option value="${c.id}">${c.name} (Talep: ${c.demand})</option>
   `).join('');
   
   portfolioSelect.innerHTML = portfolios.map(p => `
-    <option value="${p.id}">${p.title}</option>
+    <option value="${p.id}">${p.title} - ${p.price.toLocaleString('tr-TR')} TL</option>
   `).join('');
 }
 
@@ -336,7 +343,6 @@ function addMatch(){
   alert("Talebe göre eşleştirme yapıldı.");
 }
 
-// EŞLEŞTİRME LİSTELEME VE FİLTRELEME
 function renderMatches(){
   const list = document.getElementById("matchList");
   if(!list) return;
@@ -349,14 +355,14 @@ function renderMatches(){
     const portfolio = portfolios.find(p => p.id === match.portfolioId);
 
     if(customer && portfolio) {
-      // Eşleştirme listesinde arama yaparken müşteri adına, talebine veya ilan başlığına bakıyoruz
       const matchText = (customer.name + " " + customer.demand + " " + portfolio.title).toLowerCase();
       
       if(matchText.includes(searchKey)) {
         htmlContent += `
           <div class="match-item">
             <h3>Müşteri: ${customer.name}</h3>
-            <p><strong>Müşteri Talebi:</strong> <span style="color: #d35400;">${customer.demand}</span></p> <p>Eşleşen İlan: <strong>${portfolio.title}</strong></p>
+            <p><strong>Müşteri Talebi:</strong> <span style="color: #d35400;">${customer.demand}</span></p>
+            <p>Eşleşen İlan: <strong>${portfolio.title}</strong></p>
             <p>İlan Fiyatı: ${portfolio.price.toLocaleString('tr-TR')} TL</p>
             <button onclick="editMatch(${match.id})">Eşleşmeyi Düzenle</button>
             <button onclick="deleteMatch(${match.id})">Eşleşmeyi Kaldır</button>
@@ -376,7 +382,6 @@ function editMatch(matchId) {
   const choice = prompt("Neyi değiştirmek istersiniz? \n1 - Müşteriyi Değiştir \n2 - İlanı Değiştir", "1");
   
   if(choice === "1") {
-    // Seçim ekranında talepleri de gösteriyoruz
     let listStr = customers.map((c, index) => `${index + 1} - ${c.name} (${c.demand})`).join("\n");
     const selectedIndex = prompt("Yeni Müşteri Numarasını Seçin:\n" + listStr);
     if(selectedIndex && customers[selectedIndex - 1]) {
@@ -416,14 +421,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
   updateMatchOptions();
   updateDashboard();
 
-  // Canlı (Real-time) Filtreleme Dinleyicileri
+  // Portföy Canlı Filtreleme Tetikleyicileri (Inputlara yazıldığı an listeyi günceller)
   document.getElementById("portfolioSearch")?.addEventListener("input", renderPortfolios);
   document.getElementById("portfolioMinPrice")?.addEventListener("input", renderPortfolios);
   document.getElementById("portfolioMaxPrice")?.addEventListener("input", renderPortfolios);
 
-  // Müşteri arama kutusuna yazıldığında (Hem isme hem talebe göre arar)
+  // Müşteri arama kutusu tetikleyicisi
   document.getElementById("customerSearch")?.addEventListener("input", renderCustomers);
 
-  // Eşleştirme arama kutusuna yazıldığında
+  // Eşleştirme arama kutusu tetikleyicisi
   document.getElementById("matchSearch")?.addEventListener("input", renderMatches);
 });
