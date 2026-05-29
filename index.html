@@ -46,46 +46,44 @@
   </section>
 
   <!-- PORTFOLIO -->
-  <section id="portfolio">
+  <section id="portfoliosSection">
+  <h2>Yeni İlan Ekle</h2>
+  <input type="text" id="title" placeholder="İlan Başlığı (Örn: 3+1 Havuzlu Villa)">
+  <input type="number" id="price" placeholder="Fiyat (TL)">
+  <input type="text" id="description" placeholder="İlan Açıklaması">
+  <input type="file" id="images" multiple accept="image/*">
+  <button onclick="addPortfolio()">İlanı Kaydet</button>
 
-    <div class="card">
-      <h2>Yeni İlan Ekle</h2>
+  <hr>
 
-      <input type="text" id="title" placeholder="İlan Başlığı">
-      <input type="text" id="price" placeholder="Fiyat">
-      <textarea id="description" placeholder="Açıklama"></textarea>
+  <h2>Mevcut İlanlar (Portföyler)</h2>
+  <div class="filter-group">
+    <input type="text" id="portfolioSearch" placeholder="Başlık veya açıklamada ara...">
+    <input type="number" id="portfolioMinPrice" placeholder="Min Fiyat (TL)">
+    <input type="number" id="portfolioMaxPrice" placeholder="Max Fiyat (TL)">
+  </div>
+  
+  <div id="portfolioList"></div>
+</section>
 
-      <input type="file" id="images" multiple accept="image/*">
-
-      <button onclick="addPortfolio()">İlan Ekle</button>
-    </div>
-
-    <div id="portfolioList"></div>
-
-  </section>
 
   <!-- CUSTOMERS -->
-  <section id="customers">
-
-    <div class="card">
-      <h2>Yeni Müşteri</h2>
-      <section id="customersSection">
+  <section id="customersSection">
+  <h2>Müşteri Ekle</h2>
   <input type="text" id="customerName" placeholder="Ad Soyad">
   <input type="text" id="customerPhone" placeholder="Telefon">
   <input type="text" id="customerDemand" placeholder="Müşteri Talebi (Örn: 2+1 Satılık Daire)">
   <input type="text" id="customerNote" placeholder="Özel Notlar">
+  <button onclick="addCustomer()">Müşteri Ekle</button>
 
+  <hr>
 
+  <h2>Müşteri Listesi</h2>
+  <input type="text" id="customerSearch" placeholder="İsim veya talebe göre filtrele...">
+  
+  <div id="customerList"></div>
+</section>
 
-      
-      
-      
-      <button onclick="addCustomer()">Müşteri Ekle</button>
-    </div>
-
-    <div id="customerList"></div>
-
-  </section>
 
   <!-- MATCHING -->
   <section id="matching">
