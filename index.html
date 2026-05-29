@@ -104,13 +104,11 @@
 
 <div id="imageModal" class="image-modal">
   <span class="close-modal" onclick="closeImageModal()">&times;</span>
-  
   <div class="modal-gallery-container">
     <button class="gallery-nav prev-btn" onclick="changeModalImage(-1)">&#10094;</button>
     <img class="modal-content" id="modalTargetImg" alt="Büyük Görsel">
     <button class="gallery-nav next-btn" onclick="changeModalImage(1)">&#10095;</button>
   </div>
-  
   <div id="modalCaption" class="modal-caption">1 / 1</div>
 </div>
 
@@ -131,7 +129,7 @@
     <label style="margin-top:20px; font-weight:bold;">Mevcut Fotoğraflar (Silmek için üzerine tıklayın):</label>
     <div id="editExistingImages" class="edit-images-preview"></div>
     
-    <label style="margin-top:15px;">Yeni Fotoğraf Ekle (Maksimum 3 adet olacak şekilde):</label>
+    <label style="margin-top:15px;">Yeni Fotoğraf Ekle (Maksimum 3 adet):</label>
     <input type="file" id="editNewImages" multiple accept=".jpeg, .jpg, .png, image/jpeg, image/png">
     
     <div class="action-btns">
