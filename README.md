@@ -1,4 +1,4 @@
-# 🏠 Emlak CRM - Mobil Portföy Yönetimi
+# 🏠 HADOLIN CRM - Mobil Portföy Yönetimi
 
 Modern, mobil-uyumlu gayrimenkul CRM uygulaması. İlanlar, müşteriler ve otomatik eşleştirme sistemi ile yönetin.
 
