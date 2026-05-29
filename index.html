@@ -44,7 +44,7 @@
       <input type="text" id="title" placeholder="İlan Başlığı (Örn: 3+1 Havuzlu Villa)">
       <input type="number" id="price" placeholder="Fiyat (TL)">
       <input type="text" id="description" placeholder="İlan Açıklaması">
-      <input type="file" id="images" multiple accept="image/*">
+      <input type="file" id="images" multiple accept=".jpeg, .jpg, .png, image/jpeg, image/png">
       <button class="primary-btn" onclick="addPortfolio()">İlanı Kaydet</button>
     </div>
 
@@ -101,6 +101,11 @@
   </section>
 
 </main>
+
+<div id="imageModal" class="image-modal" onclick="closeImageModal()">
+  <span class="close-modal">&times;</span>
+  <img class="modal-content" id="modalTargetImg" alt="Büyük Görsel">
+</div>
 
 <script src="script.js"></script>
 </body>
