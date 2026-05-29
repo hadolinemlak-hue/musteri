@@ -46,7 +46,6 @@ main {
   margin: 0 auto;
 }
 
-/* Sayfa Gösterme/Gizleme Mantığı */
 section {
   display:none;
 }
@@ -67,7 +66,6 @@ section.active {
   border: 1px solid #173777;
 }
 
-/* Listelerin Grid Düzeni */
 .list-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -124,7 +122,6 @@ label {
   color: #8dc0ff;
 }
 
-/* Buton Stilleri */
 button {
   cursor: pointer;
   transition: opacity 0.2s;
@@ -146,7 +143,6 @@ button:hover {
   font-weight: bold;
 }
 
-/* Kart İçi Düzenle/Sil Yan Yana Butonları */
 .action-btns {
   display: flex;
   gap: 10px;
@@ -179,6 +175,12 @@ button:hover {
   border-radius:12px;
   object-fit:cover;
   border: 1px solid #1f4fb4;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.images img:hover {
+  transform: scale(1.05);
 }
 
 .phone-link {
@@ -224,6 +226,54 @@ h2 {
   font-size: 13px;
 }
 
+/* MODAL BÜYÜK RESİM PENCERESİ */
+.image-modal {
+  display: none; 
+  position: fixed; 
+  z-index: 9999; 
+  padding-top: 50px; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(7, 23, 57, 0.95);
+}
+
+.modal-content {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 16px;
+  border: 2px solid #1f4fb4;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation-name: zoom;
+  animation-duration: 0.3s;
+}
+
+@keyframes zoom {
+  from {transform:scale(0.5)} 
+  to {transform:scale(1)}
+}
+
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  color: #5ca0ff;
+}
+
 @media(max-width:430px){
   nav{
     flex-direction:column;
@@ -231,5 +281,8 @@ h2 {
   .images img{
     width:90px;
     height:90px;
+  }
+  .modal-content {
+    width: 95%;
   }
 }
