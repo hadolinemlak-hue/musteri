@@ -2,12 +2,18 @@ let portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
 let customers = JSON.parse(localStorage.getItem("customers")) || [];
 let matches = JSON.parse(localStorage.getItem("matches")) || [];
 
+// Bölüm geçişlerini hatasız yöneten ana fonksiyon
 function showSection(id){
-  document.querySelectorAll("section").forEach(section=>{
+  document.querySelectorAll("main section").forEach(section => {
     section.classList.remove("active");
   });
+
   const target = document.getElementById(id);
-  if(target) target.classList.add("active");
+  if (target) {
+    target.classList.add("active");
+  } else {
+    console.error("Hata: '" + id + "' ID'sine sahip alan bulunamadı.");
+  }
 }
 
 function saveData(){
@@ -28,7 +34,7 @@ function updateDashboard(){
 }
 
 /* ==========================================================================
-   PORTFOLIO (PORTFÖY / İLAN) İŞLEMLERİ [DÜZENLE, SİL VE FİLTRE DAHİL]
+   PORTFOLIO (PORTFÖY / İLAN) İŞLEMLERİ
    ========================================================================== */
 
 async function addPortfolio(){
@@ -91,19 +97,16 @@ function convertToBase64(file){
   });
 }
 
-// PORTFÖY LİSTELEME VE GELİŞMİŞ FİLTRELEME
 function renderPortfolios(){
   const list = document.getElementById("portfolioList");
   if(!list) return;
 
-  // Filtre input değerlerini alıyoruz
   const searchKey = document.getElementById("portfolioSearch")?.value.toLowerCase() || "";
   const minPrice = parseFloat(document.getElementById("portfolioMinPrice")?.value) || 0;
   const maxPrice = parseFloat(document.getElementById("portfolioMaxPrice")?.value) || Infinity;
 
   let htmlContent = "";
 
-  // Filtreleme süzgeci
   const filtered = portfolios.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchKey) || item.description.toLowerCase().includes(searchKey);
     const matchesPrice = item.price >= minPrice && item.price <= maxPrice;
@@ -116,11 +119,13 @@ function renderPortfolios(){
     htmlContent += `
       <div class="portfolio-item">
         <h3>${item.title}</h3>
-        <p><strong>Fiyat:</strong> ${item.price.toLocaleString('tr-TR')} TL</p>
-        <p>${item.description}</p>
+        <p style="margin-top:5px;"><strong>Fiyat:</strong> ${item.price.toLocaleString('tr-TR')} TL</p>
+        <p style="margin-top:5px; color:#bdc3c7;">${item.description || 'Açıklama yok.'}</p>
         <div class="images">${imagesHTML}</div>
-        <button onclick="editPortfolio(${item.id})">Düzenle</button>
-        <button onclick="deletePortfolio(${item.id})">Sil</button>
+        <div class="action-btns">
+          <button class="edit-btn" onclick="editPortfolio(${item.id})">Düzenle</button>
+          <button class="delete-btn" onclick="deletePortfolio(${item.id})">Sil</button>
+        </div>
       </div>
     `;
   });
@@ -128,7 +133,6 @@ function renderPortfolios(){
   list.innerHTML = htmlContent || "<p>Kriterlere uygun ilan bulunamadı.</p>";
 }
 
-// PORTFÖY DÜZENLEME (EDIT)
 function editPortfolio(id) {
   const portfolio = portfolios.find(p => p.id === id);
   if(!portfolio) return;
@@ -141,37 +145,29 @@ function editPortfolio(id) {
 
   const newDesc = prompt("Yeni Açıklama:", portfolio.description);
 
-  // Verileri güncelle
   portfolio.title = newTitle.trim();
   portfolio.price = parseFloat(newPrice);
   if(newDesc !== null) portfolio.description = newDesc.trim();
 
   saveData();
   renderPortfolios();
-  renderMatches(); // Eşleşmeler sayfasındaki ilan başlıklarının da güncellenmesi için
-  updateMatchOptions(); // Seçim kutularının (select) güncellenmesi için
-  
-  alert("İlan başarıyla güncellendi.");
+  renderMatches(); 
+  updateMatchOptions();
+  alert("İlan güncellendi.");
 }
 
-// PORTFÖY SİLME (DELETE)
 function deletePortfolio(id){
   if(!confirm("Bu ilanı silmek istediğinize emin misiniz?")) return;
 
-  // İlanı diziden kaldır
   portfolios = portfolios.filter(p => p.id !== id);
-  
-  // Kritik İlişki Koruması: İlan silindiğinde ona ait eski eşleşmeleri de temizle
   matches = matches.filter(m => m.portfolioId !== id);
 
   saveData();
   renderPortfolios();
   renderMatches();
   updateMatchOptions();
-  
-  alert("İlan ve ilanla ilişkili tüm eşleştirmeler silindi.");
+  alert("İlan ve ilgili eşleştirmeleri silindi.");
 }
-
 
 /* ==========================================================================
    CUSTOMER (MÜŞTERİ) İŞLEMLERİ
@@ -241,12 +237,14 @@ function renderCustomers(){
     htmlContent += `
       <div class="customer-item">
         <h3>${customer.name}</h3>
-        <p><strong>Talep:</strong> <span style="color: #2c3e50; font-weight: bold;">${customer.demand}</span></p>
+        <p style="margin-top:6px;"><strong>Talep:</strong> <span class="demand-badge">${customer.demand}</span></p>
         <a class="phone-link" href="tel:${callPhone}">📞 ${customer.phone}</a>
-        <p><strong>Not:</strong> ${customer.note || '-'}</p>
+        <p style="margin-top:6px; color:#bdc3c7;"><strong>Not:</strong> ${customer.note || '-'}</p>
         <a class="whatsapp-btn" href="https://wa.me/${whatsappPhone}" target="_blank">WhatsApp Gönder</a>
-        <button onclick="editCustomer(${customer.id})">Düzenle</button>
-        <button onclick="deleteCustomer(${customer.id})">Sil</button>
+        <div class="action-btns">
+          <button class="edit-btn" onclick="editCustomer(${customer.id})">Düzenle</button>
+          <button class="delete-btn" onclick="deleteCustomer(${customer.id})">Sil</button>
+        </div>
       </div>
     `;
   });
@@ -296,7 +294,6 @@ function deleteCustomer(id){
   alert("Müşteri ve ilgili eşleştirmeleri silindi.");
 }
 
-
 /* ==========================================================================
    MATCH (EŞLEŞTİRME) İŞLEMLERİ
    ========================================================================== */
@@ -317,13 +314,16 @@ function updateMatchOptions(){
 }
 
 function addMatch(){
-  const customerId = parseInt(document.getElementById("matchCustomer").value);
-  const portfolioId = parseInt(document.getElementById("matchPortfolio").value);
+  const customerSelect = document.getElementById("matchCustomer");
+  const portfolioSelect = document.getElementById("matchPortfolio");
 
-  if(!customerId || !portfolioId){
-    alert("Eşleştirme yapabilmek için müşteri ve ilan seçilmelidir.");
+  if(!customerSelect || !portfolioSelect || customerSelect.value === "" || portfolioSelect.value === "") {
+    alert("Önce müşteri ve portföy eklemelisiniz.");
     return;
   }
+
+  const customerId = parseInt(customerSelect.value);
+  const portfolioId = parseInt(portfolioSelect.value);
 
   const isExist = matches.some(m => m.customerId === customerId && m.portfolioId === portfolioId);
   if(isExist) {
@@ -361,11 +361,13 @@ function renderMatches(){
         htmlContent += `
           <div class="match-item">
             <h3>Müşteri: ${customer.name}</h3>
-            <p><strong>Müşteri Talebi:</strong> <span style="color: #d35400;">${customer.demand}</span></p>
-            <p>Eşleşen İlan: <strong>${portfolio.title}</strong></p>
-            <p>İlan Fiyatı: ${portfolio.price.toLocaleString('tr-TR')} TL</p>
-            <button onclick="editMatch(${match.id})">Eşleşmeyi Düzenle</button>
-            <button onclick="deleteMatch(${match.id})">Eşleşmeyi Kaldır</button>
+            <p style="margin-top:5px;"><strong>Müşteri Talebi:</strong> <span class="demand-badge">${customer.demand}</span></p>
+            <p style="margin-top:5px;">Eşleşen İlan: <strong>${portfolio.title}</strong></p>
+            <p style="margin-top:5px;">İlan Fiyatı: ${portfolio.price.toLocaleString('tr-TR')} TL</p>
+            <div class="action-btns">
+              <button class="edit-btn" onclick="editMatch(${match.id})">Değiştir</button>
+              <button class="delete-btn" onclick="deleteMatch(${match.id})">Kaldır</button>
+            </div>
           </div>
         `;
       }
@@ -409,7 +411,6 @@ function deleteMatch(matchId) {
   alert("Eşleşme kaldırıldı.");
 }
 
-
 /* ==========================================================================
    UYGULAMA BAŞLANGICI VE DİNAMİK FİLTRELEME DİNLEYİCİLERİ
    ========================================================================== */
@@ -421,14 +422,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
   updateMatchOptions();
   updateDashboard();
 
-  // Portföy Canlı Filtreleme Tetikleyicileri (Inputlara yazıldığı an listeyi günceller)
+  // Canlı Filtreleme Tetikleyicileri
   document.getElementById("portfolioSearch")?.addEventListener("input", renderPortfolios);
   document.getElementById("portfolioMinPrice")?.addEventListener("input", renderPortfolios);
   document.getElementById("portfolioMaxPrice")?.addEventListener("input", renderPortfolios);
-
-  // Müşteri arama kutusu tetikleyicisi
   document.getElementById("customerSearch")?.addEventListener("input", renderCustomers);
-
-  // Eşleştirme arama kutusu tetikleyicisi
   document.getElementById("matchSearch")?.addEventListener("input", renderMatches);
 });
