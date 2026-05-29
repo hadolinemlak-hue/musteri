@@ -22,17 +22,34 @@ function saveData(){
 
 function updateDashboard(){
 
-  document.getElementById("portfolioCount").innerText = portfolios.length;
-  document.getElementById("customerCount").innerText = customers.length;
-  document.getElementById("matchCount").innerText = matches.length;
+  const portfolioCount = document.getElementById("portfolioCount");
+  const customerCount = document.getElementById("customerCount");
+  const matchCount = document.getElementById("matchCount");
+
+  if(portfolioCount){
+    portfolioCount.innerText = portfolios.length;
+  }
+
+  if(customerCount){
+    customerCount.innerText = customers.length;
+  }
+
+  if(matchCount){
+    matchCount.innerText = matches.length;
+  }
 }
 
 function addPortfolio(){
 
-  const title = document.getElementById("title").value;
-  const price = document.getElementById("price").value;
-  const description = document.getElementById("description").value;
+  const title = document.getElementById("title").value.trim();
+  const price = document.getElementById("price").value.trim();
+  const description = document.getElementById("description").value.trim();
   const files = document.getElementById("images").files;
+
+  if(title === "" || price === ""){
+    alert("Başlık ve fiyat zorunludur.");
+    return;
+  }
 
   if(files.length > 3){
     alert("En fazla 3 fotoğraf yükleyebilirsiniz.");
@@ -40,11 +57,14 @@ function addPortfolio(){
   }
 
   let imageArray = [];
-  let loaded = 0;
 
   if(files.length === 0){
+
     finishAdd([]);
+    return;
   }
+
+  let loaded = 0;
 
   for(let file of files){
 
@@ -58,7 +78,7 @@ function addPortfolio(){
       if(loaded === files.length){
         finishAdd(imageArray);
       }
-    }
+    };
 
     reader.readAsDataURL(file);
   }
@@ -81,12 +101,17 @@ function addPortfolio(){
     document.getElementById("price").value = "";
     document.getElementById("description").value = "";
     document.getElementById("images").value = "";
+
+    alert("İlan eklendi.");
   }
 }
 
 function renderPortfolios(){
 
   const list = document.getElementById("portfolioList");
+
+  if(!list) return;
+
   list.innerHTML = "";
 
   portfolios.forEach(item=>{
@@ -94,7 +119,7 @@ function renderPortfolios(){
     let imagesHTML = "";
 
     item.images.forEach(img=>{
-      imagesHTML += `<img src="${img}">`;
+      imagesHTML += `<img src="${img}" alt="">`;
     });
 
     list.innerHTML += `
@@ -113,9 +138,14 @@ function renderPortfolios(){
 
 function addCustomer(){
 
-  const name = document.getElementById("customerName").value;
-  const phone = document.getElementById("customerPhone").value;
-  const note = document.getElementById("customerNote").value;
+  const name = document.getElementById("customerName").value.trim();
+  const phone = document.getElementById("customerPhone").value.trim();
+  const note = document.getElementById("customerNote").value.trim();
+
+  if(name === "" || phone === ""){
+    alert("Ad ve telefon zorunludur.");
+    return;
+  }
 
   customers.push({
     id:Date.now(),
@@ -131,16 +161,21 @@ function addCustomer(){
   document.getElementById("customerName").value = "";
   document.getElementById("customerPhone").value = "";
   document.getElementById("customerNote").value = "";
+
+  alert("Müşteri eklendi.");
 }
 
 function renderCustomers(){
 
   const list = document.getElementById("customerList");
+
+  if(!list) return;
+
   list.innerHTML = "";
 
   customers.forEach(customer=>{
 
-    const cleanPhone = customer.phone.replace(/\s+/g, '');
+    const cleanPhone = customer.phone.replace(/\D/g,'');
 
     list.innerHTML += `
       <div class="customer-item">
@@ -170,6 +205,8 @@ function updateMatchOptions(){
 
   const customerSelect = document.getElementById("matchCustomer");
   const portfolioSelect = document.getElementById("matchPortfolio");
+
+  if(!customerSelect || !portfolioSelect) return;
 
   customerSelect.innerHTML = "";
   portfolioSelect.innerHTML = "";
@@ -201,6 +238,11 @@ function addMatch(){
   const customer = customers.find(c=>c.id == customerId);
   const portfolio = portfolios.find(p=>p.id == portfolioId);
 
+  if(!customer || !portfolio){
+    alert("Eşleştirme yapılamadı.");
+    return;
+  }
+
   matches.push({
     customerName:customer.name,
     portfolioTitle:portfolio.title
@@ -208,11 +250,16 @@ function addMatch(){
 
   saveData();
   renderMatches();
+
+  alert("Eşleştirme yapıldı.");
 }
 
 function renderMatches(){
 
   const list = document.getElementById("matchList");
+
+  if(!list) return;
+
   list.innerHTML = "";
 
   matches.forEach(match=>{
@@ -226,8 +273,12 @@ function renderMatches(){
   });
 }
 
-renderPortfolios();
-renderCustomers();
-renderMatches();
-updateMatchOptions();
-updateDashboard();
+document.addEventListener("DOMContentLoaded", ()=>{
+
+  renderPortfolios();
+  renderCustomers();
+  renderMatches();
+  updateMatchOptions();
+  updateDashboard();
+
+});
