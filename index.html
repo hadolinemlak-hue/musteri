@@ -102,9 +102,43 @@
 
 </main>
 
-<div id="imageModal" class="image-modal" onclick="closeImageModal()">
-  <span class="close-modal">&times;</span>
-  <img class="modal-content" id="modalTargetImg" alt="Büyük Görsel">
+<div id="imageModal" class="image-modal">
+  <span class="close-modal" onclick="closeImageModal()">&times;</span>
+  
+  <div class="modal-gallery-container">
+    <button class="gallery-nav prev-btn" onclick="changeModalImage(-1)">&#10094;</button>
+    <img class="modal-content" id="modalTargetImg" alt="Büyük Görsel">
+    <button class="gallery-nav next-btn" onclick="changeModalImage(1)">&#10095;</button>
+  </div>
+  
+  <div id="modalCaption" class="modal-caption">1 / 1</div>
+</div>
+
+<div id="editPortfolioModal" class="edit-portfolio-modal">
+  <div class="edit-modal-card">
+    <h2>İlan Düzenle</h2>
+    <input type="hidden" id="editPortfolioId">
+    
+    <label>İlan Başlığı:</label>
+    <input type="text" id="editTitle">
+    
+    <label>Fiyat (TL):</label>
+    <input type="number" id="editPrice">
+    
+    <label>Açıklama:</label>
+    <textarea id="editDescription" rows="3" style="width:100%; padding:14px; margin-top:10px; border:1px solid #1f4fb4; border-radius:12px; background:#173777; color:white; font-size:14px; resize:none;"></textarea>
+    
+    <label style="margin-top:20px; font-weight:bold;">Mevcut Fotoğraflar (Silmek için üzerine tıklayın):</label>
+    <div id="editExistingImages" class="edit-images-preview"></div>
+    
+    <label style="margin-top:15px;">Yeni Fotoğraf Ekle (Maksimum 3 adet olacak şekilde):</label>
+    <input type="file" id="editNewImages" multiple accept=".jpeg, .jpg, .png, image/jpeg, image/png">
+    
+    <div class="action-btns">
+      <button class="edit-btn" onclick="savePortfolioEdit()">Değişiklikleri Kaydet</button>
+      <button class="delete-btn" onclick="closePortfolioEditModal()">İptal</button>
+    </div>
+  </div>
 </div>
 
 <script src="script.js"></script>
