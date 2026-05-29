@@ -21,84 +21,73 @@
 
 <main>
 
-  <!-- DASHBOARD -->
   <section id="dashboard" class="active">
-
     <div class="stats-grid">
-
       <div class="stat-card">
         <h2 id="portfolioCount">0</h2>
         <p>Toplam İlan</p>
       </div>
-
       <div class="stat-card">
         <h2 id="customerCount">0</h2>
         <p>Toplam Müşteri</p>
       </div>
-
       <div class="stat-card">
         <h2 id="matchCount">0</h2>
         <p>Eşleştirme</p>
       </div>
-
     </div>
-
   </section>
 
-  <!-- PORTFOLIO -->
-  <section id="portfoliosSection">
-  <h2>Yeni İlan Ekle</h2>
-  <input type="text" id="title" placeholder="İlan Başlığı (Örn: 3+1 Havuzlu Villa)">
-  <input type="number" id="price" placeholder="Fiyat (TL)">
-  <input type="text" id="description" placeholder="İlan Açıklaması">
-  <input type="file" id="images" multiple accept="image/*">
-  <button onclick="addPortfolio()">İlanı Kaydet</button>
+  <section id="portfolio">
+    <h2>Yeni İlan Ekle</h2>
+    <input type="text" id="title" placeholder="İlan Başlığı (Örn: 3+1 Havuzlu Villa)">
+    <input type="number" id="price" placeholder="Fiyat (TL)">
+    <input type="text" id="description" placeholder="İlan Açıklaması">
+    <input type="file" id="images" multiple accept="image/*">
+    <button onclick="addPortfolio()">İlanı Kaydet</button>
 
-  <hr>
+    <hr>
 
-  <h2>Mevcut İlanlar (Portföyler)</h2>
-  <div class="filter-group">
-    <input type="text" id="portfolioSearch" placeholder="Başlık veya açıklamada ara...">
-    <input type="number" id="portfolioMinPrice" placeholder="Min Fiyat (TL)">
-    <input type="number" id="portfolioMaxPrice" placeholder="Max Fiyat (TL)">
-  </div>
-  
-  <div id="portfolioList"></div>
-</section>
+    <h2>Mevcut İlanlar (Portföyler)</h2>
+    <div class="filter-group">
+      <input type="text" id="portfolioSearch" placeholder="Başlık veya açıklamada ara...">
+      <input type="number" id="portfolioMinPrice" placeholder="Min Fiyat (TL)">
+      <input type="number" id="portfolioMaxPrice" placeholder="Max Fiyat (TL)">
+    </div>
+    
+    <div id="portfolioList"></div>
+  </section>
 
+  <section id="customers">
+    <h2>Müşteri Ekle</h2>
+    <input type="text" id="customerName" placeholder="Ad Soyad">
+    <input type="text" id="customerPhone" placeholder="Telefon">
+    <input type="text" id="customerDemand" placeholder="Müşteri Talebi (Örn: 2+1 Satılık Daire)">
+    <input type="text" id="customerNote" placeholder="Özel Notlar">
+    <button onclick="addCustomer()">Müşteri Ekle</button>
 
-  <!-- CUSTOMERS -->
-  <section id="customersSection">
-  <h2>Müşteri Ekle</h2>
-  <input type="text" id="customerName" placeholder="Ad Soyad">
-  <input type="text" id="customerPhone" placeholder="Telefon">
-  <input type="text" id="customerDemand" placeholder="Müşteri Talebi (Örn: 2+1 Satılık Daire)">
-  <input type="text" id="customerNote" placeholder="Özel Notlar">
-  <button onclick="addCustomer()">Müşteri Ekle</button>
+    <hr>
 
-  <hr>
+    <h2>Müşteri Listesi</h2>
+    <input type="text" id="customerSearch" placeholder="İsim veya talebe göre filtrele...">
+    
+    <div id="customerList"></div>
+  </section>
 
-  <h2>Müşteri Listesi</h2>
-  <input type="text" id="customerSearch" placeholder="İsim veya talebe göre filtrele...">
-  
-  <div id="customerList"></div>
-</section>
-
-
-  <!-- MATCHING -->
   <section id="matching">
-
     <div class="card">
-      <h2>Eşleştirme</h2>
-
+      <h2>Eşleştirme Yap</h2>
       <select id="matchCustomer"></select>
       <select id="matchPortfolio"></select>
-
       <button onclick="addMatch()">Eşleştir</button>
     </div>
 
-    <div id="matchList"></div>
+    <hr>
 
+    <h2>Eşleştirme Listesi</h2>
+    <input type="text" id="matchSearch" placeholder="Müşteri, talep veya ilan ara...">
+    
+    <div id="matchList"></div>
   </section>
 
 </main>
