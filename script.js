@@ -39,7 +39,9 @@ function updateDashboard(){
   }
 }
 
-function addPortfolio(){
+/* PORTFOLIO */
+
+async function addPortfolio(){
 
   const title = document.getElementById("title").value.trim();
   const price = document.getElementById("price").value.trim();
@@ -47,63 +49,59 @@ function addPortfolio(){
   const files = document.getElementById("images").files;
 
   if(title === "" || price === ""){
-    alert("Başlık ve fiyat zorunludur.");
+    alert("Başlık ve fiyat zorunlu.");
     return;
   }
 
   if(files.length > 3){
-    alert("En fazla 3 fotoğraf yükleyebilirsiniz.");
+    alert("En fazla 3 fotoğraf eklenebilir.");
     return;
   }
 
-  let imageArray = [];
+  let images = [];
 
-  if(files.length === 0){
+  for(let i = 0; i < files.length; i++){
 
-    finishAdd([]);
-    return;
+    const base64 = await convertToBase64(files[i]);
+    images.push(base64);
   }
 
-  let loaded = 0;
+  portfolios.push({
+    id:Date.now(),
+    title,
+    price,
+    description,
+    images
+  });
 
-  for(let file of files){
+  saveData();
+  renderPortfolios();
+  updateMatchOptions();
+
+  document.getElementById("title").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("images").value = "";
+
+  alert("İlan başarıyla eklendi.");
+}
+
+function convertToBase64(file){
+
+  return new Promise((resolve,reject)=>{
 
     const reader = new FileReader();
 
-    reader.onload = function(e){
+    reader.readAsDataURL(file);
 
-      imageArray.push(e.target.result);
-      loaded++;
-
-      if(loaded === files.length){
-        finishAdd(imageArray);
-      }
+    reader.onload = ()=>{
+      resolve(reader.result);
     };
 
-    reader.readAsDataURL(file);
-  }
-
-  function finishAdd(images){
-
-    portfolios.push({
-      id:Date.now(),
-      title,
-      price,
-      description,
-      images
-    });
-
-    saveData();
-    renderPortfolios();
-    updateMatchOptions();
-
-    document.getElementById("title").value = "";
-    document.getElementById("price").value = "";
-    document.getElementById("description").value = "";
-    document.getElementById("images").value = "";
-
-    alert("İlan eklendi.");
-  }
+    reader.onerror = error=>{
+      reject(error);
+    };
+  });
 }
 
 function renderPortfolios(){
@@ -119,22 +117,31 @@ function renderPortfolios(){
     let imagesHTML = "";
 
     item.images.forEach(img=>{
-      imagesHTML += `<img src="${img}" alt="">`;
+
+      imagesHTML += `
+        <img src="${img}" alt="">
+      `;
     });
 
     list.innerHTML += `
       <div class="portfolio-item">
+
         <h3>${item.title}</h3>
-        <p>Fiyat: ${item.price}</p>
+
+        <p><strong>Fiyat:</strong> ${item.price}</p>
+
         <p>${item.description}</p>
 
         <div class="images">
           ${imagesHTML}
         </div>
+
       </div>
     `;
   });
 }
+
+/* CUSTOMER */
 
 function addCustomer(){
 
@@ -188,18 +195,67 @@ function renderCustomers(){
 
         <p>${customer.note}</p>
 
-        <a 
+        <a
           class="whatsapp-btn"
           href="https://wa.me/90${cleanPhone}"
           target="_blank"
         >
-          WhatsApp Mesaj Gönder
+          WhatsApp Gönder
         </a>
+
+        <button onclick="editCustomer(${customer.id})">
+          Düzenle
+        </button>
+
+        <button onclick="deleteCustomer(${customer.id})">
+          Sil
+        </button>
 
       </div>
     `;
   });
 }
+
+function editCustomer(id){
+
+  const customer = customers.find(c=>c.id === id);
+
+  const newName = prompt("Ad Soyad", customer.name);
+  if(newName === null) return;
+
+  const newPhone = prompt("Telefon", customer.phone);
+  if(newPhone === null) return;
+
+  const newNote = prompt("Not", customer.note);
+  if(newNote === null) return;
+
+  customer.name = newName;
+  customer.phone = newPhone;
+  customer.note = newNote;
+
+  saveData();
+  renderCustomers();
+  updateMatchOptions();
+
+  alert("Müşteri güncellendi.");
+}
+
+function deleteCustomer(id){
+
+  const confirmDelete = confirm("Müşteri silinsin mi?");
+
+  if(!confirmDelete) return;
+
+  customers = customers.filter(c=>c.id !== id);
+
+  saveData();
+  renderCustomers();
+  updateMatchOptions();
+
+  alert("Müşteri silindi.");
+}
+
+/* MATCH */
 
 function updateMatchOptions(){
 
@@ -266,8 +322,14 @@ function renderMatches(){
 
     list.innerHTML += `
       <div class="match-item">
+
         <h3>${match.customerName}</h3>
-        <p>Eşleşen İlan: ${match.portfolioTitle}</p>
+
+        <p>
+          Eşleşen İlan:
+          ${match.portfolioTitle}
+        </p>
+
       </div>
     `;
   });
@@ -281,4 +343,4 @@ document.addEventListener("DOMContentLoaded", ()=>{
   updateMatchOptions();
   updateDashboard();
 
-});
+});+
