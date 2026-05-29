@@ -1,602 +1,104 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Emlak CRM</title>
-<style>
-  :root {
-    --bg: #f4f6f9;
-    --card: #fff;
-    --text: #1a1a2e;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --primary: #2563eb;
-    --primary-light: #eff6ff;
-    --green: #16a34a;
-    --green-light: #f0fdf4;
-    --red: #dc2626;
-    --orange: #ea580c;
-    --radius: 12px;
-    --shadow: 0 1px 4px rgba(0,0,0,0.08);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  /* NAV */
-  .nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .nav-logo { font-weight: 700; font-size: 17px; color: var(--primary); }
-  .nav-stats { display: flex; gap: 16px; }
-  .nav-stat { text-align: center; }
-  .nav-stat-num { font-weight: 700; font-size: 16px; color: var(--primary); display: block; line-height: 1; }
-  .nav-stat-lbl { font-size: 10px; color: var(--muted); }
-
-  /* TABS */
-  .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); }
-  .tab { flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
-  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-  /* CONTENT */
-  .page { display: none; padding: 16px; }
-  .page.active { display: block; }
-
-  /* SEARCH BAR */
-  .search-wrap { position: relative; margin-bottom: 12px; }
-  .search-wrap input { width: 100%; padding: 10px 10px 10px 36px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--card); }
-  .search-wrap .si { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
-
-  /* CARDS */
-  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; }
-  .card-header { padding: 14px 16px 0; }
-  .card-title { font-weight: 600; font-size: 15px; }
-  .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .card-body { padding: 10px 16px 14px; }
-  .info-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; color: var(--muted); }
-  .info-row b { color: var(--text); }
-
-  /* PHOTOS */
-  .photos { display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto; }
-  .photos img { width: 80px; height: 60px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-  .photos .no-photo { width: 80px; height: 60px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 10px; flex-shrink: 0; }
-
-  /* ACTION BUTTONS */
-  .card-actions { display: flex; gap: 8px; padding: 0 16px 14px; }
-  .btn { padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: opacity .15s; }
-  .btn:active { opacity: .8; }
-  .btn-wa { background: #25d366; color: #fff; }
-  .btn-call { background: var(--primary-light); color: var(--primary); }
-  .btn-del { background: #fef2f2; color: var(--red); margin-left: auto; }
-  .btn-primary { background: var(--primary); color: #fff; padding: 10px 16px; font-size: 14px; border-radius: 10px; }
-  .btn-green { background: var(--green); color: #fff; padding: 10px 16px; font-size: 14px; border-radius: 10px; }
-
-  /* FAB */
-  .fab { position: fixed; bottom: 80px; right: 20px; width: 52px; height: 52px; background: var(--primary); border-radius: 50%; border: none; color: #fff; font-size: 26px; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
-
-  /* MODAL */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-end; }
-  .modal-bg.open { display: flex; }
-  .modal { background: var(--card); border-radius: 20px 20px 0 0; padding: 20px 16px 32px; width: 100%; max-height: 90vh; overflow-y: auto; }
-  .modal-title { font-weight: 700; font-size: 17px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-  .close-btn { background: var(--bg); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-  /* FORM */
-  .form-group { margin-bottom: 14px; }
-  .form-group label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; display: block; margin-bottom: 5px; }
-  .form-group input, .form-group textarea, .form-group select {
-    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 14px; font-family: inherit; background: var(--card);
-  }
-  .form-group textarea { min-height: 80px; resize: vertical; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .photo-upload-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  .photo-slot { border: 1.5px dashed var(--border); border-radius: 8px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: var(--bg); }
-  .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
-  .photo-slot input { display: none; }
-  .photo-slot span { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .photo-slot .rm { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,.6); border: none; color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-  /* MATCH */
-  .match-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; padding: 14px 16px; }
-  .match-names { font-weight: 600; font-size: 14px; }
-  .match-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: var(--green-light); color: var(--green); }
-  .badge-blue { background: var(--primary-light); color: var(--primary); }
-
-  /* EMPTY */
-  .empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 14px; }
-  .empty-icon { font-size: 40px; margin-bottom: 8px; }
-
-  /* LOADING */
-  .loading { text-align: center; padding: 32px; color: var(--muted); font-size: 14px; }
-
-  /* NO. TAG */
-  .num-tag { display: inline-block; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 5px; margin-right: 6px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hadolin CRM</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="nav">
-  <div class="nav-logo">🏠 Emlak CRM</div>
-  <div class="nav-stats">
-    <div class="nav-stat"><span class="nav-stat-num" id="cnt-ilan">0</span><span class="nav-stat-lbl">İlan</span></div>
-    <div class="nav-stat"><span class="nav-stat-num" id="cnt-musteri">0</span><span class="nav-stat-lbl">Müşteri</span></div>
-    <div class="nav-stat"><span class="nav-stat-num" id="cnt-eslesme">0</span><span class="nav-stat-lbl">Eşleşme</span></div>
-  </div>
-</div>
+<header>
+  <h1>Hadolin CRM</h1>
+</header>
 
-<div class="tabs">
-  <div class="tab active" onclick="showTab('ilanlar')">İlanlar</div>
-  <div class="tab" onclick="showTab('musteriler')">Müşteriler</div>
-  <div class="tab" onclick="showTab('eslesme')">Eşleşme</div>
-</div>
+<nav>
+  <button onclick="showSection('dashboard')">Dashboard</button>
+  <button onclick="showSection('portfolio')">Portföy</button>
+  <button onclick="showSection('customers')">Müşteri</button>
+  <button onclick="showSection('matching')">Eşleştirme</button>
+</nav>
 
-<!-- İLANLAR -->
-<div class="page active" id="page-ilanlar">
-  <div class="search-wrap"><span class="si">🔍</span><input type="text" id="search-ilan" placeholder="İlan ara (başlık, şehir)..." oninput="renderIlanlar()"></div>
-  <div id="ilan-list"><div class="loading">Yükleniyor...</div></div>
-</div>
+<main>
 
-<!-- MÜŞTERİLER -->
-<div class="page" id="page-musteriler">
-  <div class="search-wrap"><span class="si">🔍</span><input type="text" id="search-musteri" placeholder="Müşteri ara (ad, telefon, müşteri no)..." oninput="renderMusteriler()"></div>
-  <div id="musteri-list"><div class="loading">Yükleniyor...</div></div>
-</div>
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="active">
 
-<!-- EŞLEŞME -->
-<div class="page" id="page-eslesme">
-  <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Yeni Eşleştirme</div>
-    <div class="form-group"><label>Müşteri</label>
-      <select id="match-musteri"><option value="">-- Müşteri Seçin --</option></select></div>
-    <div class="form-group"><label>İlan</label>
-      <select id="match-ilan"><option value="">-- İlan Seçin --</option></select></div>
-    <div style="background:#fffbeb;border-radius:8px;padding:10px;font-size:12px;color:#92400e;margin-bottom:12px;" id="match-uyari"></div>
-    <button class="btn btn-green" style="width:100%;" onclick="doMatch()">✅ Eşleştir</button>
-  </div>
-  <div id="match-list"><div class="loading">Yükleniyor...</div></div>
-</div>
+    <div class="stats-grid">
 
-<!-- FAB -->
-<button class="fab" id="fab-btn" onclick="openModal()">+</button>
-
-<!-- MODAL İLAN -->
-<div class="modal-bg" id="modal-ilan">
-  <div class="modal">
-    <div class="modal-title">Yeni İlan <button class="close-btn" onclick="closeModal('modal-ilan')">✕</button></div>
-    <div class="form-group"><label>Başlık</label><input type="text" id="ilan-baslik" placeholder="3+1 Daire, Villa..."></div>
-    <div class="form-row">
-      <div class="form-group"><label>Min Fiyat (₺)</label><input type="number" id="ilan-fiyat-min" placeholder="500000"></div>
-      <div class="form-group"><label>Max Fiyat (₺)</label><input type="number" id="ilan-fiyat-max" placeholder="600000"></div>
-    </div>
-    <div class="form-group"><label>Şehir</label><input type="text" id="ilan-sehir" placeholder="İstanbul, Ankara..."></div>
-    <div class="form-group"><label>Açıklama</label><textarea id="ilan-aciklama" placeholder="İlan hakkında bilgi..."></textarea></div>
-    <div class="form-group">
-      <label>Fotoğraflar (max 3)</label>
-      <div class="photo-upload-grid">
-        <div class="photo-slot" id="slot0" onclick="triggerPhoto(0)">
-          <input type="file" id="photo0" accept="image/*" onchange="previewPhoto(0,this)">
-          <span style="font-size:22px;">📷</span><span>Fotoğraf 1</span>
-        </div>
-        <div class="photo-slot" id="slot1" onclick="triggerPhoto(1)">
-          <input type="file" id="photo1" accept="image/*" onchange="previewPhoto(1,this)">
-          <span style="font-size:22px;">📷</span><span>Fotoğraf 2</span>
-        </div>
-        <div class="photo-slot" id="slot2" onclick="triggerPhoto(2)">
-          <input type="file" id="photo2" accept="image/*" onchange="previewPhoto(2,this)">
-          <span style="font-size:22px;">📷</span><span>Fotoğraf 3</span>
-        </div>
+      <div class="stat-card">
+        <h2 id="portfolioCount">0</h2>
+        <p>Toplam İlan</p>
       </div>
+
+      <div class="stat-card">
+        <h2 id="customerCount">0</h2>
+        <p>Toplam Müşteri</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="matchCount">0</h2>
+        <p>Eşleştirme</p>
+      </div>
+
     </div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveIlan()">💾 Kaydet</button>
-  </div>
-</div>
 
-<!-- MODAL MÜŞTERİ -->
-<div class="modal-bg" id="modal-musteri">
-  <div class="modal">
-    <div class="modal-title">Yeni Müşteri <button class="close-btn" onclick="closeModal('modal-musteri')">✕</button></div>
-    <div class="form-group"><label>Ad Soyad</label><input type="text" id="m-ad" placeholder="Ali Yılmaz"></div>
-    <div class="form-group"><label>Telefon</label><input type="tel" id="m-tel" placeholder="05XX XXX XX XX"></div>
-    <div class="form-group"><label>Email</label><input type="email" id="m-email" placeholder="ali@email.com"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Min Bütçe (₺)</label><input type="number" id="m-butce-min" placeholder="400000"></div>
-      <div class="form-group"><label>Max Bütçe (₺)</label><input type="number" id="m-butce-max" placeholder="700000"></div>
-    </div>
-    <div class="form-group"><label>Tercihler</label><textarea id="m-tercih" placeholder="Konum, tip, oda sayısı..."></textarea></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveMusteriForm()">💾 Kaydet</button>
-  </div>
-</div>
+  </section>
 
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <!-- PORTFOLIO -->
+  <section id="portfolio">
 
-// ⚠️ KENDİ FİREBASE YAPILANDIRMANIZI BURAYA GİRİN
-const firebaseConfig = {
-  apiKey: "AIzaSyDEMO_REPLACE_WITH_YOUR_KEY",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:abc123"
-};
-
-let app, db;
-try {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  window._db = db;
-  window._fs = { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp };
-  window._dbReady = true;
-} catch(e) {
-  console.warn("Firebase bağlantısı kurulamadı, yerel mod aktif:", e.message);
-  window._dbReady = false;
-}
-window._initDone = true;
-document.dispatchEvent(new Event('db-ready'));
-</script>
-
-<script>
-// ===== VERİ KATMANI =====
-// Firebase yoksa localStorage'a düşer
-let ilanlar = [], musteriler = [], eslesmeler = [];
-let dbReady = false;
-let useLocal = false;
-
-function localLoad() {
-  ilanlar = JSON.parse(localStorage.getItem('ilanlar') || '[]');
-  musteriler = JSON.parse(localStorage.getItem('musteriler') || '[]');
-  eslesmeler = JSON.parse(localStorage.getItem('eslesmeler') || '[]');
-}
-
-function localSave() {
-  localStorage.setItem('ilanlar', JSON.stringify(ilanlar));
-  localStorage.setItem('musteriler', JSON.stringify(musteriler));
-  localStorage.setItem('eslesmeler', JSON.stringify(eslesmeler));
-}
-
-async function loadAll() {
-  if (!window._dbReady) {
-    useLocal = true;
-    localLoad();
-    return;
-  }
-  const db = window._db;
-  const { collection, getDocs, query, orderBy } = window._fs;
-  try {
-    const [iQ, mQ, eQ] = await Promise.all([
-      getDocs(query(collection(db,'ilanlar'), orderBy('ts','desc'))),
-      getDocs(query(collection(db,'musteriler'), orderBy('ts','desc'))),
-      getDocs(query(collection(db,'eslesmeler'), orderBy('ts','desc')))
-    ]);
-    ilanlar = iQ.docs.map(d => ({id:d.id,...d.data()}));
-    musteriler = mQ.docs.map(d => ({id:d.id,...d.data()}));
-    eslesmeler = eQ.docs.map(d => ({id:d.id,...d.data()}));
-  } catch(err) {
-    console.warn('Firestore okuma hatası, yerel moda geçiliyor:', err);
-    useLocal = true;
-    localLoad();
-  }
-}
-
-async function addItem(col, data) {
-  data.ts = Date.now();
-  if (useLocal || !window._dbReady) {
-    data.id = 'loc_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-    if (col==='ilanlar') ilanlar.unshift(data);
-    else if (col==='musteriler') musteriler.unshift(data);
-    else eslesmeler.unshift(data);
-    localSave();
-    return data;
-  }
-  const db = window._db;
-  const { collection, addDoc } = window._fs;
-  const ref = await addDoc(collection(db, col), data);
-  data.id = ref.id;
-  if (col==='ilanlar') ilanlar.unshift(data);
-  else if (col==='musteriler') musteriler.unshift(data);
-  else eslesmeler.unshift(data);
-  return data;
-}
-
-async function delItem(col, id) {
-  if (useLocal || !window._dbReady || id.startsWith('loc_')) {
-    if (col==='ilanlar') ilanlar = ilanlar.filter(x=>x.id!==id);
-    else if (col==='musteriler') musteriler = musteriler.filter(x=>x.id!==id);
-    else eslesmeler = eslesmeler.filter(x=>x.id!==id);
-    localSave();
-    return;
-  }
-  const db = window._db;
-  const { deleteDoc, doc } = window._fs;
-  await deleteDoc(doc(db, col, id));
-  if (col==='ilanlar') ilanlar = ilanlar.filter(x=>x.id!==id);
-  else if (col==='musteriler') musteriler = musteriler.filter(x=>x.id!==id);
-  else eslesmeler = eslesmeler.filter(x=>x.id!==id);
-}
-
-// ===== MÜŞTERI NUMARASI =====
-function nextMusteriNo() {
-  if (musteriler.length === 0) return 1001;
-  const nums = musteriler.map(m => parseInt(m.no||0)).filter(n=>!isNaN(n));
-  return nums.length ? Math.max(...nums)+1 : 1001;
-}
-
-// ===== FORMAT =====
-function fmtTL(n) { return n ? Number(n).toLocaleString('tr-TR') + ' ₺' : '—'; }
-function fmtTelWA(tel) {
-  let t = tel.replace(/\D/g,'');
-  if (t.startsWith('0')) t = '90' + t.slice(1);
-  else if (!t.startsWith('90')) t = '90' + t;
-  return t;
-}
-
-// ===== FOTO =====
-let photoData = [null, null, null];
-
-function triggerPhoto(i) { document.getElementById('photo'+i).click(); }
-
-function previewPhoto(i, inp) {
-  if (!inp.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    // Resize to save data
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const MAX = 800;
-      let w = img.width, h = img.height;
-      if (w > MAX) { h = Math.round(h * MAX/w); w = MAX; }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      photoData[i] = canvas.toDataURL('image/jpeg', 0.7);
-      const slot = document.getElementById('slot'+i);
-      slot.innerHTML = `<img src="${photoData[i]}"><button class="rm" onclick="removePhoto(${i},event)">✕</button>`;
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(inp.files[0]);
-}
-
-function removePhoto(i, e) {
-  e.stopPropagation();
-  photoData[i] = null;
-  const slot = document.getElementById('slot'+i);
-  slot.innerHTML = `<input type="file" id="photo${i}" accept="image/*" onchange="previewPhoto(${i},this)"><span style="font-size:22px;">📷</span><span>Fotoğraf ${i+1}</span>`;
-}
-
-// ===== TAB =====
-let activeTab = 'ilanlar';
-function showTab(t) {
-  activeTab = t;
-  document.querySelectorAll('.tab').forEach((el,i)=>{ el.classList.toggle('active', ['ilanlar','musteriler','eslesme'][i]===t); });
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+t).classList.add('active');
-  document.getElementById('fab-btn').style.display = t==='eslesme' ? 'none' : 'flex';
-  if (t==='eslesme') populateMatchSelects();
-}
-
-// ===== MODAL =====
-function openModal() {
-  if (activeTab === 'ilanlar') {
-    photoData = [null,null,null];
-    ['ilan-baslik','ilan-fiyat-min','ilan-fiyat-max','ilan-sehir','ilan-aciklama'].forEach(id=>document.getElementById(id).value='');
-    for(let i=0;i<3;i++){
-      const s=document.getElementById('slot'+i);
-      s.innerHTML=`<input type="file" id="photo${i}" accept="image/*" onchange="previewPhoto(${i},this)"><span style="font-size:22px;">📷</span><span>Fotoğraf ${i+1}</span>`;
-    }
-    document.getElementById('modal-ilan').classList.add('open');
-  } else {
-    ['m-ad','m-tel','m-email','m-butce-min','m-butce-max','m-tercih'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('modal-musteri').classList.add('open');
-  }
-}
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
-
-// ===== SAVE İLAN =====
-async function saveIlan() {
-  const baslik = document.getElementById('ilan-baslik').value.trim();
-  const sehir = document.getElementById('ilan-sehir').value.trim();
-  const fMin = parseInt(document.getElementById('ilan-fiyat-min').value) || 0;
-  const fMax = parseInt(document.getElementById('ilan-fiyat-max').value) || 0;
-  if (!baslik || !sehir) return alert('Başlık ve şehir zorunlu!');
-  const data = {
-    baslik, sehir,
-    fiyatMin: fMin, fiyatMax: fMax || fMin,
-    aciklama: document.getElementById('ilan-aciklama').value.trim(),
-    photos: photoData.filter(Boolean)
-  };
-  await addItem('ilanlar', data);
-  closeModal('modal-ilan');
-  renderAll();
-}
-
-// ===== SAVE MÜŞTERİ =====
-async function saveMusteriForm() {
-  const ad = document.getElementById('m-ad').value.trim();
-  const tel = document.getElementById('m-tel').value.trim();
-  if (!ad || !tel) return alert('Ad ve telefon zorunlu!');
-  const no = nextMusteriNo();
-  const data = {
-    no, ad, tel,
-    email: document.getElementById('m-email').value.trim(),
-    butceMin: parseInt(document.getElementById('m-butce-min').value) || 0,
-    butceMax: parseInt(document.getElementById('m-butce-max').value) || 0,
-    tercih: document.getElementById('m-tercih').value.trim()
-  };
-  await addItem('musteriler', data);
-  closeModal('modal-musteri');
-  renderAll();
-}
-
-// ===== RENDER İLANLAR =====
-function renderIlanlar() {
-  const q = document.getElementById('search-ilan').value.toLowerCase();
-  let list = ilanlar.filter(i=>
-    !q || i.baslik?.toLowerCase().includes(q) || i.sehir?.toLowerCase().includes(q)
-  );
-  const el = document.getElementById('ilan-list');
-  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🏠</div>İlan bulunamadı</div>'; return; }
-  el.innerHTML = list.map(i => `
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">${esc(i.baslik)}</div>
-        <div class="card-sub">📍 ${esc(i.sehir)} &nbsp;|&nbsp; 💰 ${fmtTL(i.fiyatMin)}${i.fiyatMax && i.fiyatMax!==i.fiyatMin ? ' – ' + fmtTL(i.fiyatMax) : ''}</div>
-      </div>
-      ${i.photos?.length ? `<div class="photos">${i.photos.map(p=>`<img src="${p}" loading="lazy">`).join('')}</div>` : ''}
-      <div class="card-body">
-        ${i.aciklama ? `<div style="font-size:13px;color:var(--muted)">${esc(i.aciklama)}</div>` : ''}
-      </div>
-      <div class="card-actions">
-        <button class="btn btn-del" onclick="silIlan('${i.id}')">🗑</button>
-      </div>
-    </div>
-  `).join('');
-}
+      <h2>Yeni İlan Ekle</h2>
 
-// ===== RENDER MÜŞTERİLER =====
-function renderMusteriler() {
-  const q = document.getElementById('search-musteri').value.toLowerCase();
-  let list = musteriler.filter(m=>
-    !q ||
-    m.ad?.toLowerCase().includes(q) ||
-    m.tel?.includes(q) ||
-    String(m.no).includes(q)
-  );
-  const el = document.getElementById('musteri-list');
-  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">👤</div>Müşteri bulunamadı</div>'; return; }
-  el.innerHTML = list.map(m => `
+      <input type="text" id="title" placeholder="İlan Başlığı">
+      <input type="text" id="price" placeholder="Fiyat">
+      <textarea id="description" placeholder="Açıklama"></textarea>
+
+      <input type="file" id="images" multiple accept="image/*">
+
+      <button onclick="addPortfolio()">İlan Ekle</button>
+    </div>
+
+    <div id="portfolioList"></div>
+
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section id="customers">
+
     <div class="card">
-      <div class="card-header">
-        <div class="card-title"><span class="num-tag">#${m.no||'?'}</span>${esc(m.ad)}</div>
-        <div class="card-sub">${m.email ? '📧 ' + esc(m.email) : ''}</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row">📞 <b>${esc(m.tel)}</b></div>
-        <div class="info-row">💰 Bütçe: <b>${fmtTL(m.butceMin)}${m.butceMax && m.butceMax!==m.butceMin ? ' – ' + fmtTL(m.butceMax) : ''}</b></div>
-        ${m.tercih ? `<div class="info-row">📝 <span>${esc(m.tercih)}</span></div>` : ''}
-      </div>
-      <div class="card-actions">
-        <a class="btn btn-wa" href="https://wa.me/${fmtTelWA(m.tel)}?text=${encodeURIComponent('Merhaba '+m.ad+', Emlak CRM üzerinden sizi arıyorum.')}" target="_blank">
-          💬 WhatsApp
-        </a>
-        <a class="btn btn-call" href="tel:${m.tel}">📞 Ara</a>
-        <button class="btn btn-del" onclick="silMusteri('${m.id}')">🗑</button>
-      </div>
+      <h2>Yeni Müşteri</h2>
+
+      <input type="text" id="customerName" placeholder="Ad Soyad">
+      <input type="text" id="customerPhone" placeholder="Telefon">
+      <textarea id="customerNote" placeholder="Not"></textarea>
+
+      <button onclick="addCustomer()">Müşteri Ekle</button>
     </div>
-  `).join('');
-}
 
-// ===== EŞLEŞME =====
-function populateMatchSelects() {
-  const ms = document.getElementById('match-musteri');
-  const is = document.getElementById('match-ilan');
-  ms.innerHTML = '<option value="">-- Müşteri Seçin --</option>' +
-    musteriler.map(m=>`<option value="${m.id}">#${m.no} – ${esc(m.ad)}</option>`).join('');
-  is.innerHTML = '<option value="">-- İlan Seçin --</option>' +
-    ilanlar.map(i=>`<option value="${i.id}">${esc(i.baslik)} – ${esc(i.sehir)}</option>`).join('');
-  ms.onchange = is.onchange = checkMatchCompat;
-}
+    <div id="customerList"></div>
 
-function checkMatchCompat() {
-  const mId = document.getElementById('match-musteri').value;
-  const iId = document.getElementById('match-ilan').value;
-  const uyari = document.getElementById('match-uyari');
-  if (!mId || !iId) { uyari.style.display='none'; return; }
-  const m = musteriler.find(x=>x.id===mId);
-  const i = ilanlar.find(x=>x.id===iId);
-  if (!m || !i) return;
-  // Aralık eşleştirme: müşteri bütçe aralığı ile ilan fiyat aralığı çakışıyor mu?
-  const mMin = m.butceMin || 0, mMax = m.butceMax || m.butceMin || Infinity;
-  const iMin = i.fiyatMin || 0, iMax = i.fiyatMax || i.fiyatMin || Infinity;
-  const overlap = mMin <= iMax && iMin <= mMax;
-  uyari.style.display = 'block';
-  if (overlap) {
-    uyari.style.background = '#f0fdf4'; uyari.style.color = '#15803d';
-    uyari.textContent = '✅ Bütçe aralıkları uyuşuyor! Müşteri: ' + fmtTL(mMin) + '–' + fmtTL(mMax) + ' | İlan: ' + fmtTL(iMin) + '–' + fmtTL(iMax);
-  } else {
-    uyari.style.background = '#fef2f2'; uyari.style.color = '#dc2626';
-    uyari.textContent = '⚠️ Bütçe aralıkları uyuşmuyor! Müşteri: ' + fmtTL(mMin) + '–' + fmtTL(mMax) + ' | İlan: ' + fmtTL(iMin) + '–' + fmtTL(iMax);
-  }
-}
+  </section>
 
-async function doMatch() {
-  const mId = document.getElementById('match-musteri').value;
-  const iId = document.getElementById('match-ilan').value;
-  if (!mId || !iId) return alert('Müşteri ve ilan seçin!');
-  const m = musteriler.find(x=>x.id===mId);
-  const i = ilanlar.find(x=>x.id===iId);
-  const data = { musteriId:mId, musteriAd:m.ad, musteriNo:m.no, ilanId:iId, ilanBaslik:i.baslik, ilanSehir:i.sehir };
-  await addItem('eslesmeler', data);
-  renderAll();
-  populateMatchSelects();
-  document.getElementById('match-uyari').style.display='none';
-}
+  <!-- MATCHING -->
+  <section id="matching">
 
-function renderEslesmeler() {
-  const el = document.getElementById('match-list');
-  if (!eslesmeler.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🤝</div>Henüz eşleşme yok</div>'; return; }
-  el.innerHTML = eslesmeler.map(e => `
-    <div class="match-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div class="match-names">
-            <span class="num-tag">#${e.musteriNo||'?'}</span>${esc(e.musteriAd)}
-          </div>
-          <div class="match-meta" style="margin-top:6px;">
-            🏠 ${esc(e.ilanBaslik)} – ${esc(e.ilanSehir||'')}
-          </div>
-        </div>
-        <button class="btn btn-del" style="padding:6px 10px;" onclick="silEslesme('${e.id}')">🗑</button>
-      </div>
+    <div class="card">
+      <h2>Eşleştirme</h2>
+
+      <select id="matchCustomer"></select>
+      <select id="matchPortfolio"></select>
+
+      <button onclick="addMatch()">Eşleştir</button>
     </div>
-  `).join('');
-}
 
-// ===== SİL =====
-async function silIlan(id) { if(confirm('İlan silinsin mi?')) { await delItem('ilanlar',id); renderAll(); } }
-async function silMusteri(id) { if(confirm('Müşteri silinsin mi?')) { await delItem('musteriler',id); renderAll(); } }
-async function silEslesme(id) { if(confirm('Eşleşme silinsin mi?')) { await delItem('eslesmeler',id); renderAll(); } }
-window.silIlan=silIlan; window.silMusteri=silMusteri; window.silEslesme=silEslesme;
+    <div id="matchList"></div>
 
-// ===== HELPERS =====
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  </section>
 
-function updateCounters() {
-  document.getElementById('cnt-ilan').textContent = ilanlar.length;
-  document.getElementById('cnt-musteri').textContent = musteriler.length;
-  document.getElementById('cnt-eslesme').textContent = eslesmeler.length;
-}
+</main>
 
-function renderAll() {
-  updateCounters();
-  renderIlanlar();
-  renderMusteriler();
-  renderEslesmeler();
-}
-
-// ===== INIT =====
-async function init() {
-  await loadAll();
-  renderAll();
-}
-
-// Firebase modülü yüklenince başlat
-document.addEventListener('db-ready', init);
-// Fallback: 3 saniye sonra yine de başlat
-setTimeout(()=>{ if(!window._initDone){ window._dbReady=false; init(); } }, 3000);
-
-// Global expose
-window.saveIlan=saveIlan; window.saveMusteriForm=saveMusteriForm;
-window.openModal=openModal; window.closeModal=closeModal;
-window.showTab=showTab; window.doMatch=doMatch;
-window.triggerPhoto=triggerPhoto; window.previewPhoto=previewPhoto; window.removePhoto=removePhoto;
-window.renderIlanlar=renderIlanlar; window.renderMusteriler=renderMusteriler;
-window.checkMatchCompat=checkMatchCompat; window.populateMatchSelects=populateMatchSelects;
-</script>
+<script src="script.js"></script>
 </body>
 </html>
