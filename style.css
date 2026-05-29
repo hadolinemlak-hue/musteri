@@ -32,17 +32,26 @@ nav button{
   border-radius:12px;
   padding:14px;
   font-size:15px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-main{
+nav button:hover {
+  background: #1f4fb4;
+}
+
+main {
   padding:15px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-section{
+/* Sayfa Gösterme/Gizleme Mantığı */
+section {
   display:none;
 }
 
-section.active{
+section.active {
   display:block;
 }
 
@@ -50,24 +59,42 @@ section.active{
 .portfolio-item,
 .customer-item,
 .match-item,
-.stat-card{
+.stat-card {
   background:#0c255b;
-  padding:15px;
+  padding:20px;
   border-radius:16px;
   margin-bottom:15px;
+  border: 1px solid #173777;
 }
 
-.stats-grid{
+/* Listelerin Grid Düzeni */
+.list-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+@media(min-width: 768px) {
+  .list-container {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+.stats-grid {
   display:grid;
   grid-template-columns:1fr;
   gap:15px;
 }
 
-.stat-card{
+.stat-card {
   text-align:center;
 }
 
-.stat-card h2{
+.stat-card h2 {
   font-size:36px;
   margin-bottom:10px;
   color:#5ca0ff;
@@ -75,51 +102,96 @@ section.active{
 
 input,
 textarea,
-select{
+select {
   width:100%;
   padding:14px;
   margin-top:10px;
-  border:none;
+  border:1px solid #1f4fb4;
   border-radius:12px;
   background:#173777;
   color:white;
+  font-size: 14px;
 }
 
-button{
-  margin-top:12px;
-  width:100%;
-  border:none;
-  border-radius:12px;
-  background:#2457c5;
-  color:white;
-  padding:14px;
-  font-size:16px;
+input:focus, select:focus {
+  outline: 2px solid #5ca0ff;
 }
 
-.images{
+label {
+  display: block;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #8dc0ff;
+}
+
+/* Buton Stilleri */
+button {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.primary-btn {
+  margin-top: 15px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #2457c5;
+  color: white;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Kart İçi Düzenle/Sil Yan Yana Butonları */
+.action-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.action-btns button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  border: none;
+  color: white;
+}
+
+.edit-btn { background: #e67e22; }
+.delete-btn { background: #c0392b; }
+
+.images {
   display:flex;
   gap:10px;
   overflow-x:auto;
   margin-top:10px;
+  padding-bottom: 5px;
 }
 
-.images img{
+.images img {
   width:100px;
   height:100px;
   border-radius:12px;
   object-fit:cover;
+  border: 1px solid #1f4fb4;
 }
 
-.phone-link{
+.phone-link {
   color:#8dc0ff;
   text-decoration:none;
-  display:block;
+  display:inline-block;
   margin-top:8px;
+  font-weight: bold;
 }
 
-.whatsapp-btn{
+.whatsapp-btn {
   display:block;
-  margin-top:10px;
+  margin-top:12px;
   background:#25D366;
   color:white;
   text-align:center;
@@ -129,12 +201,33 @@ button{
   font-weight:bold;
 }
 
-@media(max-width:430px){
+.price-filters {
+  display: flex;
+  gap: 10px;
+}
 
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: #1f4fb4;
+  margin: 25px 0;
+}
+
+h2 {
+  margin-top: 10px;
+}
+
+.demand-badge {
+  background: #d35400;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+@media(max-width:430px){
   nav{
     flex-direction:column;
   }
-
   .images img{
     width:90px;
     height:90px;
